@@ -1,0 +1,3 @@
+rootProject.name = "FirebaseConnect"
+include ':app'
+include ':firebaseconnectapp'
