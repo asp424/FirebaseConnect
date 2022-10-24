@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.lm.firebaseconnect.State.GET_INCOMING_CALL
+import com.lm.firebaseconnect.callState
 import com.lm.firebaseconnectapp.firebaseChat
 
 @Composable
@@ -28,7 +30,8 @@ fun Note(
                 firebaseChat.setChatId(i)
                 navController.navigate("chat")
             },
-        shape = RoundedCornerShape(8.dp), border = BorderStroke(2.dp, Color.Blue)
+        shape = RoundedCornerShape(8.dp), border = BorderStroke(2.dp,
+            if (callState.value.typeMessage == GET_INCOMING_CALL) Color.Red else Color.Blue)
     ) {
         Box(Modifier.padding(10.dp), CenterStart) {
             Column {

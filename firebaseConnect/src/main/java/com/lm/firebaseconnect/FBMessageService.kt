@@ -13,6 +13,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
+import com.lm.firebaseconnect.State.REJECT
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 internal class FBMessageService : FirebaseMessagingService() {
@@ -41,12 +42,17 @@ internal class FBMessageService : FirebaseMessagingService() {
                             textMessage, name, notificationBuilder, notificationManager
                         )
                         firebaseMessageServiceChatCallback
-                            .sendCallBack(chatPath, chatId, typeMessage)
+                            .sendCallBack(chatPath, chatId, typeMessage, callingId)
                     }
                 }
                 INCOMING_CALL -> {
                     firebaseMessageServiceChatCallback
-                        .sendCallBack(chatPath, chatId, typeMessage)
+                        .sendCallBack(chatPath, chatId, typeMessage, callingId)
+                    callState.value = this
+                }
+                REJECT -> {
+                    firebaseMessageServiceChatCallback
+                        .sendCallBack(chatPath, chatId, typeMessage, callingId)
                     callState.value = this
                 }
                 else -> callState.value = this

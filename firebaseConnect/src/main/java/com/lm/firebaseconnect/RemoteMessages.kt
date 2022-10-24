@@ -1,8 +1,10 @@
 package com.lm.firebaseconnect
 
+import com.lm.firebaseconnect.State.CALLING_ID
 import com.lm.firebaseconnect.State.CHAT_ID
 import com.lm.firebaseconnect.State.CHAT_PATH
 import com.lm.firebaseconnect.State.DATA
+import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
@@ -49,9 +51,11 @@ internal class RemoteMessages(
         firebaseRead.firebaseSave.saveWait()
     }
 
-    private val callInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, INCOMING_CALL)
+    private val callInbox: JSONObject get() = baseInbox
+        .put(TYPE_MESSAGE, INCOMING_CALL)
+        .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
 
-    private val rejectInbox: JSONObject get() = JSONObject().put(TYPE_MESSAGE, REJECT)
+    private val rejectInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, REJECT)
 
     private val messageInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, MESSAGE)
 

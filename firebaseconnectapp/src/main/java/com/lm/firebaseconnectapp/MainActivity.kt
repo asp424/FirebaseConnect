@@ -24,13 +24,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        firebaseChat.setOnlineApp()
         firebaseChat.startListenerForCall()
     }
 
     override fun onPause() {
         super.onPause()
-        firebaseChat.setOfflineApp()
         firebaseChat.stopListenerForCall()
     }
 }

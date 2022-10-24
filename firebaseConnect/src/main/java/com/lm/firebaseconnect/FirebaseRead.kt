@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
+import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.REJECT
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +57,8 @@ internal class FirebaseRead(
     }
 
     fun readOnline() = readNode(Nodes.ONLINE)
+
+    fun readOnCall() = readNode(Nodes.CALL)
 
     private fun ProducerScope<RemoteLoadStates>.eventListener() = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
@@ -112,6 +115,14 @@ internal class FirebaseRead(
             }
         }
     }
+    inline fun startReadCall(crossinline onRead: (String) -> Unit) = CoroutineScope(IO).launch {
+        readOnCall().collect {
+            it.snapshot { w ->
+                if (w.key == firebaseSave.pairPath)
+                    onRead(w.value.toString())
+            }
+        }
+    }
 
     private fun stopListener() {
         messagesJob.cancel(); writingJob.cancel(); onlineJob.cancel(); notifyJob.cancel()
@@ -123,11 +134,8 @@ internal class FirebaseRead(
 
     fun startListenerForCall() {
         callJob = startNodeListener(Nodes.CALL, firebaseSave.myDigit) {
-            if (it == INCOMING_CALL) {
-                callState.value = RemoteMessageModel(INCOMING_CALL)
-            }
-            if (it == REJECT){
-                callState.value = remoteMessageModel.rejectCall()
+            if (it == GET_INCOMING_CALL) {
+                callState.value = RemoteMessageModel(GET_INCOMING_CALL)
             }
         }
     }
@@ -135,11 +143,6 @@ internal class FirebaseRead(
     private fun startListener() {
         stopListener()
         messagesJob = startMessagesListener { listMessages.value = UIStates.Success(it) }
-        callJob = startNodeListener(Nodes.CALL) {
-            if (it == INCOMING_CALL) {
-                callState.value = RemoteMessageModel(INCOMING_CALL)
-            }
-        }
         writingJob = startNodeListener(Nodes.WRITING) { writingState.value = (it != "0") }
         onlineJob = startNodeListener(Nodes.ONLINE) { onLineState.value = (it != "0") }
         notifyJob = startNodeListener(Nodes.NOTIFY) {
