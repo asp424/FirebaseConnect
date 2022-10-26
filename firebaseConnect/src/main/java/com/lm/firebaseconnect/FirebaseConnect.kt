@@ -10,13 +10,11 @@ import androidx.lifecycle.LifecycleEventObserver
 class FirebaseConnect private constructor(
     cryptoKey: String,
     myName: String,
-    myDigit: String,
-    apiKey: String
+    val myDigit: String,
+    apiKey: String,
+    var chatId: String = "",
+    var databaseUserId: String = ""
 ) {
-
-    var chatId = ""
-
-    var databaseUserId = ""
 
     class Instance(
         private val cryptoKey: String,
@@ -57,6 +55,10 @@ class FirebaseConnect private constructor(
 
     fun reject() = remoteMessages.reject()
 
+    fun startMainListener() = firebaseHandler.startMainListener()
+
+    fun stopMainListener() = firebaseHandler.stopMainListener()
+
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
         rememberUpdatedState(LocalLifecycleOwner.current).value.apply {
@@ -68,10 +70,7 @@ class FirebaseConnect private constructor(
                         if (Lifecycle.Event.ON_PAUSE == event) onPause()
                     }
                     lifecycle.addObserver(observer)
-                    onDispose {
-                        onPause()
-                        lifecycle.removeObserver(observer)
-                    }
+                    onDispose { onPause(); lifecycle.removeObserver(observer) }
                 }
             }
             content(this@FirebaseConnect)
@@ -83,6 +82,12 @@ class FirebaseConnect private constructor(
     }
 
     private val timeConverter by lazy { TimeConverter() }
+
+    private val childEventListenerInstance by lazy { ChildEventListenerInstance() }
+
+    private val firebaseHandler by lazy {
+        FirebaseHandler(this, firebaseSave, childEventListenerInstance)
+    }
 
     private val crypto by lazy { Crypto(cryptoKey) }
 

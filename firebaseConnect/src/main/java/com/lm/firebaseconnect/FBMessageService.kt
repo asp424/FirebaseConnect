@@ -46,9 +46,14 @@ internal class FBMessageService : FirebaseMessagingService() {
                     }
                 }
                 INCOMING_CALL -> {
+                    if (!isRun(activityManager, packageName)) {
+                        showNotificationFromMessenger(
+                            "Звонок", name, notificationBuilder, notificationManager
+                        )
+                    }
+                    callState.value = this
                     firebaseMessageServiceChatCallback
                         .sendCallBack(chatPath, chatId, typeMessage, callingId)
-                    callState.value = this
                 }
                 REJECT -> {
                     firebaseMessageServiceChatCallback

@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.lm.firebaseconnect.*
-import com.lm.firebaseconnectapp.firebaseChat
+import com.lm.firebaseconnectapp.firebaseConnect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,11 +35,11 @@ import kotlinx.coroutines.launch
 fun Chat(navController: NavHostController) {
     val coroutine = rememberCoroutineScope()
     val firebaseChat = remember {
-        firebaseChat
+        firebaseConnect
     }
     firebaseChat.SetChatContent {
-        if (listMessages.value is UIStates.Success) {
-            val listMessages = (listMessages.value as UIStates.Success).list
+        if (listMessages.value is UIMessagesStates.Success) {
+            val listMessages = (listMessages.value as UIMessagesStates.Success).list
             Scaffold(content = {
                 val state = rememberLazyListState()
                 LaunchedEffect(true) {

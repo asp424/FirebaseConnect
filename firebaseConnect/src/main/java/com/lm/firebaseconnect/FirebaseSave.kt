@@ -10,7 +10,7 @@ import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
 import com.lm.firebaseconnect.State.BUSY
 import com.lm.firebaseconnect.State.WAIT
 
-internal class FirebaseSave(
+class FirebaseSave(
     val myDigit: String,
     val firebaseChat: FirebaseConnect,
     val timeConverter: TimeConverter,
@@ -39,13 +39,21 @@ internal class FirebaseSave(
     fun clearHimNotify() = databaseReference.child(firebaseChat.chatId).child(Nodes.NOTIFY.node())
         .updateChildren(mapOf(pairPath to FirebaseRead.CLEAR_NOTIFY))
 
-    private fun save(value: String, node: String, path: String = pairPath) {
-        databaseReference.child(myDigit).child(node).updateChildren(mapOf(path to value))
+    private fun save(
+        value: String,
+        node: String,
+        path: String = pairPath,
+        digit: String = myDigit
+    ) {
+        databaseReference.child(digit).child(node).updateChildren(mapOf(path to value))
     }
 
     fun saveWait() = save(WAIT, Nodes.CALL.node())
 
-    fun saveBusy() = save(BUSY, Nodes.CALL.node())
+    fun saveBusy() {
+        save(BUSY, Nodes.CALL.node())
+        save(BUSY, Nodes.CALL.node(), firebaseChat.chatId)
+    }
 
     fun saveWriting(value: String) = save(value, Nodes.WRITING.node())
 

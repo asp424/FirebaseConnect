@@ -1,6 +1,6 @@
 package com.lm.firebaseconnect
 
-internal sealed interface Nodes{
+sealed interface Nodes{
     object MESSAGES: Nodes
     object CHATS: Nodes
     object ONLINE: Nodes

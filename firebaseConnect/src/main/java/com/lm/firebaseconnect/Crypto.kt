@@ -6,7 +6,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-internal class Crypto(private val cryptoKey: String) {
+class Crypto(private val cryptoKey: String) {
 
     fun cipherEncrypt(text: String): String {
         instance.apply {

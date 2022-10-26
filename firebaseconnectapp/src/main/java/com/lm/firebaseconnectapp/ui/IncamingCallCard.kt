@@ -19,7 +19,7 @@ import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.callState
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
-import com.lm.firebaseconnectapp.firebaseChat
+import com.lm.firebaseconnectapp.firebaseConnect
 
 @Composable
 fun SettingsCard() {
@@ -53,7 +53,7 @@ fun SettingsCard() {
                     Icon(painterResource(R.drawable.a), null,
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { firebaseChat.reject() }
+                            .clickable { firebaseConnect.reject() }
                             .background(Color.White)
                     )
 

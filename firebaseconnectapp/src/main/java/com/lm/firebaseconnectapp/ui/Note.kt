@@ -15,19 +15,19 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.callState
-import com.lm.firebaseconnectapp.firebaseChat
+import com.lm.firebaseconnectapp.firebaseConnect
 
 @Composable
 fun Note(
-    modifier: Modifier, notesText: String, i: Int, navController: NavHostController
+    modifier: Modifier, notesText: String, i: String, online: String, navController: NavHostController
 ) {
     Card(
         modifier = modifier
-            .padding(bottom = 10.dp)
+            .padding(start = 10.dp, end = 10.dp, bottom = 5.dp, top = 5.dp)
             .fillMaxWidth()
             .wrapContentHeight()
             .clickable {
-                firebaseChat.setChatId(i)
+                firebaseConnect.setChatId(i.toInt())
                 navController.navigate("chat")
             },
         shape = RoundedCornerShape(8.dp), border = BorderStroke(2.dp,
@@ -36,7 +36,7 @@ fun Note(
         Box(Modifier.padding(10.dp), CenterStart) {
             Column {
                 Text(
-                    text = notesText, maxLines = 1,
+                    text = i, maxLines = 1,
                     fontSize = 12.sp, color = Color.Gray
                 )
                 if (notesText.isNotEmpty()) {
@@ -46,7 +46,7 @@ fun Note(
                     )
                 }
                 Text(
-                    text = notesText, maxLines = 1,
+                    text = online, maxLines = 1,
                     fontSize = 12.sp, color = Color.Gray
                 )
             }

@@ -6,30 +6,31 @@ import androidx.activity.compose.setContent
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnectapp.ui.NavHost
 
-val firebaseConnect by lazy {
+val firebaseConnectInstance by lazy {
     FirebaseConnect.Instance(
-        BuildConfig.C_KEY, BuildConfig.FCM_SERVER_KEY, 23, "her"
+        BuildConfig.C_KEY, BuildConfig.FCM_SERVER_KEY, 23, "hui"
     )
 }
 
-val firebaseChat by lazy { firebaseConnect.chat().setChatId(90) }
+val firebaseConnect by lazy { firebaseConnectInstance.chat() }
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        firebaseConnect.getAndSaveToken()
-        setContent { NavHost() }
+        firebaseConnectInstance.getAndSaveToken(); setContent { NavHost() }
     }
 
     override fun onResume() {
         super.onResume()
-        firebaseChat.startListenerForCall()
+        firebaseConnect.startMainListener()
+        firebaseConnect.startListenerForCall()
     }
 
     override fun onPause() {
         super.onPause()
-        firebaseChat.stopListenerForCall()
+        firebaseConnect.stopListenerForCall()
+        firebaseConnect.stopMainListener()
     }
 }
 

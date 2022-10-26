@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 import java.util.*
 
-internal class TimeConverter {
+class TimeConverter {
 
     val currentTime get() = "${TIME_TAG_START}${calendar.time.time}${TIME_TAG_END}"
 

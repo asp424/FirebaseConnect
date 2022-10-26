@@ -23,7 +23,7 @@ import retrofit2.http.Body
 import retrofit2.http.HeaderMap
 import retrofit2.http.POST
 
-internal class RemoteMessages(
+class RemoteMessages(
     private val apiKey: String,
     private val firebaseRead: FirebaseRead
 ) {

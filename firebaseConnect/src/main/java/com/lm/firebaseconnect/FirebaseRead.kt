@@ -6,8 +6,6 @@ import com.google.firebase.database.ValueEventListener
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
-import com.lm.firebaseconnect.State.INCOMING_CALL
-import com.lm.firebaseconnect.State.REJECT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
@@ -18,7 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
-internal class FirebaseRead(
+class FirebaseRead(
     val firebaseSave: FirebaseSave
 ) {
 
@@ -80,8 +78,8 @@ internal class FirebaseRead(
     private fun startMessagesListener(onMessage: (List<Pair<String, String>>) -> Unit) =
         CoroutineScope(IO).launch {
             messagesListener().collect {
-                if (it is RemoteLoadStates.Success<*>) {
-                    onMessage((it.data as DataSnapshot).children.map { v ->
+                if (it is RemoteLoadStates.Success) {
+                    onMessage(it.data.children.map { v ->
                         val message = firebaseSave.crypto.cipherDecrypt(v.value.toString())
                         val digit = message.getDigitFromMessage
                         val normMessage = with(firebaseSave.timeConverter) {
@@ -100,11 +98,12 @@ internal class FirebaseRead(
         snapshot { ds -> if (ds.key == firebaseSave.pairPath) onCheck(ds.value.toString()) }
 
     inline fun RemoteLoadStates.snapshot(crossinline onGet: (DataSnapshot) -> Unit) {
-        if (this is RemoteLoadStates.Success<*>) (data as DataSnapshot).children.map { onGet(it) }
+        if (this is RemoteLoadStates.Success) data.children.map { onGet(it) }
     }
 
     inline fun startReadToken(crossinline onRead: (String) -> Unit) = CoroutineScope(IO).launch {
-        readToken().collect { it.snapshot { w -> onRead(w.value.toString()) } }
+        readToken().collect {
+            it.snapshot { w -> onRead(w.value.toString()) } }
     }
 
     inline fun startReadOnline(crossinline onRead: (String) -> Unit) = CoroutineScope(IO).launch {
@@ -118,47 +117,32 @@ internal class FirebaseRead(
     inline fun startReadCall(crossinline onRead: (String) -> Unit) = CoroutineScope(IO).launch {
         readOnCall().collect {
             it.snapshot { w ->
-                if (w.key == firebaseSave.pairPath)
+                if (w.key == firebaseSave.pairPath || w.value == null)
                     onRead(w.value.toString())
             }
         }
     }
 
-    private fun stopListener() {
-        messagesJob.cancel(); writingJob.cancel(); onlineJob.cancel(); notifyJob.cancel()
-    }
+    private fun stopListener() = messagesJob.cancel()
 
-    fun stopListenerForCall() {
-        callJob.cancel()
-    }
+    fun stopListenerForCall() = callJob.cancel()
 
     fun startListenerForCall() {
         callJob = startNodeListener(Nodes.CALL, firebaseSave.myDigit) {
-            if (it == GET_INCOMING_CALL) {
-                callState.value = RemoteMessageModel(GET_INCOMING_CALL)
-            }
+            if (it == GET_INCOMING_CALL) callState.value = RemoteMessageModel(GET_INCOMING_CALL)
         }
     }
 
+
     private fun startListener() {
         stopListener()
-        messagesJob = startMessagesListener { listMessages.value = UIStates.Success(it) }
-        writingJob = startNodeListener(Nodes.WRITING) { writingState.value = (it != "0") }
-        onlineJob = startNodeListener(Nodes.ONLINE) { onLineState.value = (it != "0") }
-        notifyJob = startNodeListener(Nodes.NOTIFY) {
-            if (it == RING) CoroutineScope(IO).launch {
-                notifyState.value = true
-                delay(3000)
-                notifyState.value = false
-                firebaseSave.clearHimNotify()
-            }
-        }
+        messagesJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
     }
 
     fun initStates() {
         onLineState.value = false
         writingState.value = false
-        listMessages.value = UIStates.Loading
+        listMessages.value = UIMessagesStates.Loading
     }
 
     private val String.getDigitFromMessage
@@ -179,12 +163,6 @@ internal class FirebaseRead(
     private val String.removeDigitTags get() = substringAfter(DIGIT_TAG_END)
 
     private var messagesJob: Job = Job()
-
-    private var writingJob: Job = Job()
-
-    private var onlineJob: Job = Job()
-
-    private var notifyJob: Job = Job()
 
     private var callJob: Job = Job()
 
