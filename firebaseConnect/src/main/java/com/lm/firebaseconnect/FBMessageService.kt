@@ -21,6 +21,10 @@ internal class FBMessageService : FirebaseMessagingService() {
     private val notificationManager
             by lazy { NotificationManagerCompat.from(this) }
 
+    private val sharedPreferences by lazy { getSharedPreferences("checkForFirst", MODE_PRIVATE) }
+
+
+
     private val activityManager
             by lazy { getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager }
 
@@ -40,7 +44,7 @@ internal class FBMessageService : FirebaseMessagingService() {
                 remoteMessageModel.getFromRemoteMessage(remoteMessage),
                 activityManager,
                 packageName,
-                notificationManager, notificationBuilder
+                notificationManager, notificationBuilder, sharedPreferences
             )
     }
 }

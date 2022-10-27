@@ -54,7 +54,7 @@ fun SettingsCard() {
                         modifier = Modifier
                             .size(40.dp)
                             .clickable {
-                                firebaseConnect.reset()
+                                firebaseConnect.reset(callState.value.token)
                             }
                             .background(Color.White)
                     )

@@ -28,8 +28,22 @@ class FirebaseRead(
             }
         }
 
+    fun readMyNode(node: Nodes, onRead: (String) -> Unit) = node.myNodePath.get()
+        .addOnCompleteListener {
+            it.result?.also { resultNotNull ->
+                resultNotNull.key?.also { keyNotNull ->
+                    if (keyNotNull == firebaseSave.myDigit) onRead(resultNotNull.value.toString())
+                }
+            }
+        }
+
     private val Nodes.nodePath
         get() = firebaseSave.databaseReference.child(getChatId).child(node()).child(getChatId)
+
+    private val Nodes.myNodePath
+        get() = firebaseSave.databaseReference
+            .child(firebaseSave.myDigit).child(node()).child(firebaseSave.myDigit)
+
 
     private fun startMessagesListener(onMessage: (List<Pair<String, String>>) -> Unit) =
         CoroutineScope(IO).launch {

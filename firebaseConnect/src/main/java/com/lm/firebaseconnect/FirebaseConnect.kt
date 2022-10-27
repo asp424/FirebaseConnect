@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 
@@ -41,11 +40,11 @@ class FirebaseConnect private constructor(
 
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
 
-    fun call() = firebaseCall.call(remoteMessages)
+    fun call(token: String) = firebaseCall.call(token)
 
-    fun reject() = remoteMessages.reject()
+    fun reject(token: String) = remoteMessages.reject(token)
 
-    fun reset() = remoteMessages.reset()
+    fun reset(token: String) = remoteMessages.reset(token)
 
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
@@ -109,7 +108,7 @@ class FirebaseConnect private constructor(
 
     private val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
 
-    private val firebaseCall by lazy { FirebaseCall(firebaseSave, firebaseRead) }
+    private val firebaseCall by lazy { FirebaseCall(remoteMessages) }
 
     companion object {
         const val ZERO = "0"

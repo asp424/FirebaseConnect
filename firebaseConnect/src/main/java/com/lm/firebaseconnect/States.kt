@@ -40,4 +40,5 @@ object State {
     const val BUSY = "busy"
     const val GET_INCOMING_CALL = "getIncomingCall"
     const val CALLING_ID = "callingId"
+    const val API_KEY = "apiKey"
 }

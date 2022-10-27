@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -23,7 +24,13 @@ import com.lm.firebaseconnectapp.firebaseConnect
 
 @Composable
 fun Note(
-    modifier: Modifier, notesText: String, i: String, online: String, navController: NavHostController
+    modifier: Modifier,
+    notesText: String,
+    i: String,
+    online: String,
+    navController: NavHostController,
+    token: String,
+    onCallClick: (String) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -35,14 +42,17 @@ fun Note(
                 navController.navigate("chat")
             },
         shape = RoundedCornerShape(8.dp), border = BorderStroke(2.dp,
-            if (callState.value.typeMessage == GET_INCOMING_CALL) Color.Red else Color.Blue)
+            if (callState.value.typeMessage == GET_INCOMING_CALL) Color.Red else {
+                if (online == "1") Green else Color.Blue
+            })
     ) {
 
         Box(Modifier.padding(10.dp), CenterStart) {
             Box(Modifier.padding(10.dp).fillMaxWidth(), CenterEnd) {
                 Icon(
                     Icons.Default.Call, null, modifier = Modifier.clickable {
-                        firebaseConnect.setChatId(i.toInt()).call()
+                        firebaseConnect.call(token)
+                        onCallClick(token)
                     }
                 )
             }

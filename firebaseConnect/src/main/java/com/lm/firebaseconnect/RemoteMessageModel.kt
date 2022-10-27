@@ -1,6 +1,7 @@
 package com.lm.firebaseconnect
 
 import com.google.firebase.messaging.RemoteMessage
+import com.lm.firebaseconnect.State.API_KEY
 import com.lm.firebaseconnect.State.CALLING_ID
 import com.lm.firebaseconnect.State.CHAT_ID
 import com.lm.firebaseconnect.State.CHAT_PATH
@@ -9,6 +10,7 @@ import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.OUTGOING_CALL
+import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
 import com.lm.firebaseconnect.State.WAIT
 
@@ -19,6 +21,8 @@ data class RemoteMessageModel constructor(
     val textMessage: String = "",
     val name: String = "",
     val callingId: String = "",
+    val token: String = "",
+    val apiKey: String = ""
 ) {
 
     class Instance() {
@@ -31,6 +35,8 @@ data class RemoteMessageModel constructor(
                 textMessage = getValue(MESSAGE),
                 name = getValue(NAME),
                 callingId = getValue(CALLING_ID),
+                token = getValue(TOKEN),
+                apiKey = getValue(API_KEY),
             )
         }
 

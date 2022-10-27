@@ -16,13 +16,13 @@ fun DataSnapshot.getUserModel(pairPath: String, chatId: String) =
         id = key ?: ""
         name = "name"
 
-        onLine = with(getValue(key ?: "", Nodes.ONLINE).apply {
+        onLine = getValue(key ?: "", Nodes.ONLINE).apply {
             if (key == chatId) onLineState.value = (this == "1")
-        }) { if (this == "1") "online" else "offline" }
-
-        isWriting = with(getValue(pairPath, Nodes.WRITING).apply {
-            if (key == chatId) onLineState.value = (this == "1")
-        }) { if (this == "1") "writing" else "" }
+        }
+        isWriting = getValue(pairPath, Nodes.WRITING).apply {
+            if (key == chatId) writingState.value = (this == "1")
+        }
+        token = getValue(key ?: "", Nodes.TOKEN)
 }
 
 fun DataSnapshot.getValue(path: String, node: Nodes) =

@@ -8,7 +8,7 @@ import com.lm.firebaseconnectapp.ui.NavHost
 
 val firebaseConnect by lazy {
     FirebaseConnect.Instance(
-        BuildConfig.C_KEY, BuildConfig.FCM_SERVER_KEY, 80, "Хуй"
+        BuildConfig.C_KEY, BuildConfig.FCM_SERVER_KEY, 80, "Хth"
     ).init()
 }
 

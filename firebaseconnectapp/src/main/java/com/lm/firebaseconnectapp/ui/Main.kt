@@ -4,12 +4,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -20,10 +19,12 @@ import com.lm.firebaseconnect.State.OUTGOING_CALL
 import com.lm.firebaseconnect.UIUsersStates
 import com.lm.firebaseconnect.callState
 import com.lm.firebaseconnect.listUsers
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.firebaseConnect
 
 @Composable
 fun Main(navController: NavHostController) {
+    var callToken by remember(){ mutableStateOf("") }
     firebaseConnect.SetMainScreenContent {
         if (listUsers.value is UIUsersStates.Success) {
             Column() {
@@ -33,8 +34,11 @@ fun Main(navController: NavHostController) {
                         notesText = it.isWriting,
                         i = it.id,
                         navController = navController,
-                        online = it.onLine
-                    )
+                        online = it.onLine,
+                        token = it.token
+                    ){ t ->
+                        callToken = t
+                    }
                 }
             }
             SettingsCard()
@@ -62,7 +66,7 @@ fun Main(navController: NavHostController) {
                     ) {
                         Icon(
                             Icons.Default.Close, null, modifier = Modifier.clickable {
-                                firebaseConnect.reject()
+                                firebaseConnect.reject(callToken)
                             }
                         )
                     }

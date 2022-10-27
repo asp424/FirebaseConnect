@@ -2,6 +2,7 @@ package com.lm.firebaseconnect
 
 import com.google.firebase.database.FirebaseDatabase
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
+import com.lm.firebaseconnect.FirebaseRead.Companion.CLEAR_NOTIFY
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
@@ -37,7 +38,7 @@ class FirebaseSave(
         get() = databaseReference.child(Nodes.CHATS.node()).child(pairPath).child(this)
 
     fun clearHimNotify() = databaseReference.child(firebaseChat.chatId).child(Nodes.NOTIFY.node())
-        .updateChildren(mapOf(pairPath to FirebaseRead.CLEAR_NOTIFY))
+        .updateChildren(mapOf(pairPath to CLEAR_NOTIFY))
 
     fun save(
         value: String,

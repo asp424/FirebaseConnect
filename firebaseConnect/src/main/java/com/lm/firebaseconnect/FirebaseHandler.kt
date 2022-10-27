@@ -50,7 +50,7 @@ class FirebaseHandler(
 
     fun stopMainListener() {
         listJobs.onEach { it.cancel() }
-        with(firebaseSave){ firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.myDigit) }
+        with(firebaseSave){ save(ZERO, Nodes.ONLINE, myDigit) }
     }
 
     private val listJobs by lazy { mutableListOf<Job>() }
