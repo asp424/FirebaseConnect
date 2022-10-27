@@ -53,7 +53,9 @@ fun SettingsCard() {
                     Icon(painterResource(R.drawable.a), null,
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { firebaseConnect.reject() }
+                            .clickable {
+                                firebaseConnect.reset()
+                            }
                             .background(Color.White)
                     )
 

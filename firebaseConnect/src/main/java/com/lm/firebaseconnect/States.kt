@@ -32,6 +32,7 @@ object State {
     const val OUTGOING_CALL = "outgoingCall"
     const val ANSWER = "answer"
     const val REJECT = "reject"
+    const val RESET = "reset"
     const val MESSAGE = "message"
     const val CHAT_PATH = "chatPath"
     const val CHAT_ID = "chatId"

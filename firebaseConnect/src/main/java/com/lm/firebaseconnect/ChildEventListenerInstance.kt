@@ -1,33 +1,29 @@
 package com.lm.firebaseconnect
 
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.*
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
+import java.util.concurrent.Executors
 
 class ChildEventListenerInstance {
 
-    suspend fun ProducerScope<RemoteLoadStates>.childListener(path: DatabaseReference) =
+    suspend fun ProducerScope<List<DataSnapshot>>.childListener() =
         object : ChildEventListener {
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                trySendBlocking(RemoteLoadStates.Success(snapshot))
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                trySendBlocking(RemoteLoadStates.Success(snapshot))
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                trySendBlocking(RemoteLoadStates.Success(snapshot))
-            }
-
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) = send()
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) = send()
+            override fun onChildRemoved(snapshot: DataSnapshot) = send()
             override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
             override fun onCancelled(error: DatabaseError) {}
         }.apply {
-            path.addChildEventListener(this)
-            awaitClose { path.removeEventListener(this); "stop".log }
+            databaseReference.addChildEventListener(this)
+            awaitClose { databaseReference.removeEventListener(this); "stop".log }
         }
+
+    private fun ProducerScope<List<DataSnapshot>>.send() {
+        databaseReference.get().addOnCompleteListener(Executors.newSingleThreadExecutor()) {
+            if (it.isComplete) trySendBlocking(it.result.children.toList())
+        }
+    }
+    private val databaseReference by lazy { FirebaseDatabase.getInstance().reference }
 }

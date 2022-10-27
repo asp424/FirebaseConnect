@@ -34,10 +34,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun Chat(navController: NavHostController) {
     val coroutine = rememberCoroutineScope()
-    val firebaseChat = remember {
-        firebaseConnect
-    }
-    firebaseChat.SetChatContent {
+    firebaseConnect.SetChatContent {
         if (listMessages.value is UIMessagesStates.Success) {
             val listMessages = (listMessages.value as UIMessagesStates.Success).list
             Scaffold(content = {

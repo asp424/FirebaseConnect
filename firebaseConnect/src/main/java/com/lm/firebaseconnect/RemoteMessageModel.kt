@@ -4,6 +4,8 @@ import com.google.firebase.messaging.RemoteMessage
 import com.lm.firebaseconnect.State.CALLING_ID
 import com.lm.firebaseconnect.State.CHAT_ID
 import com.lm.firebaseconnect.State.CHAT_PATH
+import com.lm.firebaseconnect.State.GET_INCOMING_CALL
+import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.OUTGOING_CALL
@@ -32,8 +34,10 @@ data class RemoteMessageModel constructor(
             )
         }
 
-        fun rejectCall() = RemoteMessageModel(typeMessage = WAIT)
+        val rejectCall get() = RemoteMessageModel(WAIT)
 
-        fun outgoingCall() = RemoteMessageModel(typeMessage = OUTGOING_CALL)
+        val outgoingCall get() = RemoteMessageModel(OUTGOING_CALL)
+
+        val getIncomingCall get() = RemoteMessageModel(GET_INCOMING_CALL)
     }
 }

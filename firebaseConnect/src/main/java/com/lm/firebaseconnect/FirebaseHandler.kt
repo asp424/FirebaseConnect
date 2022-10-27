@@ -1,16 +1,17 @@
 package com.lm.firebaseconnect
 
+import androidx.core.text.isDigitsOnly
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.FirebaseDatabase
+import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_START
+import com.lm.firebaseconnect.FirebaseRead.Companion.RING
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
-import kotlinx.coroutines.CoroutineScope
+import com.lm.firebaseconnect.State.GET_INCOMING_CALL
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 
 class FirebaseHandler(
     private val firebaseConnect: FirebaseConnect,
@@ -19,36 +20,55 @@ class FirebaseHandler(
 ) {
 
     fun startMainListener() {
-        stopMainListener()
-        job = CoroutineScope(IO).launch {
-            listener().collect {
-                databaseReference.get().addOnCompleteListener { t ->
-                    listUsers.value = UIUsersStates.Success(t.result.children.map { it }.filter())
+        CoroutineScope(IO).launch {
+            firebaseSave.init()
+            listener().collect { t ->
+
+                t.setUiState {
+                    if (it.key == firebaseSave.myDigit
+                        && it.getValue(firebaseSave.myDigit, Nodes.CALL) == GET_INCOMING_CALL
+                    ) callState.value = remoteMessageModel.getIncomingCall
                 }
+
+                t.setUiState {
+                    if (it.key == firebaseSave.firebaseChat.chatId &&
+                        it.getValue(it.key!!.pairPath, Nodes.NOTIFY) == RING
+                    ) {
+                        notifyState.value = true; delay(3000)
+                        notifyState.value = false; firebaseSave.clearHimNotify()
+                    }
+                }
+
+                listUsers.value = UIUsersStates.Success(t.filter())
             }
-        }
+        }.apply { listJobs.add(this) }
     }
 
-    fun stopMainListener() = job.cancel()
+    private suspend fun List<DataSnapshot>.setUiState(
+        onEachUser: suspend CoroutineScope.(DataSnapshot) -> Unit
+    ) = withContext(IO) { forEach { onEachUser(this, it) } }
 
-    private fun List<DataSnapshot>.filter() = filter { it.key != firebaseConnect.myDigit }
-        .filter { it.key != Nodes.CHATS.node() }
-        .map {
-            it.getUserModel(it.key?.pairPath, firebaseConnect.chatId) {
-                firebaseSave.clearHimNotify()
-            }
-        }
+    fun stopMainListener() {
+        listJobs.onEach { it.cancel() }
+        with(firebaseSave){ firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.myDigit) }
+    }
 
-    var job: Job = Job()
+    private val listJobs by lazy { mutableListOf<Job>() }
+
+    private suspend fun List<DataSnapshot>.filter() = withContext(IO) {
+        filter { it.key != null }
+            .filter { it.key != firebaseConnect.myDigit && it.key!!.isDigitsOnly() }
+            .map { it.getUserModel(it.key!!.pairPath, firebaseConnect.chatId) }
+    }
 
     private fun listener() = callbackFlow {
-        with(childEventListenerInstance) { childListener(databaseReference) }
+        with(childEventListenerInstance) { childListener() }
     }
 
-    private val String.pairPath get() = "${FIRST_USER_START}${
+    private val String.pairPath
+        get() = "${FIRST_USER_START}${
             maxOf(firebaseConnect.myDigit, this)
         }${FIRST_USER_END}${SECOND_USER_START}${
-            minOf(firebaseConnect.myDigit, this)}${SECOND_USER_END}"
-
-    private val databaseReference by lazy { FirebaseDatabase.getInstance().reference }
+            minOf(firebaseConnect.myDigit, this)
+        }${SECOND_USER_END}"
 }

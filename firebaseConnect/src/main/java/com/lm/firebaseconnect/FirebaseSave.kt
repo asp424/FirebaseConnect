@@ -1,13 +1,13 @@
 package com.lm.firebaseconnect
 
 import com.google.firebase.database.FirebaseDatabase
+import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
-import com.lm.firebaseconnect.State.BUSY
 import com.lm.firebaseconnect.State.WAIT
 
 class FirebaseSave(
@@ -39,27 +39,28 @@ class FirebaseSave(
     fun clearHimNotify() = databaseReference.child(firebaseChat.chatId).child(Nodes.NOTIFY.node())
         .updateChildren(mapOf(pairPath to FirebaseRead.CLEAR_NOTIFY))
 
-    private fun save(
+    fun save(
         value: String,
-        node: String,
+        node: Nodes,
         path: String = pairPath,
-        digit: String = myDigit
+        digit: String = myDigit,
+        onSave: () -> Unit = {}
     ) {
-        databaseReference.child(digit).child(node).updateChildren(mapOf(path to value))
+        databaseReference.child(digit).child(node.node()).updateChildren(mapOf(path to value))
+            .addOnCompleteListener { onSave() }
     }
 
-    fun saveWait() = save(WAIT, Nodes.CALL.node())
-
-    fun saveBusy() {
-        save(BUSY, Nodes.CALL.node())
-        save(BUSY, Nodes.CALL.node(), firebaseChat.chatId)
+    fun saveWait() {
+        save(WAIT, Nodes.CALL, myDigit)
+        save(WAIT, Nodes.CALL, firebaseChat.chatId, firebaseChat.chatId)
     }
 
-    fun saveWriting(value: String) = save(value, Nodes.WRITING.node())
-
-    fun saveOnline(value: String) = save(value, Nodes.ONLINE.node())
-
-    fun saveOnlineApp(value: String) = save(value, Nodes.ONLINE.node(), myDigit)
+    fun init() {
+        databaseReference.child(myDigit).get().addOnCompleteListener {
+            if (!it.result.hasChild(Nodes.CALL.node())) save(WAIT, Nodes.CALL, myDigit)
+            save(ONE, Nodes.ONLINE, myDigit)
+        }
+    }
 
     private val digitForMessage get() = "${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}"
 

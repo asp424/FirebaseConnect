@@ -1,9 +1,13 @@
 package com.lm.firebaseconnect
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 
@@ -13,7 +17,6 @@ class FirebaseConnect private constructor(
     val myDigit: String,
     apiKey: String,
     var chatId: String = "",
-    var databaseUserId: String = ""
 ) {
 
     class Instance(
@@ -22,30 +25,17 @@ class FirebaseConnect private constructor(
         private val myDigit: Int,
         private val myName: String
     ) {
-
-        fun getAndSaveToken(onGet: (String) -> Unit = {}) =
-            fcmProvider.getAndSaveToken { onGet(it) }
-
-        fun chat() = FirebaseConnect(cryptoKey, myName, myDigit.toString(), apiKey)
-
-        private val fcmProvider by lazy { FCMProvider(myDigit.toString()) }
+        fun init() = FirebaseConnect(cryptoKey, myName, myDigit.toString(), apiKey)
     }
+
+    fun getAndSaveToken(onGet: (String) -> Unit = {}) =
+        fcmProvider.getAndSaveToken { onGet(it) }
 
     fun setChatId(chatId: Int) = apply { this.chatId = chatId.toString() }
 
-    fun setDatabaseUserId(databaseUserId: String) = apply { this.databaseUserId = databaseUserId }
+    fun setWriting() = firebaseSave.save(ONE, Nodes.WRITING)
 
-    fun setWriting() = firebaseSave.saveWriting(ONE)
-
-    fun setOnlineApp() = firebaseSave.saveOnlineApp(ONE)
-
-    fun setOfflineApp() = firebaseSave.saveOnlineApp(ZERO)
-
-    fun setNoWriting() = firebaseSave.saveWriting(ZERO)
-
-    fun startListenerForCall() = firebaseRead.startListenerForCall()
-
-    fun stopListenerForCall() = firebaseRead.stopListenerForCall()
+    fun setNoWriting() = firebaseSave.save(ZERO, Nodes.WRITING)
 
     fun sendMessage(text: String) = firebaseSave.sendMessage(text, remoteMessages)
 
@@ -55,9 +45,7 @@ class FirebaseConnect private constructor(
 
     fun reject() = remoteMessages.reject()
 
-    fun startMainListener() = firebaseHandler.startMainListener()
-
-    fun stopMainListener() = firebaseHandler.stopMainListener()
+    fun reset() = remoteMessages.reset()
 
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
@@ -77,6 +65,28 @@ class FirebaseConnect private constructor(
         }
     }
 
+    @SuppressLint("RestrictedApi")
+    @Composable
+    fun SetMainScreenContent(content: @Composable FirebaseConnect.() -> Unit) {
+        val context = LocalContext.current
+        with(firebaseRead) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (Lifecycle.Event.ON_CREATE == event) initStates()
+                if (Lifecycle.Event.ON_RESUME == event) {
+                    firebaseHandler.startMainListener()
+                }
+                if (Lifecycle.Event.ON_PAUSE == event) firebaseHandler.stopMainListener()
+            }
+        val activity = remember { context.getActivity()?.apply { lifecycle.addObserver(observer) } }
+        rememberUpdatedState(activity).value.apply {
+            DisposableEffect(this) {
+                    onDispose {}
+                }
+            }
+            content(this@FirebaseConnect)
+        }
+    }
+
     private val firebaseSave by lazy {
         FirebaseSave(myDigit, this, timeConverter, myName, crypto)
     }
@@ -85,13 +95,17 @@ class FirebaseConnect private constructor(
 
     private val childEventListenerInstance by lazy { ChildEventListenerInstance() }
 
+    private val valueEventListenerInstance by lazy { ValueEventListenerInstance(firebaseSave) }
+
     private val firebaseHandler by lazy {
         FirebaseHandler(this, firebaseSave, childEventListenerInstance)
     }
 
+    private val fcmProvider by lazy { FCMProvider(myDigit) }
+
     private val crypto by lazy { Crypto(cryptoKey) }
 
-    private val firebaseRead by lazy { FirebaseRead(firebaseSave) }
+    private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
     private val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
 

@@ -34,64 +34,14 @@ internal class FBMessageService : FirebaseMessagingService() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        remoteMessageModel.getFromRemoteMessage(remoteMessage).apply {
-            when (typeMessage) {
-                MESSAGE -> {
-                    if (!isRun(activityManager, packageName)) {
-                        showNotificationFromMessenger(
-                            textMessage, name, notificationBuilder, notificationManager
-                        )
-                        firebaseMessageServiceChatCallback
-                            .sendCallBack(chatPath, chatId, typeMessage, callingId)
-                    }
-                }
-                INCOMING_CALL -> {
-                    if (!isRun(activityManager, packageName)) {
-                        showNotificationFromMessenger(
-                            "Звонок", name, notificationBuilder, notificationManager
-                        )
-                    }
-                    callState.value = this
-                    firebaseMessageServiceChatCallback
-                        .sendCallBack(chatPath, chatId, typeMessage, callingId)
-                }
-                REJECT -> {
-                    firebaseMessageServiceChatCallback
-                        .sendCallBack(chatPath, chatId, typeMessage, callingId)
-                    callState.value = this
-                }
-                else -> callState.value = this
-            }
-        }
-    }
 
-    private fun isRun(activityManager: ActivityManager, packageName: String): Boolean {
-        val runningProcesses = activityManager.runningAppProcesses ?: return false
-        for (i in runningProcesses) {
-            if (i.importance ==
-                ActivityManager.RunningAppProcessInfo
-                    .IMPORTANCE_FOREGROUND && i.processName == packageName
-            ) return true
-        }
-        return false
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun showNotificationFromMessenger(
-        message: String, name: String, notificationBuilder: NotificationCompat.Builder,
-        notificationManager: NotificationManagerCompat
-    ) {
-        notificationManager.createNotificationChannel(
-            NotificationChannel("1", "ass", NotificationManager.IMPORTANCE_DEFAULT)
-        )
-        notificationManager.notify(
-            1, notificationBuilder
-                .setContentTitle(name)
-                .setContentText(message)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .build()
-        )
+        firebaseMessageServiceChatCallback
+            .sendCallBack(
+                remoteMessageModel.getFromRemoteMessage(remoteMessage),
+                activityManager,
+                packageName,
+                notificationManager, notificationBuilder
+            )
     }
 }
 

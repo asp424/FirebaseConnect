@@ -24,64 +24,57 @@ import com.lm.firebaseconnectapp.firebaseConnect
 
 @Composable
 fun Main(navController: NavHostController) {
-    if (listUsers.value is UIUsersStates.Success) {
-        Column() {
-            (listUsers.value as UIUsersStates.Success).list.forEach {
-                Note(
-                    modifier = Modifier,
-                    notesText = it.isWriting,
-                    i = it.id,
-                    navController = navController,
-                    online = it.onLine
-                )
+    firebaseConnect.SetMainScreenContent {
+        if (listUsers.value is UIUsersStates.Success) {
+            Column() {
+                (listUsers.value as UIUsersStates.Success).list.forEach {
+                    Note(
+                        modifier = Modifier,
+                        notesText = it.isWriting,
+                        i = it.id,
+                        navController = navController,
+                        online = it.onLine
+                    )
+                }
             }
-        }
-        SettingsCard()
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(top = 100.dp),
+            SettingsCard()
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = 100.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Card(
+                    Modifier
+                        .scale(
+                            animateFloatAsState(
+                                if (callState.value.typeMessage == OUTGOING_CALL
+                                    || callState.value.typeMessage == GET_INCOMING_CALL
+                                ) 1f else 0f
+                            ).value
+                        )
+                        .fillMaxSize()
+                ) {
+                    Row(
+                        Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Icon(
+                            Icons.Default.Close, null, modifier = Modifier.clickable {
+                                firebaseConnect.reject()
+                            }
+                        )
+                    }
+                }
+            }
+
+        } else Column(
+            Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
-                Modifier
-                    .scale(
-                        animateFloatAsState(
-                            if (callState.value.typeMessage == OUTGOING_CALL
-                                || callState.value.typeMessage == GET_INCOMING_CALL
-                            ) 1f else 0f
-                        ).value
-                    )
-                    .fillMaxSize()
-            ) {
-                Row(
-                    Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Icon(
-                        Icons.Default.Close, null, modifier = Modifier.clickable {
-                            firebaseConnect.reject()
-                        }
-                    )
-                }
-            }
+            CircularProgressIndicator()
         }
-        Column(
-            Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            Icon(
-                Icons.Default.Call, null, modifier = Modifier.clickable {
-                    firebaseConnect.call()
-                }
-            )
-        }
-    } else Column(
-        Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        CircularProgressIndicator()
     }
 }

@@ -9,6 +9,7 @@ import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.REJECT
+import com.lm.firebaseconnect.State.RESET
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
 import com.lm.firebaseconnect.State.USER_ID
@@ -28,10 +29,9 @@ class RemoteMessages(
     private val firebaseRead: FirebaseRead
 ) {
 
-    private fun sendRemoteMessage(
-        inBox: JSONObject
-    ) {
-        firebaseRead.startReadToken {
+    private fun sendRemoteMessage(inBox: JSONObject) {
+        firebaseRead.readNode(Nodes.TOKEN) {
+            it.log
             fCMApi.sendRemoteMessage(
                 JSONObject().put(DATA, inBox).put(TOKEN, JSONArray().put(it)).toString(), header
             )?.enqueue(object : Callback<String?> {
@@ -47,7 +47,12 @@ class RemoteMessages(
 
     fun reject() {
         sendRemoteMessage(rejectInbox)
-        callState.value = remoteMessageModel.rejectCall()
+        callState.value = remoteMessageModel.rejectCall
+        firebaseRead.firebaseSave.saveWait()
+    }
+    fun reset() {
+        sendRemoteMessage(resetInbox)
+        callState.value = remoteMessageModel.rejectCall
         firebaseRead.firebaseSave.saveWait()
     }
 
@@ -56,16 +61,17 @@ class RemoteMessages(
         .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
 
     private val rejectInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, REJECT)
+        .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
+
+    private val resetInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, RESET)
 
     private val messageInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, MESSAGE)
 
-    private val baseInbox: JSONObject
-        get() = with(firebaseRead.firebaseSave) {
+    private val baseInbox: JSONObject get() = with(firebaseRead.firebaseSave) {
             JSONObject()
                 .put(NAME, myName)
                 .put(CHAT_PATH, pairPath)
                 .put(CHAT_ID, firebaseChat.chatId)
-                .put(USER_ID, firebaseChat.databaseUserId)
         }
 
     private val header by lazy {
