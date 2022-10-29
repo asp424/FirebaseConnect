@@ -10,6 +10,7 @@ import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.OUTGOING_CALL
+import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
 import com.lm.firebaseconnect.State.WAIT
@@ -22,7 +23,8 @@ data class RemoteMessageModel constructor(
     val name: String = "",
     val callingId: String = "",
     val token: String = "",
-    val apiKey: String = ""
+    val apiKey: String = "",
+    val room: String = "",
 ) {
 
     class Instance() {
@@ -37,6 +39,7 @@ data class RemoteMessageModel constructor(
                 callingId = getValue(CALLING_ID),
                 token = getValue(TOKEN),
                 apiKey = getValue(API_KEY),
+                room = getValue(ROOM),
             )
         }
 

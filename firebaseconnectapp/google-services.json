@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "700634303386",
+    "firebase_url": "https://fir-connect-a05e5-default-rtdb.firebaseio.com",
     "project_id": "fir-connect-a05e5",
     "storage_bucket": "fir-connect-a05e5.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "700634303386-c4dni7dvgeiu3las1e6h6a0vqh1om7uq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lm.firebaseconnectapp",
+            "certificate_hash": "f03cdbfa63fda5d2d90b2bfb235c97fa2f248282"
+          }
+        },
         {
           "client_id": "700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com",
           "client_type": 3

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 android {
@@ -29,6 +30,11 @@ android {
                 "\"AAAAoyEPC5o:APA91bFan2FPNVGsLjebfDbm51TUz0-KPhcl86TZe9CwyYoOmTr631B5Axd7eRJ3qfg5PUC4SAKCJkndfmPCf2rq7fl9X1xzkFsitgiqQbQq4gtRHAc3keGyKoIs1O4TzNPSdgBT5HbK\""
             )
             buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
+            buildConfigField(
+                "String",
+                "WEB_CLIENT_ID",
+                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\""
+            )
         }
         release {
             isMinifyEnabled = false
@@ -60,11 +66,33 @@ android {
 }
 
 dependencies {
+
+    //Base
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.6.0")
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.0.0-rc01")
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+    //JitsiMeet
+    implementation("org.jitsi.react:jitsi-meet-sdk:3.0.0") { isTransitive = true }
+
+    //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
+
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    //Compose
+    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.compose.ui:ui:1.4.0-alpha01")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha01")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha")
+
+    //Dagger
+    implementation("com.google.dagger:dagger:2.42")
+    kapt("com.google.dagger:dagger-compiler:2.42")
+
+    //Auth
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
 }

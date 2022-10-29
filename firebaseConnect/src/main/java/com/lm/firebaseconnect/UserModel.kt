@@ -23,7 +23,7 @@ fun DataSnapshot.getUserModel(pairPath: String, chatId: String) =
             if (key == chatId) writingState.value = (this == "1")
         }
         token = getValue(key ?: "", Nodes.TOKEN)
-}
+    }
 
 fun DataSnapshot.getValue(path: String, node: Nodes) =
     child(node.node()).child(path).value.toString()

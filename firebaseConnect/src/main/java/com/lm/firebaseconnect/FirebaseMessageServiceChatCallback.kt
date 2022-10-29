@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.SharedPreferences
+import android.media.Ringtone
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -11,14 +12,21 @@ import androidx.core.app.NotificationCompat.Builder
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.database.FirebaseDatabase
 import com.lm.firebaseconnect.FirebaseRead.Companion.RING
+import com.lm.firebaseconnect.State.ANSWER
 import com.lm.firebaseconnect.State.DATA
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
+import com.lm.firebaseconnect.State.MISSING_CALL
+import com.lm.firebaseconnect.State.NOTIFY_CALLBACK
 import com.lm.firebaseconnect.State.OUTGOING_CALL
 import com.lm.firebaseconnect.State.REJECT
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -39,17 +47,18 @@ internal class FirebaseMessageServiceChatCallback() {
         packageName: String,
         notificationManager: NotificationManagerCompat,
         notificationBuilder: Builder,
-        sharedPreferences: SharedPreferences
+        sharedPreferences: SharedPreferences,
+        ringtone: Ringtone
     ) = with(remoteMessageModel) {
         when (typeMessage) {
             MESSAGE -> {
                 if (!isRun(activityManager, packageName)) {
                     showNotificationFromMessenger(
                         textMessage, name, notificationBuilder, notificationManager,
-                        callingId, "0", "Message"
+                        callingId, "0", MESSAGE
                     )
-                    path(chatId, Nodes.NOTIFY).updateChildren(mapOf(chatPath to RING))
                 }
+                path(chatId, Nodes.NOTIFY).updateChildren(mapOf(chatPath to RING))
                 callState.value = remoteMessageModel
             }
             INCOMING_CALL -> {
@@ -57,11 +66,12 @@ internal class FirebaseMessageServiceChatCallback() {
                     showNotificationFromMessenger(
                         "Вам звонок от $name", "Входящий вызов",
                         notificationBuilder, notificationManager,
-                        callingId, "1", "IncomingCall"
+                        callingId, "1", INCOMING_CALL
                     )
+                    ringtone.play()
                 }
-                sendRemoteMessage(token, apiKey, GET_INCOMING_CALL)
-                    callState.value = remoteMessageModel
+                sendRemoteMessage(token, apiKey, room, GET_INCOMING_CALL)
+                callState.value = remoteMessageModel
             }
 
             REJECT -> {
@@ -69,14 +79,20 @@ internal class FirebaseMessageServiceChatCallback() {
                 showNotificationFromMessenger(
                     "Вам звонил $name", "Пропущенный вызов",
                     notificationBuilder, notificationManager,
-                    callingId, "2", "MissingCall"
+                    callingId, "2", MISSING_CALL
                 )
-                callState.value = remoteMessageModel
-
+                ringtone.stop()
+                        callState.value = remoteMessageModel
             }
             GET_INCOMING_CALL -> {
                 if (callState.value.typeMessage == OUTGOING_CALL)
-                    callState.value = remoteMessageModel
+                    callState.value = remoteMessageModel else Unit
+            }
+            ANSWER -> {
+                if (callState.value.typeMessage == GET_INCOMING_CALL) {
+                    sendRemoteMessage(token, apiKey, room, ANSWER)
+                        callState.value = remoteMessageModel
+                } else Unit
             }
             else -> callState.value = remoteMessageModel
         }
@@ -87,6 +103,7 @@ internal class FirebaseMessageServiceChatCallback() {
     private fun SharedPreferences.read() = getString("callState", "")
 
     private fun path(child: String, node: Nodes) = databaseReference.child(child).child(node.node())
+
 
     private fun isRun(activityManager: ActivityManager, packageName: String): Boolean {
         val runningProcesses = activityManager.runningAppProcesses ?: return false
@@ -111,6 +128,9 @@ internal class FirebaseMessageServiceChatCallback() {
     ) {
         notificationManager.createNotificationChannel(
             NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+                .apply {
+                    if (channelName == INCOMING_CALL) setSound(null, null)
+                }
         )
         notificationManager.notify(
             id.toInt(), notificationBuilder
@@ -122,7 +142,7 @@ internal class FirebaseMessageServiceChatCallback() {
         )
     }
 
-    private fun sendRemoteMessage(token: String, apiKey: String, typeMessage: String) {
+    private fun sendRemoteMessage(token: String, apiKey: String, room: String, typeMessage: String) {
         fCMApi.sendRemoteMessage(
             JSONObject()
                 .put(

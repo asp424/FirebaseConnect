@@ -1,5 +1,6 @@
 package com.lm.firebaseconnect
 
+import com.lm.firebaseconnect.State.ANSWER
 import com.lm.firebaseconnect.State.API_KEY
 import com.lm.firebaseconnect.State.CALLING_ID
 import com.lm.firebaseconnect.State.CHAT_ID
@@ -10,6 +11,7 @@ import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.REJECT
 import com.lm.firebaseconnect.State.RESET
+import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
 import org.json.JSONArray
@@ -30,10 +32,7 @@ class RemoteMessages(
 
     private fun sendRemoteMessage(inBox: JSONObject) {
         firebaseRead.readNode(Nodes.TOKEN) { token ->
-            token.log
-
             firebaseRead.readMyNode(Nodes.TOKEN) { myToken ->
-                myToken.log
                 fCMApi.sendRemoteMessage(
                     JSONObject()
                         .put(
@@ -71,6 +70,8 @@ class RemoteMessages(
 
     fun call(token: String) = sendCallMessage(callInbox, token)
 
+    fun answer(token: String) = sendCallMessage(answerInbox, token)
+
     fun reject(token: String) {
         sendCallMessage(rejectInbox, token)
         callState.value = remoteMessageModel.rejectCall
@@ -84,8 +85,11 @@ class RemoteMessages(
 
     private val callInbox: JSONObject get() = testInbox
         .put(TYPE_MESSAGE, INCOMING_CALL)
+        .put(ROOM, "room")
 
     private val rejectInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, REJECT)
+
+    private val answerInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, ANSWER)
 
     private val resetInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, RESET)
 

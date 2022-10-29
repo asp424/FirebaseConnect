@@ -2,18 +2,16 @@ package com.lm.firebaseconnect
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
+import android.media.Ringtone
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.lm.firebaseconnect.State.INCOMING_CALL
-import com.lm.firebaseconnect.State.MESSAGE
-import com.lm.firebaseconnect.State.REJECT
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 internal class FBMessageService : FirebaseMessagingService() {
@@ -22,8 +20,6 @@ internal class FBMessageService : FirebaseMessagingService() {
             by lazy { NotificationManagerCompat.from(this) }
 
     private val sharedPreferences by lazy { getSharedPreferences("checkForFirst", MODE_PRIVATE) }
-
-
 
     private val activityManager
             by lazy { getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager }
@@ -35,6 +31,13 @@ internal class FBMessageService : FirebaseMessagingService() {
         FirebaseMessageServiceChatCallback()
     }
 
+    private val standardNotificationUri: Uri by lazy {
+        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+    }
+    private val ringtone: Ringtone
+        by lazy { RingtoneManager.getRingtone(this, standardNotificationUri) }
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
@@ -44,7 +47,8 @@ internal class FBMessageService : FirebaseMessagingService() {
                 remoteMessageModel.getFromRemoteMessage(remoteMessage),
                 activityManager,
                 packageName,
-                notificationManager, notificationBuilder, sharedPreferences
+                notificationManager, notificationBuilder, sharedPreferences,
+                ringtone
             )
     }
 }

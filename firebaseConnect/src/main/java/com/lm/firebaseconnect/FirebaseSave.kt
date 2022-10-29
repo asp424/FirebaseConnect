@@ -51,11 +51,6 @@ class FirebaseSave(
             .addOnCompleteListener { onSave() }
     }
 
-    fun saveWait() {
-        save(WAIT, Nodes.CALL, myDigit)
-        save(WAIT, Nodes.CALL, firebaseChat.chatId, firebaseChat.chatId)
-    }
-
     fun init() {
         databaseReference.child(myDigit).get().addOnCompleteListener {
             if (!it.result.hasChild(Nodes.CALL.node())) save(WAIT, Nodes.CALL, myDigit)

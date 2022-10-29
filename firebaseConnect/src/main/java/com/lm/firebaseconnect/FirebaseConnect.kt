@@ -46,6 +46,8 @@ class FirebaseConnect private constructor(
 
     fun reset(token: String) = remoteMessages.reset(token)
 
+    fun answer(token: String) = remoteMessages.answer(token)
+
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
         rememberUpdatedState(LocalLifecycleOwner.current).value.apply {

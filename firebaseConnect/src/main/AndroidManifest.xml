@@ -14,5 +14,8 @@
                     />
             </intent-filter>
         </service>
+        <service
+            android:name="org.jitsi.meet.sdk.ConnectionService"
+            android:exported="false"/>
     </application>
 </manifest>

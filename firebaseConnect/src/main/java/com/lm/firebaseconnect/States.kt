@@ -29,6 +29,7 @@ object State {
     const val RECEIVED = "received"
     const val TYPE_MESSAGE = "typeMessage"
     const val INCOMING_CALL = "incomingCall"
+    const val MISSING_CALL = "missingCall"
     const val OUTGOING_CALL = "outgoingCall"
     const val ANSWER = "answer"
     const val REJECT = "reject"
@@ -39,6 +40,8 @@ object State {
     const val WAIT = "wait"
     const val BUSY = "busy"
     const val GET_INCOMING_CALL = "getIncomingCall"
+    const val NOTIFY_CALLBACK = "notifyCallback"
     const val CALLING_ID = "callingId"
     const val API_KEY = "apiKey"
+    const val ROOM = "room"
 }
