@@ -24,153 +24,159 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.lm.firebaseconnect.*
-import com.lm.firebaseconnectapp.firebaseConnect
+import com.lm.firebaseconnect.State.listMessages
+import com.lm.firebaseconnect.State.notifyState
+import com.lm.firebaseconnect.State.onLineState
+import com.lm.firebaseconnect.State.writingState
+import com.lm.firebaseconnect.models.UIMessagesStates
+import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Chat(navController: NavHostController) {
     val coroutine = rememberCoroutineScope()
-    firebaseConnect.SetChatContent {
-        if (listMessages.value is UIMessagesStates.Success) {
-            val listMessages = (listMessages.value as UIMessagesStates.Success).list
-            Scaffold(content = {
-                val state = rememberLazyListState()
-                LaunchedEffect(true) {
-                    delay(300)
-                    state.animateScrollToItem(listMessages.size)
-                }
-                var text by remember { mutableStateOf("") }
-
-                val click = remember {
-                    {
-                        if (text.isNotEmpty()) {
-                            sendMessage(text)
-                            text = ""
-                        }
-                        setNoWriting()
+    with(mainDep.firebaseConnect) {
+        SetChatContent {
+            if (listMessages.value is UIMessagesStates.Success) {
+                val listMessages = (listMessages.value as UIMessagesStates.Success).list
+                Scaffold(content = {
+                    val state = rememberLazyListState()
+                    LaunchedEffect(true) {
+                        delay(300)
+                        state.animateScrollToItem(listMessages.size)
                     }
-                }
-                LazyColumn(
-                    content = {
-                        items(listMessages) {
+                    var text by remember { mutableStateOf("") }
+
+                    val click = remember {
+                        {
+                            if (text.isNotEmpty()) {
+                                sendMessage(text)
+                                text = ""
+                            }
+                            setNoWriting()
+                        }
+                    }
+                    LazyColumn(
+                        content = {
+                            items(listMessages) {
+                                Text(
+                                    text = it.first,
+                                    modifier = Modifier
+                                        .padding(bottom = 5.dp), color =
+                                    if (it.second == "green") Color.Green else Color.Black
+                                )
+                            }
+                        }, modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(
+                            bottom = 100.dp, start = 10.dp, end = 10.dp, top = 60.dp
+                        ), state = state
+                    )
+
+                    val width = LocalConfiguration.current.screenWidthDp.dp
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Card(
+                            shape = CircleShape,
+                            modifier = Modifier
+                                .padding(start = 20.dp, bottom = 2.dp)
+                                .offset(
+                                    animateDpAsState(
+                                        if (writingState.value) 0.dp else (-100).dp
+                                    ).value
+                                )
+                        ) {
                             Text(
-                                text = it.first,
-                                modifier = Modifier
-                                    .padding(bottom = 5.dp), color =
-                                if (it.second == "green") Color.Green else Color.Black
+                                text = "writing...",
+                                modifier = Modifier.padding(5.dp)
                             )
                         }
-                    }, modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(
-                        bottom = 100.dp, start = 10.dp, end = 10.dp, top = 60.dp
-                    ), state = state
-                )
-
-                val width = LocalConfiguration.current.screenWidthDp.dp
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Card(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .padding(start = 20.dp, bottom = 2.dp)
-                            .offset(
-                                animateDpAsState(
-                                    if (writingState.value) 0.dp else (-100).dp
-                                ).value
-                            )
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextField(value = text, onValueChange = {
+                                text = it
+                                if (it.isNotEmpty()) setWriting()
+                                else setNoWriting()
+                            }, modifier = Modifier
+                                .width(width - 100.dp)
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutine.launch {
+                                            delay(300)
+                                            state.animateScrollToItem(listMessages.size)
+                                        }
+                                    }
+                                })
+                            FloatingActionButton(onClick = click) {
+                                Icon(Icons.Default.Send, null)
+                            }
+                        }
+                    }
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(end = 20.dp, bottom = 60.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.Bottom
                     ) {
-                        Text(
-                            text = "writing...",
-                            modifier = Modifier.padding(5.dp)
+                        Icon(
+                            Icons.Rounded.Notifications, null, tint = Color.Green,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .scale(
+                                    animateFloatAsState(
+                                        if (notifyState.value) 1f else 0f
+                                    ).value
+                                )
                         )
+                    }
+                    LocalDensity.current.apply {
+                        FloatingActionButton(
+                            onClick = { deleteAllMessages() },
+                            shape = CircleShape, containerColor = Color.Red,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .offset(width - 50.dp, 10.dp)
+                        ) {
+                            Icon(Icons.Rounded.Delete, null, tint = Color.White)
+                        }
                     }
                     Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(end = 35.dp, top = 35.dp)
                     ) {
-                        TextField(value = text, onValueChange = {
-                            text = it
-                            if (it.isNotEmpty()) setWriting()
-                            else setNoWriting()
-                        }, modifier = Modifier
-                            .width(width - 100.dp)
-                            .onFocusEvent { focusState ->
-                                if (focusState.isFocused) {
-                                    coroutine.launch {
-                                        delay(300)
-                                        state.animateScrollToItem(listMessages.size)
-                                    }
-                                }
-                            })
-                        FloatingActionButton(onClick = click) {
-                            Icon(Icons.Default.Send, null)
+                        Card(
+                            shape = CircleShape,
+                            modifier = Modifier,
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (onLineState.value) Color.Green else Color.Red
+                            ),
+                            border = BorderStroke(1.dp, Color.White)
+                        ) {
+                            Text(
+                                text = if (onLineState.value) "online" else "offline",
+                                modifier = Modifier.padding(5.dp),
+                                color = Color.White
+                            )
                         }
                     }
-                }
+                })
+            } else {
                 Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(end = 20.dp, bottom = 60.dp),
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.Bottom
+                    Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        Icons.Rounded.Notifications, null, tint = Color.Green,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .scale(
-                                animateFloatAsState(
-                                    if (notifyState.value) 1f else 0f
-                                ).value
-                            )
-                    )
+                    CircularProgressIndicator()
                 }
-                LocalDensity.current.apply {
-                    FloatingActionButton(
-                        onClick = { deleteAllMessages() },
-                        shape = CircleShape, containerColor = Color.Red,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .offset(width - 50.dp, 10.dp)
-                    ) {
-                        Icon(Icons.Rounded.Delete, null, tint = Color.White)
-                    }
-                }
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(end = 35.dp, top = 35.dp)
-                ) {
-                    Card(
-                        shape = CircleShape,
-                        modifier = Modifier,
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (onLineState.value) Color.Green else Color.Red
-                        ),
-                        border = BorderStroke(1.dp, Color.White)
-                    ) {
-                        Text(
-                            text = if (onLineState.value) "online" else "offline",
-                            modifier = Modifier.padding(5.dp),
-                            color = Color.White
-                        )
-                    }
-                }
-            })
-        } else {
-            Column(
-                Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator()
             }
         }
     }

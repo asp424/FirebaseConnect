@@ -1,4 +1,3 @@
-
 plugins { id("com.android.library"); id("org.jetbrains.kotlin.android") }
 
 android {
@@ -8,8 +7,17 @@ android {
     defaultConfig { minSdk = 24; targetSdk = 33 }; kotlinOptions { jvmTarget = "1.8" }
 
     buildFeatures { compose = true }
-    
-    composeOptions { kotlinCompilerExtensionVersion = "1.3.2" }
+
+    composeOptions { kotlinCompilerExtensionVersion = composeCompilerVersion }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -29,6 +37,10 @@ dependencies {
     //Compose
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:1.4.0-alpha01")
+
+    //Glide
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 }
 
 

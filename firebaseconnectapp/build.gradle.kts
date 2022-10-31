@@ -15,7 +15,6 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -58,6 +57,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = composeCompilerVersion
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
     packagingOptions {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -66,17 +69,20 @@ android {
 }
 
 dependencies {
-
-    //Base
+//Base
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("androidx.work:work-runtime-ktx:2.8.0-alpha01")
 
     //JitsiMeet
-    implementation("org.jitsi.react:jitsi-meet-sdk:3.0.0") { isTransitive = true }
+    implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
 
     //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
+
+    //Firebase
+    implementation("com.google.firebase:firebase-messaging-ktx:23.1.0")
 
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")

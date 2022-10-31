@@ -1,15 +1,16 @@
-package com.lm.firebaseconnect
+package com.lm.firebaseconnect.models
 
 import com.google.firebase.messaging.RemoteMessage
 import com.lm.firebaseconnect.State.API_KEY
+import com.lm.firebaseconnect.State.BUSY
 import com.lm.firebaseconnect.State.CALLING_ID
 import com.lm.firebaseconnect.State.CHAT_ID
 import com.lm.firebaseconnect.State.CHAT_PATH
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
-import com.lm.firebaseconnect.State.INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.OUTGOING_CALL
+import com.lm.firebaseconnect.State.RESET
 import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
@@ -44,9 +45,12 @@ data class RemoteMessageModel constructor(
         }
 
         val rejectCall get() = RemoteMessageModel(WAIT)
+        val resetCall get() = RemoteMessageModel(RESET)
 
         val outgoingCall get() = RemoteMessageModel(OUTGOING_CALL)
 
         val getIncomingCall get() = RemoteMessageModel(GET_INCOMING_CALL)
+
+        val busy get() = RemoteMessageModel(BUSY)
     }
 }

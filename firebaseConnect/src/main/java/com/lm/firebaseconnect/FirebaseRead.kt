@@ -1,12 +1,19 @@
 package com.lm.firebaseconnect
 
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
+import com.lm.firebaseconnect.State.listMessages
+import com.lm.firebaseconnect.State.onLineState
+import com.lm.firebaseconnect.State.writingState
+import com.lm.firebaseconnect.listeners.ValueEventListenerInstance
+import com.lm.firebaseconnect.models.Nodes
+import com.lm.firebaseconnect.models.RemoteLoadStates
+import com.lm.firebaseconnect.models.UIMessagesStates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
@@ -19,60 +26,47 @@ class FirebaseRead(
         with(valueEventListenerInstance) { eventListener() }
     }
 
-    fun readNode(node: Nodes, onRead: (String) -> Unit) = node.nodePath.get()
+    fun readNode(node: Nodes, digit: String, onRead: (String) -> Unit)
+    = nodePath(digit, node).get()
         .addOnCompleteListener {
             it.result?.also { resultNotNull ->
                 resultNotNull.key?.also { keyNotNull ->
-                    if (keyNotNull == getChatId) onRead(resultNotNull.value.toString())
+                    if (keyNotNull == digit) onRead(resultNotNull.value.toString())
                 }
             }
         }
 
-    fun readMyNode(node: Nodes, onRead: (String) -> Unit) = node.myNodePath.get()
-        .addOnCompleteListener {
-            it.result?.also { resultNotNull ->
-                resultNotNull.key?.also { keyNotNull ->
-                    if (keyNotNull == firebaseSave.myDigit) onRead(resultNotNull.value.toString())
-                }
-            }
-        }
-
-    private val Nodes.nodePath
-        get() = firebaseSave.databaseReference.child(getChatId).child(node()).child(getChatId)
-
-    private val Nodes.myNodePath
-        get() = firebaseSave.databaseReference
-            .child(firebaseSave.myDigit).child(node()).child(firebaseSave.myDigit)
-
+    private fun nodePath(digit: String, node: Nodes) =
+        firebaseSave.databaseReference.child(digit).child(node.node()).child(digit)
 
     private fun startMessagesListener(onMessage: (List<Pair<String, String>>) -> Unit) =
         CoroutineScope(IO).launch {
             messagesListener().collect {
                 if (it is RemoteLoadStates.Success) {
-                    onMessage(it.data.children.map { v ->
-                        val message = firebaseSave.crypto.cipherDecrypt(v.value.toString())
-                        val digit = message.getDigitFromMessage
-                        val normMessage = with(firebaseSave.timeConverter) {
-                            message.removeDigitTags.currentTimeZoneTime()
-                        }
-                        if (digit == firebaseSave.myDigit) Pair(normMessage, "green")
-                        else Pair(normMessage, "black")
-                    })
+                    onMessage(it.data.children.map { v -> v.getMessage() })
                 } else listOf(((it as RemoteLoadStates.Failure<*>).data as DatabaseError).message)
             }
         }
 
+    private fun DataSnapshot.getMessage() =
+        with(firebaseSave.crypto.cipherDecrypt(value.toString())) {
+            Pair(with(firebaseSave.timeConverter) {
+                removeDigitTags.currentTimeZoneTime()
+            }, if (getDigitFromMessage == firebaseSave.myDigit) MY_COLOR else CHAT_ID_COLOR)
+        }
+
     private fun stopListener() = messagesJob.cancel()
 
-    private fun startListener() {
+    private fun startListener() = with(firebaseSave) {
         stopListener()
-        firebaseSave.save(ONE, Nodes.ONLINE)
-        firebaseSave.clearHimNotify()
+        save(ONE, Nodes.ONLINE)
+        save(CLEAR_NOTIFY, Nodes.NOTIFY, digit = firebaseChat.chatId)
         messagesJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
     }
 
     fun initStates() {
-        onLineState.value = false; writingState.value = false
+        onLineState.value = false
+        writingState.value = false
         listMessages.value = UIMessagesStates.Loading
     }
 
@@ -84,8 +78,6 @@ class FirebaseRead(
     fun onPause() {
         stopListener(); firebaseSave.save(ZERO, Nodes.ONLINE); firebaseSave.save(ZERO, Nodes.WRITING)
     }
-
-    private val getChatId get() = firebaseSave.firebaseChat.chatId
 
     private val String.removeDigitTags get() = substringAfter(DIGIT_TAG_END)
 
@@ -100,5 +92,7 @@ class FirebaseRead(
         const val DIGIT_TAG_END = "</N>"
         const val RING = "RING"
         const val CLEAR_NOTIFY = "none"
+        const val MY_COLOR = "green"
+        const val CHAT_ID_COLOR = "black"
     }
 }

@@ -1,14 +1,17 @@
 package com.lm.firebaseconnect
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.lm.firebaseconnect.FirebaseRead.Companion.RING
+import com.lm.firebaseconnect.State.callState
+import com.lm.firebaseconnect.listeners.ChildEventListenerInstance
+import com.lm.firebaseconnect.listeners.ValueEventListenerInstance
+import com.lm.firebaseconnect.models.Nodes
+import com.lm.firebaseconnect.models.RemoteMessageModel
 
 class FirebaseConnect private constructor(
     cryptoKey: String,
@@ -38,9 +41,14 @@ class FirebaseConnect private constructor(
 
     fun sendMessage(text: String) = firebaseSave.sendMessage(text, remoteMessages)
 
+    fun sendRemoteMessage(typeMessage: String) =
+        remoteMessages.sendRemoteMessageFromMessageService(typeMessage)
+
+    fun setRingNotification() = firebaseSave.save(RING, Nodes.NOTIFY)
+
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
 
-    fun call(token: String) = firebaseCall.call(token)
+    fun call(token: String) = remoteMessages.call(token)
 
     fun reject(token: String) = remoteMessages.reject(token)
 
@@ -68,7 +76,9 @@ class FirebaseConnect private constructor(
 
     @SuppressLint("RestrictedApi")
     @Composable
-    fun SetMainScreenContent(content: @Composable FirebaseConnect.() -> Unit) {
+    fun SetMainScreenContent(
+        content: @Composable FirebaseConnect.() -> Unit
+    ) {
         val context = LocalContext.current
         with(firebaseRead) {
             val observer = LifecycleEventObserver { _, event ->
@@ -78,9 +88,10 @@ class FirebaseConnect private constructor(
                 }
                 if (Lifecycle.Event.ON_PAUSE == event) firebaseHandler.stopMainListener()
             }
-        val activity = remember { context.getActivity()?.apply { lifecycle.addObserver(observer) } }
-        rememberUpdatedState(activity).value.apply {
-            DisposableEffect(this) {
+            val activity =
+                remember { context.getActivity()?.apply { lifecycle.addObserver(observer) } }
+            rememberUpdatedState(activity).value.apply {
+                DisposableEffect(this) {
                     onDispose {}
                 }
             }
@@ -109,8 +120,6 @@ class FirebaseConnect private constructor(
     private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
     private val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
-
-    private val firebaseCall by lazy { FirebaseCall(remoteMessages) }
 
     companion object {
         const val ZERO = "0"

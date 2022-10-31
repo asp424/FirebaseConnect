@@ -2,26 +2,26 @@ package com.lm.firebaseconnect
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-
-val onLineState = mutableStateOf(false)
-
-var writingState = mutableStateOf(false)
-
-var notifyState = mutableStateOf(false)
-
-var callState = mutableStateOf(RemoteMessageModel())
-
-val remoteMessageModel by lazy { RemoteMessageModel.Instance() }
-
-val listMessages: MutableState<UIMessagesStates> = mutableStateOf(UIMessagesStates.Loading)
-
-@SuppressLint("MutableCollectionMutableState")
-var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
+import com.lm.firebaseconnect.models.RemoteMessageModel
+import com.lm.firebaseconnect.models.UIMessagesStates
+import com.lm.firebaseconnect.models.UIUsersStates
 
 object State {
+    val onLineState = mutableStateOf(false)
+
+    var writingState = mutableStateOf(false)
+
+    var notifyState = mutableStateOf(false)
+
+    var callState = mutableStateOf(RemoteMessageModel())
+
+    val remoteMessageModel by lazy { RemoteMessageModel.Instance() }
+
+    val listMessages: MutableState<UIMessagesStates> = mutableStateOf(UIMessagesStates.Loading)
+
+    @SuppressLint("MutableCollectionMutableState")
+    var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
     const val USER_ID = "userId"
     const val TOKEN = "registration_ids"
     const val DATA = "data"

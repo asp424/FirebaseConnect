@@ -3,6 +3,7 @@ package com.lm.firebaseconnect
 import androidx.core.text.isDigitsOnly
 import com.google.firebase.database.DataSnapshot
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
+import com.lm.firebaseconnect.FirebaseRead.Companion.CLEAR_NOTIFY
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
@@ -10,6 +11,13 @@ import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.RING
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
+import com.lm.firebaseconnect.State.listUsers
+import com.lm.firebaseconnect.State.notifyState
+import com.lm.firebaseconnect.listeners.ChildEventListenerInstance
+import com.lm.firebaseconnect.models.Nodes
+import com.lm.firebaseconnect.models.UIUsersStates
+import com.lm.firebaseconnect.models.getUserModel
+import com.lm.firebaseconnect.models.getValue
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,7 +37,10 @@ class FirebaseHandler(
                         it.getValue(it.key!!.pairPath, Nodes.NOTIFY) == RING
                     ) {
                         notifyState.value = true; delay(3000)
-                        notifyState.value = false; firebaseSave.clearHimNotify()
+                        notifyState.value = false;
+                        firebaseSave.save(
+                            CLEAR_NOTIFY, Nodes.NOTIFY, digit = firebaseSave.firebaseChat.chatId
+                        )
                     }
                 }
                 listUsers.value = UIUsersStates.Success(t.filter())

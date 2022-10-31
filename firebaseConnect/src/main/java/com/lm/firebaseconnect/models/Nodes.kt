@@ -1,4 +1,4 @@
-package com.lm.firebaseconnect
+package com.lm.firebaseconnect.models
 
 sealed interface Nodes{
     object MESSAGES: Nodes

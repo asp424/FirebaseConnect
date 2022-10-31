@@ -7,10 +7,10 @@ import androidx.compose.runtime.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.lm.firebaseconnect.UserModel
+import com.lm.firebaseconnect.models.UserModel
 
-@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalAnimationApi::class)
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun NavHost() {
     var callUserModel by remember() { mutableStateOf(UserModel()) }
@@ -31,4 +31,3 @@ fun NavHost() {
     IncomingCallScreen(callUserModel)
     OutgoingCallScreen(callUserModel)
 }
-

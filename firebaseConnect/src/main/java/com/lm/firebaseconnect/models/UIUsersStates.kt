@@ -1,9 +1,4 @@
-package com.lm.firebaseconnect
-
-sealed interface UIMessagesStates {
-    object Loading : UIMessagesStates
-    class Success(val list: List<Pair<String, String>>) : UIMessagesStates
-}
+package com.lm.firebaseconnect.models
 
 sealed interface UIUsersStates {
     object Loading : UIUsersStates

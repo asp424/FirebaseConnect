@@ -1,4 +1,4 @@
-package com.lm.firebaseconnect
+package com.lm.firebaseconnect.models
 
 import com.google.firebase.database.DataSnapshot
 

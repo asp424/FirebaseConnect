@@ -14,6 +14,9 @@ import com.lm.firebaseconnect.State.RESET
 import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
+import com.lm.firebaseconnect.State.callState
+import com.lm.firebaseconnect.State.remoteMessageModel
+import com.lm.firebaseconnect.models.Nodes
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -31,8 +34,8 @@ class RemoteMessages(
 ) {
 
     private fun sendRemoteMessage(inBox: JSONObject) {
-        firebaseRead.readNode(Nodes.TOKEN) { token ->
-            firebaseRead.readMyNode(Nodes.TOKEN) { myToken ->
+        firebaseRead.readNode(Nodes.TOKEN, firebaseRead.firebaseSave.firebaseChat.chatId) { token ->
+            firebaseRead.readNode(Nodes.TOKEN, firebaseRead.firebaseSave.myDigit) { myToken ->
                 fCMApi.sendRemoteMessage(
                     JSONObject()
                         .put(
@@ -50,25 +53,41 @@ class RemoteMessages(
     }
 
     private fun sendCallMessage(inBox: JSONObject, token: String) {
-            firebaseRead.readMyNode(Nodes.TOKEN) { myToken ->
-                fCMApi.sendRemoteMessage(
-                    JSONObject()
-                        .put(
-                            DATA, inBox.put(TOKEN, myToken).put(API_KEY, apiKey)
-                        )
-                        .put(
-                            TOKEN, JSONArray().put(token)
-                        ).toString(), header
-                )?.enqueue(object : Callback<String?> {
-                    override fun onResponse(call: Call<String?>, response: Response<String?>) {}
-                    override fun onFailure(call: Call<String?>, t: Throwable) {}
-                })
+        firebaseRead.readNode(Nodes.TOKEN, firebaseRead.firebaseSave.myDigit) { myToken ->
+            fCMApi.sendRemoteMessage(
+                JSONObject()
+                    .put(
+                        DATA, inBox.put(TOKEN, myToken)
+                    )
+                    .put(
+                        TOKEN, JSONArray().put(token)
+                    ).toString(), header
+            )?.enqueue(object : Callback<String?> {
+                override fun onResponse(call: Call<String?>, response: Response<String?>) {}
+                override fun onFailure(call: Call<String?>, t: Throwable) {}
+            })
+        }
+    }
+
+    fun sendRemoteMessageFromMessageService(typeMessage: String) = with(callState.value) {
+        fCMApi.sendRemoteMessage(
+            JSONObject()
+                .put(DATA, JSONObject().put(TYPE_MESSAGE, typeMessage))
+                .put(TOKEN, JSONArray().put(token)).toString(), header
+        )?.enqueue(
+            object : Callback<String?> {
+                override fun onResponse(call: Call<String?>, response: Response<String?>) {}
+                override fun onFailure(call: Call<String?>, t: Throwable) {}
             }
+        )
     }
 
     fun message(message: String) = sendRemoteMessage(messageInbox.put(MESSAGE, message))
 
-    fun call(token: String) = sendCallMessage(callInbox, token)
+    fun call(token: String) {
+        callState.value = remoteMessageModel.outgoingCall
+        sendCallMessage(callInbox, token)
+    }
 
     fun answer(token: String) = sendCallMessage(answerInbox, token)
 
@@ -77,37 +96,47 @@ class RemoteMessages(
         callState.value = remoteMessageModel.rejectCall
         //firebaseRead.firebaseSave.saveWait()
     }
+
     fun reset(token: String) {
         sendCallMessage(resetInbox, token)
         callState.value = remoteMessageModel.rejectCall
-       // firebaseRead.firebaseSave.saveWait()
+        // firebaseRead.firebaseSave.saveWait()
     }
 
-    private val callInbox: JSONObject get() = testInbox
-        .put(TYPE_MESSAGE, INCOMING_CALL)
-        .put(ROOM, "room")
+    private val callInbox: JSONObject
+        get() = testInbox
+            .put(TYPE_MESSAGE, INCOMING_CALL)
+            .put(ROOM, "room")
+            .put(MESSAGE, "Входящий вызов от ${firebaseRead.firebaseSave.myName}")
+            .put(NAME, "Входящий вызов")
 
     private val rejectInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, REJECT)
+        .put(MESSAGE, "Вам звонил ${firebaseRead.firebaseSave.myName}")
+        .put(NAME, "Пропущенный вызов")
 
     private val answerInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, ANSWER)
 
     private val resetInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, RESET)
+        .put(MESSAGE, "Вам звонил ${firebaseRead.firebaseSave.myName}")
+        .put(NAME, "Пропущенный вызов")
 
     private val messageInbox: JSONObject get() = baseInbox.put(TYPE_MESSAGE, MESSAGE)
+        .put(NAME, "Сообщение от ${firebaseRead.firebaseSave.myName}")
 
-    private val baseInbox: JSONObject get() = with(firebaseRead.firebaseSave) {
+    private val baseInbox: JSONObject
+        get() = with(firebaseRead.firebaseSave) {
             JSONObject()
-                .put(NAME, myName)
                 .put(CHAT_PATH, pairPath)
                 .put(CHAT_ID, firebaseChat.chatId)
                 .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
         }
 
-    private val testInbox: JSONObject get() = with(firebaseRead.firebaseSave) {
-        JSONObject()
-            .put(NAME, myName)
-            .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
-    }
+    private val testInbox: JSONObject
+        get() = with(firebaseRead.firebaseSave) {
+            JSONObject()
+                .put(NAME, myName)
+                .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
+        }
 
     private val header by lazy {
         HashMap<String, String>().apply {

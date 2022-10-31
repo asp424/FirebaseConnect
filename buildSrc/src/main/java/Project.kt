@@ -10,7 +10,7 @@ val RepositoryHandler.repository: MavenArtifactRepository
 get() = run {
     google(); mavenCentral(); maven(
     url = "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases"
-)
+); maven(url = "https://www.jitpack.io")
 }
 
 fun Project.clearProject(file: File) = tasks.register("type", Delete::class) { delete(file) }

@@ -1,6 +1,8 @@
-package com.lm.firebaseconnect
+package com.lm.firebaseconnect.models
 
 import com.google.firebase.database.DataSnapshot
+import com.lm.firebaseconnect.State.onLineState
+import com.lm.firebaseconnect.State.writingState
 
 data class UserModel(
     var name: String = "",

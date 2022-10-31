@@ -2,6 +2,7 @@ package com.lm.firebaseconnect
 
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.lm.firebaseconnect.models.Nodes
 
 class FCMProvider(
     private val myDigit: String

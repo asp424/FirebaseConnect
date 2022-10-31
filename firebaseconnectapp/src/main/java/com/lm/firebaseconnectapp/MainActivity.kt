@@ -19,17 +19,14 @@ import com.lm.firebaseconnectapp.data.one_tap_google.FBAuth
 import com.lm.firebaseconnectapp.data.one_tap_google.FBRegStates
 import com.lm.firebaseconnectapp.data.one_tap_google.OTGRegState
 import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
+import com.lm.firebaseconnectapp.di.compose.MainScreenDependencies
 import com.lm.firebaseconnectapp.ui.NavHost
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-val firebaseConnect by lazy {
-    FirebaseConnect.Instance(
-        BuildConfig.C_KEY, BuildConfig.FCM_SERVER_KEY, 80, "serg"
-    ).init()
-}
 
 class MainActivity : ComponentActivity() {
 
@@ -47,13 +44,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (firebaseAuth.currentUser?.uid != null) {
-        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult())
-        { handleResult(it) }.apply { startOTGAuth(this) }
-            } else {
-                firebaseConnect.getAndSaveToken()
-                setContent { NavHost() }
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult())
+            { handleResult(it) }.apply { startOTGAuth(this) }
+        } else {
+            with(appComponent) {
+                notificationManager().cancelAll()
+                firebaseConnect().getAndSaveToken()
+                setContent { MainScreenDependencies(this) { NavHost() } }
             }
         }
+    }
 
     private fun startOTGAuth(
         regLauncher: ActivityResultLauncher<IntentSenderRequest>
