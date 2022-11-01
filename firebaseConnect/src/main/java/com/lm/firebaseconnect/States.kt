@@ -22,26 +22,20 @@ object State {
 
     @SuppressLint("MutableCollectionMutableState")
     var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
-    const val USER_ID = "userId"
     const val TOKEN = "registration_ids"
     const val DATA = "data"
     const val NAME = "name"
-    const val RECEIVED = "received"
     const val TYPE_MESSAGE = "typeMessage"
     const val INCOMING_CALL = "incomingCall"
-    const val MISSING_CALL = "missingCall"
     const val OUTGOING_CALL = "outgoingCall"
     const val ANSWER = "answer"
     const val REJECT = "reject"
     const val RESET = "reset"
     const val MESSAGE = "message"
-    const val CHAT_PATH = "chatPath"
-    const val CHAT_ID = "chatId"
     const val WAIT = "wait"
     const val BUSY = "busy"
     const val GET_INCOMING_CALL = "getIncomingCall"
-    const val NOTIFY_CALLBACK = "notifyCallback"
     const val CALLING_ID = "callingId"
-    const val API_KEY = "apiKey"
-    const val ROOM = "room"
+    const val GET_CHECK_FOR_CALL = "getCheckForCall"
+    const val CHECK_FOR_CALL = "checkForCall"
 }

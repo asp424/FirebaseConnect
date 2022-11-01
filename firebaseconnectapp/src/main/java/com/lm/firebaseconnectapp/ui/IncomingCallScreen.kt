@@ -1,6 +1,5 @@
 package com.lm.firebaseconnectapp.ui
 
-import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -17,34 +16,24 @@ import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.lm.firebaseconnect.State.ANSWER
 import com.lm.firebaseconnect.State.INCOMING_CALL
-import com.lm.firebaseconnect.State.REJECT
-import com.lm.firebaseconnect.State.RESET
-import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.callState
-import com.lm.firebaseconnect.State.remoteMessageModel
-import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.delay
 
-
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun IncomingCallScreen(callUserModel: UserModel) {
+fun IncomingCallScreen() {
     with(mainDep) {
-        val width = LocalConfiguration.current.screenWidthDp.dp
-        val height = LocalConfiguration.current.screenHeightDp.dp
-        var text by remember { mutableStateOf(false) }
+        var screen by remember { mutableStateOf(false) }
         LaunchedEffect(callState.value) {
-            text = if (callState.value.typeMessage == INCOMING_CALL) {
+            screen = if (callState.value.typeMessage == INCOMING_CALL) {
                 true
             } else {
                 delay(2000)
@@ -56,7 +45,7 @@ fun IncomingCallScreen(callUserModel: UserModel) {
             Modifier
                 .fillMaxSize()
                 .scale(
-                    animScale(text)
+                    animScale(screen)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -72,19 +61,22 @@ fun IncomingCallScreen(callUserModel: UserModel) {
                         .padding(80.dp)
                 ) {
                     FloatingActionButton(
-                        onClick = { firebaseConnect.reset(callUserModel.token); ringtone.stop() },
+                        onClick = {
+                            firebaseConnect.remoteMessages.reset(callState.value.token); ringtone.stop()
+                        },
                         shape = CircleShape, containerColor = Red
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
-                            Modifier.size(50.dp).padding(10.dp), White
+                            Modifier
+                                .size(50.dp)
+                                .padding(10.dp), White
                         )
                     }
                     FloatingActionButton(onClick = {
                         ringtone.stop()
-                        firebaseConnect.answer(callUserModel.token)
-                        callState.value = remoteMessageModel.rejectCall
-                        startJitsiMit(context, ROOM)
+                        firebaseConnect.remoteMessages.answer(callState.value.token)
+                        startJitsiMit(context, callState.value.token)
                     }, shape = CircleShape, containerColor = Green) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_phone_24), null,
@@ -100,19 +92,7 @@ fun IncomingCallScreen(callUserModel: UserModel) {
                 ) {
                     Text(text = callState.value.callingId, color = White)
                     Text(
-                        text = "Он отменил вызов", color = White, modifier =
-                        Modifier.scale(
-                            animScale(
-                                callState.value.typeMessage == RESET
-                                        || callState.value.typeMessage == REJECT
-                            )
-                        )
-                    )
-                    Text(
-                        text = "Он взял трубку", color = White, modifier =
-                        Modifier.scale(
-                            animScale(callState.value.typeMessage == ANSWER)
-                        )
+                        text = callState.value.name, color = White
                     )
                 }
             }

@@ -13,7 +13,7 @@ import com.lm.firebaseconnect.models.UserModel
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun NavHost() {
-    var callUserModel by remember() { mutableStateOf(UserModel()) }
+    var callUserModel by remember { mutableStateOf(UserModel()) }
     val navController = rememberAnimatedNavController()
     AnimatedNavHost(
         navController = navController, startDestination = "main"
@@ -28,6 +28,6 @@ fun NavHost() {
             Chat(navController)
         }
     }
-    IncomingCallScreen(callUserModel)
+    IncomingCallScreen()
     OutgoingCallScreen(callUserModel)
 }

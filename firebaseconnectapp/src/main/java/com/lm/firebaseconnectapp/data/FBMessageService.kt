@@ -1,9 +1,6 @@
 package com.lm.firebaseconnectapp.data
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -13,6 +10,7 @@ import com.lm.firebaseconnectapp.appComponent
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class FBMessageService : FirebaseMessagingService() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 

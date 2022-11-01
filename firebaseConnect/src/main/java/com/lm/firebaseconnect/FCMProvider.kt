@@ -18,6 +18,9 @@ class FCMProvider(
                 }
             }
         }
+        addOnFailureListener {
+            it.message.log
+        }
         Unit
     }
 

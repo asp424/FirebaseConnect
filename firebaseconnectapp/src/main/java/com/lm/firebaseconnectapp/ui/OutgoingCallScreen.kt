@@ -13,41 +13,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.lm.firebaseconnect.State.ANSWER
+import com.lm.firebaseconnect.State.GET_CHECK_FOR_CALL
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.State.OUTGOING_CALL
-import com.lm.firebaseconnect.State.REJECT
-import com.lm.firebaseconnect.State.RESET
-import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.callState
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
-import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun OutgoingCallScreen(callUserModel: UserModel) {
     with(mainDep.firebaseConnect) {
-        val width = LocalConfiguration.current.screenWidthDp.dp
-        val height = LocalConfiguration.current.screenHeightDp.dp
-        val context = LocalContext.current
-        var text by remember { mutableStateOf(false) }
+        var screen by remember { mutableStateOf(false) }
         LaunchedEffect(callState.value) {
-            text = if (callState.value.typeMessage == OUTGOING_CALL ||
-                callState.value.typeMessage == GET_INCOMING_CALL
+            screen = if (callState.value.typeMessage == OUTGOING_CALL ||
+                callState.value.typeMessage == GET_CHECK_FOR_CALL || callState.value.typeMessage == GET_INCOMING_CALL
             ) {
                 true
             } else {
-                if (callState.value.typeMessage == ANSWER) {
-                    startJitsiMit(context, ROOM)
-                }
                 delay(2000)
                 false
             }
@@ -57,7 +45,7 @@ fun OutgoingCallScreen(callUserModel: UserModel) {
                 .fillMaxSize()
                 .scale(
                     animScale(
-                        text
+                        screen
                     )
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -74,8 +62,9 @@ fun OutgoingCallScreen(callUserModel: UserModel) {
                         .padding(80.dp)
                 ) {
                     FloatingActionButton(
-                        onClick = { reject(callUserModel.token) },
-                        shape = CircleShape, containerColor = Color.Red
+                        onClick = { remoteMessages.reject(callUserModel.token) },
+                        shape = CircleShape, containerColor = Color.Red, modifier =
+                            Modifier.scale(animScale(callState.value.typeMessage == GET_INCOMING_CALL ))
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
@@ -90,34 +79,10 @@ fun OutgoingCallScreen(callUserModel: UserModel) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = callUserModel.id, color = Color.White)
-                    Text(
-                        text = "Пошёл вызов у него", color = Color.White, modifier =
-                        Modifier.scale(
-                            animScale(callState.value.typeMessage == GET_INCOMING_CALL)
-                        )
-                    )
-                    Text(
-                        text = "Он взял трубку", color = Color.White, modifier =
-                        Modifier.scale(
-                            animScale(callState.value.typeMessage == ANSWER)
-                        )
-                    )
-
-                    Text(
-                        text = "Он отклонил вызов", color = Color.White, modifier =
-                        Modifier.scale(
-                            animScale(callState.value.typeMessage == RESET)
-                        )
-                    )
-                    Text(
-                        text = "Он отклонил вызов", color = Color.White, modifier =
-                        Modifier.scale(
-                            animScale(callState.value.typeMessage == REJECT)
-                        )
+                    Text(text = callState.value.name, color = Color.White
                     )
                 }
             }
         }
     }
-
 }

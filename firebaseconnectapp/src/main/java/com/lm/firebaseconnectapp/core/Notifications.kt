@@ -5,14 +5,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.media.Ringtone
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.lm.firebaseconnect.R
 import com.lm.firebaseconnect.State
-import javax.inject.Named
+import com.lm.firebaseconnect.State.ANSWER
+import com.lm.firebaseconnect.State.REJECT
 import kotlin.random.Random
 
 class Notifications(
@@ -20,40 +20,26 @@ class Notifications(
     private val pendingIntentBuilder: (Int, Intent) -> PendingIntent,
     private val notificationBuilder: (String) -> NotificationCompat.Builder,
     private val intentBuilder: (String, String) -> Intent,
-    @Named("Ringtone")
-    private val ringtone: Ringtone,
 ) {
 
     @SuppressLint("UnspecifiedImmutableFlag")
     @RequiresApi(Build.VERSION_CODES.O)
-    fun showNotificationFromMessenger(channelId: String) = with(State.callState.value) {
-        createChannel(channelId)
-        val getCallIntent = intentBuilder.invoke("get", callingId)
-
-        val cancelIntent = intentBuilder.invoke("cancel", callingId)
-
+    fun showNotification() = with(State.callState.value) {
+        createChannel()
         notificationManager.notify(
             if (typeMessage == State.MESSAGE) Random(99).nextInt() else callingId.toInt(),
-            notificationBuilder.invoke(channelId).apply {
+            notificationBuilder.invoke(typeMessage).apply {
                 setAutoCancel(true)
                 setContentText(textMessage)
                 setContentTitle(name)
+                val cancelIntent = intentBuilder.invoke(REJECT, callingId)
                 if (typeMessage == State.INCOMING_CALL) {
-                    setContentIntent(
-                        pendingIntentBuilder.invoke(
-                            1, intentBuilder.invoke("off", callingId)
-                        )
-                    )
-                    setDeleteIntent(pendingIntentBuilder.invoke(4,
-                        intentBuilder.invoke("delete", callingId)))
-                    addAction(
-                        1, "Отклонить",
-                        pendingIntentBuilder.invoke(2, cancelIntent)
-                    )
+                    setDeleteIntent(pendingIntentBuilder.invoke(4, cancelIntent))
+                    addAction(1, "Отклонить", pendingIntentBuilder.invoke(2, cancelIntent))
                     addAction(
                         1, "Ответить", pendingIntentBuilder
                             .invoke(
-                                3, intentBuilder.invoke("get", callingId)
+                                3, intentBuilder.invoke(ANSWER, callingId)
                             )
                     )
                 }
@@ -64,13 +50,14 @@ class Notifications(
         )
     }
 
-    private fun createChannel(channelId: String) = with(State.callState.value) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannel() = with(State.callState.value) {
         val channel = NotificationChannel(
-            channelId,
+            typeMessage,
             typeMessage,
             NotificationManager.IMPORTANCE_HIGH
         ).apply { setSound(null, null) }
-        notificationManager.getNotificationChannel(channelId)
+        notificationManager.getNotificationChannel(typeMessage)
             ?: notificationManager.createNotificationChannel(channel)
     }
 }

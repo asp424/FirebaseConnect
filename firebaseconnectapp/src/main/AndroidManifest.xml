@@ -35,8 +35,5 @@
                     android:stopWithTask="false" />
             </intent-filter>
         </service>
-        <activity
-            android:name=".StartJitsiActivity"
-            android:exported="true" />
     </application>
 </manifest>

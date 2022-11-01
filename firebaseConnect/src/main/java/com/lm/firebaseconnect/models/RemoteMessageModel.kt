@@ -1,31 +1,21 @@
 package com.lm.firebaseconnect.models
 
 import com.google.firebase.messaging.RemoteMessage
-import com.lm.firebaseconnect.State.API_KEY
-import com.lm.firebaseconnect.State.BUSY
 import com.lm.firebaseconnect.State.CALLING_ID
-import com.lm.firebaseconnect.State.CHAT_ID
-import com.lm.firebaseconnect.State.CHAT_PATH
 import com.lm.firebaseconnect.State.GET_INCOMING_CALL
 import com.lm.firebaseconnect.State.MESSAGE
 import com.lm.firebaseconnect.State.NAME
 import com.lm.firebaseconnect.State.OUTGOING_CALL
-import com.lm.firebaseconnect.State.RESET
-import com.lm.firebaseconnect.State.ROOM
 import com.lm.firebaseconnect.State.TOKEN
 import com.lm.firebaseconnect.State.TYPE_MESSAGE
 import com.lm.firebaseconnect.State.WAIT
 
 data class RemoteMessageModel constructor(
     val typeMessage: String = WAIT,
-    val chatPath: String = "",
-    val chatId: String = "",
     val textMessage: String = "",
     val name: String = "",
     val callingId: String = "",
     val token: String = "",
-    val apiKey: String = "",
-    val room: String = "",
 ) {
 
     class Instance() {
@@ -33,24 +23,21 @@ data class RemoteMessageModel constructor(
         fun getFromRemoteMessage(remoteMessage: RemoteMessage) = with(remoteMessage) {
             RemoteMessageModel(
                 typeMessage = getValue(TYPE_MESSAGE),
-                chatPath = getValue(CHAT_PATH),
-                chatId = getValue(CHAT_ID),
                 textMessage = getValue(MESSAGE),
                 name = getValue(NAME),
                 callingId = getValue(CALLING_ID),
                 token = getValue(TOKEN),
-                apiKey = getValue(API_KEY),
-                room = getValue(ROOM),
             )
         }
 
-        val rejectCall get() = RemoteMessageModel(WAIT)
-        val resetCall get() = RemoteMessageModel(RESET)
+        val rejectCall get() = RemoteMessageModel(WAIT, name = "Отмена вызова")
 
-        val outgoingCall get() = RemoteMessageModel(OUTGOING_CALL)
+        val getIncomingCall get() = RemoteMessageModel(GET_INCOMING_CALL, name = "Вызов...")
 
-        val getIncomingCall get() = RemoteMessageModel(GET_INCOMING_CALL)
+        val outgoingCall get() = RemoteMessageModel(OUTGOING_CALL, name = "Отправка запроса...")
 
-        val busy get() = RemoteMessageModel(BUSY)
+       // val busy get() = RemoteMessageModel(BUSY, name = "Взял трубку")
+
+        val testBusy get() = RemoteMessageModel(WAIT, name = "Взял трубку")
     }
 }

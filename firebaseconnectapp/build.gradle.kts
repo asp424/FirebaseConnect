@@ -73,10 +73,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("androidx.work:work-runtime-ktx:2.8.0-alpha01")
 
     //JitsiMeet
-    implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
+  //  implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
 
     //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
