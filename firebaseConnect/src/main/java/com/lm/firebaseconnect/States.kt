@@ -7,7 +7,7 @@ import com.lm.firebaseconnect.models.RemoteMessageModel
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnect.models.UIUsersStates
 
-object State {
+object States {
     val onLineState = mutableStateOf(false)
 
     var writingState = mutableStateOf(false)
@@ -20,8 +20,17 @@ object State {
 
     val listMessages: MutableState<UIMessagesStates> = mutableStateOf(UIMessagesStates.Loading)
 
+    val RemoteMessageModel.set get() = run { callState.value = this }
+
+    val String.isType get() = callState.value.typeMessage == this
+
+    val getToken get() = callState.value.token
+
+    val get get() = callState.value
+
     @SuppressLint("MutableCollectionMutableState")
     var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
+
     const val TOKEN = "registration_ids"
     const val DATA = "data"
     const val NAME = "name"

@@ -12,3 +12,4 @@ fun Context.getActivity(): ComponentActivity? = when (this) {
     is ContextWrapper -> baseContext.getActivity()
     else -> null
 }
+

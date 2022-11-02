@@ -2,10 +2,10 @@ package com.lm.firebaseconnectapp.core
 
 import android.app.Application
 import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_CANCEL_CURRENT
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnectapp.di.dagger.DaggerAppComponent
 
 class App : Application() {
@@ -17,7 +17,7 @@ class App : Application() {
         }.intentBuilder { actions, extras ->
             Intent(this, NotificationReceiver::class.java).apply {
                 action = actions
-                putExtra("callingId", extras)
+                putExtra(CALLING_ID, extras)
             }
         }.create()
     }

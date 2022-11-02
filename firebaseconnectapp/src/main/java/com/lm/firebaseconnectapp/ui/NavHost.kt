@@ -25,7 +25,7 @@ fun NavHost() {
 
         composable("chat", enterTransition = { enterLeftToRight },
             exitTransition = { exitLeftToRight }){
-            Chat(navController)
+            Chat()
         }
     }
     IncomingCallScreen()

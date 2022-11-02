@@ -4,9 +4,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
-import com.lm.firebaseconnect.State.listMessages
-import com.lm.firebaseconnect.State.onLineState
-import com.lm.firebaseconnect.State.writingState
+import com.lm.firebaseconnect.States.listMessages
+import com.lm.firebaseconnect.States.onLineState
+import com.lm.firebaseconnect.States.writingState
 import com.lm.firebaseconnect.listeners.ValueEventListenerInstance
 import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnect.models.RemoteLoadStates
@@ -19,15 +19,10 @@ import kotlinx.coroutines.launch
 
 class FirebaseRead(
     val firebaseSave: FirebaseSave,
-    private val valueEventListenerInstance: ValueEventListenerInstance
+    private val valueListener: ValueEventListenerInstance
 ) {
-
-    private fun messagesListener() = callbackFlow {
-        with(valueEventListenerInstance) { eventListener() }
-    }
-
     fun readNode(node: Nodes, digit: String, onRead: (String) -> Unit)
-    = nodePath(digit, node).get()
+    = firebaseSave.databaseReference.child(digit).child(node.node()).child(digit).get()
         .addOnCompleteListener {
             it.result?.also { resultNotNull ->
                 resultNotNull.key?.also { keyNotNull ->
@@ -36,12 +31,9 @@ class FirebaseRead(
             }
         }
 
-    private fun nodePath(digit: String, node: Nodes) =
-        firebaseSave.databaseReference.child(digit).child(node.node()).child(digit)
-
     private fun startMessagesListener(onMessage: (List<Pair<String, String>>) -> Unit) =
         CoroutineScope(IO).launch {
-            messagesListener().collect {
+            callbackFlow { with(valueListener) { eventListener() } }.collect {
                 if (it is RemoteLoadStates.Success) {
                     onMessage(it.data.children.map { v -> v.getMessage() })
                 } else listOf(((it as RemoteLoadStates.Failure<*>).data as DatabaseError).message)
@@ -51,14 +43,13 @@ class FirebaseRead(
     private fun DataSnapshot.getMessage() =
         with(firebaseSave.crypto.cipherDecrypt(value.toString())) {
             Pair(with(firebaseSave.timeConverter) {
-                removeDigitTags.currentTimeZoneTime()
-            }, if (getDigitFromMessage == firebaseSave.myDigit) MY_COLOR else CHAT_ID_COLOR)
+                substringAfter(DIGIT_TAG_END).currentTimeZoneTime()
+            }, if (substringAfter(DIGIT_TAG_START).substringBefore(DIGIT_TAG_END) ==
+                firebaseSave.myDigit) MY_COLOR else CHAT_ID_COLOR)
         }
 
-    private fun stopListener() = messagesJob.cancel()
-
-    private fun startListener() = with(firebaseSave) {
-        stopListener()
+    fun startListener() = with(firebaseSave) {
+        messagesJob.cancel()
         save(ONE, Nodes.ONLINE)
         save(CLEAR_NOTIFY, Nodes.NOTIFY, digit = firebaseChat.chatId)
         messagesJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
@@ -70,18 +61,13 @@ class FirebaseRead(
         listMessages.value = UIMessagesStates.Loading
     }
 
-    private val String.getDigitFromMessage
-        get() = substringAfter(DIGIT_TAG_START).substringBefore(DIGIT_TAG_END)
-
-    fun onResume() = startListener()
-
     fun onPause() {
-        stopListener(); firebaseSave.save(ZERO, Nodes.ONLINE); firebaseSave.save(ZERO, Nodes.WRITING)
+        messagesJob.cancel()
+        firebaseSave.save(ZERO, Nodes.ONLINE)
+        firebaseSave.save(ZERO, Nodes.WRITING)
     }
 
-    private val String.removeDigitTags get() = substringAfter(DIGIT_TAG_END)
-
-    private var messagesJob: Job = Job()
+    var messagesJob: Job = Job()
 
     companion object {
         const val FIRST_USER_START = "<f>"

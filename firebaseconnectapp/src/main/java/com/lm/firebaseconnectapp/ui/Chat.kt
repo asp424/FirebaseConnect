@@ -23,11 +23,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.lm.firebaseconnect.State.listMessages
-import com.lm.firebaseconnect.State.notifyState
-import com.lm.firebaseconnect.State.onLineState
-import com.lm.firebaseconnect.State.writingState
+import com.lm.firebaseconnect.States.listMessages
+import com.lm.firebaseconnect.States.notifyState
+import com.lm.firebaseconnect.States.onLineState
+import com.lm.firebaseconnect.States.writingState
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import kotlinx.coroutines.delay
@@ -36,7 +35,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Chat(navController: NavHostController) {
+fun Chat() {
     val coroutine = rememberCoroutineScope()
     with(mainDep.firebaseConnect) {
         SetChatContent {

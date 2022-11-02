@@ -1,22 +1,21 @@
 package com.lm.firebaseconnect
 
-import com.lm.firebaseconnect.State.ANSWER
-import com.lm.firebaseconnect.State.BUSY
-import com.lm.firebaseconnect.State.CALLING_ID
-import com.lm.firebaseconnect.State.CHECK_FOR_CALL
-import com.lm.firebaseconnect.State.DATA
-import com.lm.firebaseconnect.State.GET_CHECK_FOR_CALL
-import com.lm.firebaseconnect.State.INCOMING_CALL
-import com.lm.firebaseconnect.State.MESSAGE
-import com.lm.firebaseconnect.State.NAME
-import com.lm.firebaseconnect.State.OUTGOING_CALL
-import com.lm.firebaseconnect.State.REJECT
-import com.lm.firebaseconnect.State.RESET
-import com.lm.firebaseconnect.State.TOKEN
-import com.lm.firebaseconnect.State.TYPE_MESSAGE
-import com.lm.firebaseconnect.State.WAIT
-import com.lm.firebaseconnect.State.callState
-import com.lm.firebaseconnect.State.remoteMessageModel
+import com.lm.firebaseconnect.States.ANSWER
+import com.lm.firebaseconnect.States.BUSY
+import com.lm.firebaseconnect.States.CALLING_ID
+import com.lm.firebaseconnect.States.CHECK_FOR_CALL
+import com.lm.firebaseconnect.States.DATA
+import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
+import com.lm.firebaseconnect.States.INCOMING_CALL
+import com.lm.firebaseconnect.States.MESSAGE
+import com.lm.firebaseconnect.States.NAME
+import com.lm.firebaseconnect.States.OUTGOING_CALL
+import com.lm.firebaseconnect.States.TOKEN
+import com.lm.firebaseconnect.States.TYPE_MESSAGE
+import com.lm.firebaseconnect.States.WAIT
+import com.lm.firebaseconnect.States.isType
+import com.lm.firebaseconnect.States.remoteMessageModel
+import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnect.models.RemoteMessageModel
 import kotlinx.coroutines.CoroutineScope
@@ -34,19 +33,67 @@ import retrofit2.http.Body
 import retrofit2.http.HeaderMap
 import retrofit2.http.POST
 
-class RemoteMessages(
-    private val apiKey: String,
-    private val firebaseRead: FirebaseRead
-) {
+class RemoteMessages(private val apiKey: String, private val firebaseRead: FirebaseRead) {
 
-    private fun sendRemoteMessage(inBox: JSONObject, token: String) {
-        firebaseRead.readNode(Nodes.TOKEN, firebaseRead.firebaseSave.myDigit) { myToken ->
+    fun message(message: String) {
+        firebaseRead.readNode(Nodes.TOKEN, getChatId) { token ->
+            sendRemoteMessage("Сообщение от $getMyName", message, MESSAGE, token)
+        }
+    }
+
+    fun initialCall(token: String) {
+        sendRemoteMessage(
+            "Входящий вызов", "Входящий вызов от $getMyName", CHECK_FOR_CALL, token
+        )
+        remoteMessageModel.outgoingCall.set
+        CoroutineScope(IO).launch {
+            delay(10000)
+            if (OUTGOING_CALL.isType) remoteMessageModel.rejectCall.set
+        }
+    }
+
+    fun checkForCall(remoteMessageModel: RemoteMessageModel) {
+        if (WAIT.isType) {
+            sendRemoteMessage(
+                "Связь установлена", "Ответ на входящий вызов. Я $getMyName",
+                GET_CHECK_FOR_CALL, remoteMessageModel.token
+            )
+        } else sendRemoteMessage(
+            "Юзер занят", "Ответ на входящий вызов. Я $getMyName", BUSY,
+            remoteMessageModel.token
+        )
+    }
+
+    fun doCall(remoteMessage: RemoteMessageModel) {
+        sendRemoteMessage(
+            "Входящий вызов", "Входящий вызов от $getMyName", INCOMING_CALL,
+            remoteMessage.token
+        ); remoteMessageModel.getIncomingCall.set
+    }
+
+    fun answer(token: String) =
+        sendRemoteMessage("Взял трубу", "Взял трубу", ANSWER, token)
+
+    fun cancelCall(token: String, typeMessage: String) =
+        sendRemoteMessage(
+            "Пропущенный вызов", "Вам звонил $getMyName", typeMessage, token
+        ).apply { remoteMessageModel.rejectCall.set }
+
+    private val getMyName get() = firebaseRead.firebaseSave.myName
+
+    private val getMyDigit get() = firebaseRead.firebaseSave.myDigit
+
+    private val getChatId get() = firebaseRead.firebaseSave.firebaseChat.chatId
+
+    private fun sendRemoteMessage(
+        title: String, message: String, typeMessage: String, token: String
+    ) {
+        firebaseRead.readNode(Nodes.TOKEN, getMyDigit) { myToken ->
             fCMApi.sendRemoteMessage(
-                JSONObject()
-                    .put(DATA, inBox.put(TOKEN, myToken)).put(
-                        TOKEN, JSONArray()
-                            .put(token)
-                    ).toString(), header
+                JSONObject().put(DATA, JSONObject().put(TYPE_MESSAGE, typeMessage)
+                    .put(NAME, title).put(MESSAGE, message)
+                    .put(CALLING_ID, getMyDigit).put(TOKEN, myToken)
+                ).put(TOKEN, JSONArray().put(token)).toString(), header
             )?.enqueue(object : Callback<String?> {
                 override fun onResponse(call: Call<String?>, response: Response<String?>) {}
                 override fun onFailure(call: Call<String?>, t: Throwable) {}
@@ -54,98 +101,9 @@ class RemoteMessages(
         }
     }
 
-    fun message(message: String) {
-        firebaseRead.readNode(Nodes.TOKEN, firebaseRead.firebaseSave.firebaseChat.chatId) { token ->
-            sendRemoteMessage(
-                titleMessageType(
-                    "Сообщение от ${firebaseRead.firebaseSave.myName}", message, MESSAGE
-                ), token
-            )
-        }
-    }
-
-    fun call(token: String) {
-        sendRemoteMessage(
-            titleMessageType(
-                "Входящий вызов",
-                "Входящий вызов от ${firebaseRead.firebaseSave.myName}", CHECK_FOR_CALL
-            ), token
-        )
-        callState.value = remoteMessageModel.outgoingCall
-        CoroutineScope(IO).launch {
-            delay(10000)
-            if (callState.value.typeMessage == OUTGOING_CALL)
-                callState.value = remoteMessageModel.rejectCall
-        }
-    }
-
-    fun checkForCall(
-        remoteMessageModel: RemoteMessageModel
-    ) {
-        remoteMessageModel.typeMessage.log
-        callState.value.typeMessage.log
-        if (callState.value.typeMessage == WAIT) {
-            sendRemoteMessage(
-                titleMessageType(
-                    "Связь установлена",
-                    "Ответ на входящий вызов. Я ${firebaseRead.firebaseSave.myName}",
-                    GET_CHECK_FOR_CALL
-                ), remoteMessageModel.token
-            )
-        } else sendRemoteMessage(
-            titleMessageType(
-                "Юзер занят",
-                "Ответ на входящий вызов. Я ${firebaseRead.firebaseSave.myName}",
-                BUSY
-            ), remoteMessageModel.token
-        )
-    }
-
-    fun callCallBack(remoteMessage: RemoteMessageModel) {
-        sendRemoteMessage(
-            titleMessageType(
-                "Входящий вызов",
-                "Входящий вызов от ${firebaseRead.firebaseSave.myName}",
-                INCOMING_CALL
-            ), remoteMessage.token
-        )
-        callState.value = remoteMessageModel.getIncomingCall
-    }
-
-    fun answer(token: String) {
-        sendRemoteMessage(
-            titleMessageType(
-                "Взял трубу", "Взял трубу", ANSWER
-            ), token
-        )
-    }
-
-    fun reject(token: String) {
-        sendRemoteMessage(titleMessageType(cancelCall.first, cancelCall.second, REJECT), token)
-        callState.value = remoteMessageModel.rejectCall
-    }
-
-    fun reset(token: String) {
-        sendRemoteMessage(titleMessageType(cancelCall.first, cancelCall.second, RESET), token)
-        callState.value = remoteMessageModel.rejectCall
-    }
-
-    private val cancelCall
-        get() = Pair(
-            "Пропущенный вызов",
-            "Вам звонил ${firebaseRead.firebaseSave.myName}"
-        )
-
-    private fun titleMessageType(title: String, message: String, typeMessage: String) =
-        JSONObject().put(TYPE_MESSAGE, typeMessage)
-            .put(NAME, title)
-            .put(MESSAGE, message)
-            .put(CALLING_ID, firebaseRead.firebaseSave.myDigit)
-
     private val header by lazy {
         HashMap<String, String>().apply {
-            put("Authorization", "key=${apiKey}")
-            put("Content-Type", "application/json")
+            put("Authorization", "key=${apiKey}"); put("Content-Type", "application/json")
         }
     }
 
@@ -156,8 +114,7 @@ class RemoteMessages(
     }
 
     interface ApiInterface {
-        @POST("send")
-        fun sendRemoteMessage(
+        @POST("send") fun sendRemoteMessage(
             @Body remoteBody: String?, @HeaderMap headers: HashMap<String, String>
         ): Call<String?>?
     }

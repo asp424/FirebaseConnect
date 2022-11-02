@@ -30,8 +30,7 @@ class FirebaseConnect private constructor(
         fun init() = FirebaseConnect(cryptoKey, myName, myDigit.toString(), apiKey)
     }
 
-    fun getAndSaveToken(onGet: (String) -> Unit = {}) =
-        fcmProvider.getAndSaveToken { onGet(it) }
+    fun getAndSaveToken(onGet: (String) -> Unit = {}) = fcmProvider.getAndSaveToken { onGet(it) }
 
     fun setChatId(chatId: Int) = apply { this.chatId = chatId.toString() }
 
@@ -50,7 +49,7 @@ class FirebaseConnect private constructor(
                 with(firebaseRead) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (Lifecycle.Event.ON_CREATE == event) initStates()
-                        if (Lifecycle.Event.ON_RESUME == event) onResume()
+                        if (Lifecycle.Event.ON_RESUME == event) startListener()
                         if (Lifecycle.Event.ON_PAUSE == event) onPause()
                     }
                     lifecycle.addObserver(observer)
@@ -70,9 +69,7 @@ class FirebaseConnect private constructor(
         with(firebaseRead) {
             val observer = LifecycleEventObserver { _, event ->
                 if (Lifecycle.Event.ON_CREATE == event) initStates()
-                if (Lifecycle.Event.ON_RESUME == event) {
-                    firebaseHandler.startMainListener()
-                }
+                if (Lifecycle.Event.ON_RESUME == event) firebaseHandler.startMainListener()
                 if (Lifecycle.Event.ON_PAUSE == event) firebaseHandler.stopMainListener()
             }
             val activity =
@@ -86,7 +83,7 @@ class FirebaseConnect private constructor(
         }
     }
 
-    val firebaseSave by lazy {
+    private val firebaseSave by lazy {
         FirebaseSave(myDigit, this, timeConverter, myName, crypto)
     }
 
@@ -104,7 +101,7 @@ class FirebaseConnect private constructor(
 
     private val crypto by lazy { Crypto(cryptoKey) }
 
-    val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
+    private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
     val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
 

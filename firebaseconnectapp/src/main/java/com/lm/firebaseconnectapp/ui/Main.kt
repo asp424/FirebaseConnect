@@ -9,9 +9,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import com.lm.firebaseconnect.State.listUsers
+import com.lm.firebaseconnect.States.listUsers
 import com.lm.firebaseconnect.models.UIUsersStates
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
@@ -26,7 +25,6 @@ fun Main(
     onCallClick: (UserModel) -> Unit
 ) {
     with(mainDep.firebaseConnect) {
-        val context = LocalContext.current
         SetMainScreenContent(content = {
             if (listUsers.value is UIUsersStates.Success) {
                 Column(Modifier.fillMaxSize()) {

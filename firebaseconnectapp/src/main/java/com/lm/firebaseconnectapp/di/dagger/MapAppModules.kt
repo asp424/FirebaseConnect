@@ -11,7 +11,8 @@ import dagger.Module
         NotificationManagerModule::class,
         NotificationsModule::class,
         RingtoneModule::class,
-        NotificationSoundModule::class
+        NotificationSoundModule::class,
+        AppIsRunCheckerModule::class
     ]
 )
 interface MapAppModules

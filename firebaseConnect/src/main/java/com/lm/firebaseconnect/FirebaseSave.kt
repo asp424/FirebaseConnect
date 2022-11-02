@@ -8,7 +8,7 @@ import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
-import com.lm.firebaseconnect.State.WAIT
+import com.lm.firebaseconnect.States.WAIT
 import com.lm.firebaseconnect.models.Nodes
 
 class FirebaseSave(
@@ -21,8 +21,9 @@ class FirebaseSave(
     fun sendMessage(text: String, remoteMessages: RemoteMessages) {
         Nodes.MESSAGES.node().child.updateChildren(
             mapOf(
-                randomId to crypto.cipherEncrypt(
-                    "$digitForMessage$myName(${timeConverter.currentTime}): $text"
+                databaseReference.push().key.toString() to crypto.cipherEncrypt(
+                    "${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}" +
+                            "$myName(${timeConverter.currentTime}): $text"
                 )
             )
         )
@@ -46,10 +47,6 @@ class FirebaseSave(
             save(ONE, Nodes.ONLINE, myDigit)
         }
     }
-
-    private val digitForMessage get() = "${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}"
-
-    private val randomId get() = databaseReference.push().key.toString()
 
     val pairPath
         get() = "${FIRST_USER_START}${maxOf(myDigit, firebaseChat.chatId)}${FIRST_USER_END}${

@@ -42,8 +42,8 @@ fun NameAndStatusBlockMainList(
         Icon(
             Icons.Default.Call, null, modifier = Modifier
                 .clickable {
-                    remoteMessages.call(userModel.token)
                     onCallClick(userModel)
+                    remoteMessages.initialCall(userModel.token)
                 }
                 .padding(start = 10.dp, 15.dp)
         )

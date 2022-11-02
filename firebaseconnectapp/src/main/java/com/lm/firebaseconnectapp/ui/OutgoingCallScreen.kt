@@ -15,10 +15,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.lm.firebaseconnect.State.GET_CHECK_FOR_CALL
-import com.lm.firebaseconnect.State.GET_INCOMING_CALL
-import com.lm.firebaseconnect.State.OUTGOING_CALL
-import com.lm.firebaseconnect.State.callState
+import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
+import com.lm.firebaseconnect.States.GET_INCOMING_CALL
+import com.lm.firebaseconnect.States.OUTGOING_CALL
+import com.lm.firebaseconnect.States.REJECT
+import com.lm.firebaseconnect.States.get
+import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
@@ -30,15 +32,11 @@ import kotlinx.coroutines.delay
 fun OutgoingCallScreen(callUserModel: UserModel) {
     with(mainDep.firebaseConnect) {
         var screen by remember { mutableStateOf(false) }
-        LaunchedEffect(callState.value) {
-            screen = if (callState.value.typeMessage == OUTGOING_CALL ||
-                callState.value.typeMessage == GET_CHECK_FOR_CALL || callState.value.typeMessage == GET_INCOMING_CALL
-            ) {
-                true
-            } else {
-                delay(2000)
-                false
-            }
+
+        LaunchedEffect(get) {
+            screen =
+                if (OUTGOING_CALL.isType || GET_CHECK_FOR_CALL.isType || GET_INCOMING_CALL.isType
+                ) { true } else { delay(2000); false }
         }
         Column(
             Modifier
@@ -62,9 +60,9 @@ fun OutgoingCallScreen(callUserModel: UserModel) {
                         .padding(80.dp)
                 ) {
                     FloatingActionButton(
-                        onClick = { remoteMessages.reject(callUserModel.token) },
+                        onClick = { remoteMessages.cancelCall(callUserModel.token, REJECT) },
                         shape = CircleShape, containerColor = Color.Red, modifier =
-                            Modifier.scale(animScale(callState.value.typeMessage == GET_INCOMING_CALL ))
+                        Modifier.scale(animScale(GET_INCOMING_CALL.isType))
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
@@ -79,8 +77,7 @@ fun OutgoingCallScreen(callUserModel: UserModel) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = callUserModel.id, color = Color.White)
-                    Text(text = callState.value.name, color = Color.White
-                    )
+                    Text(text = get.name, color = Color.White)
                 }
             }
         }

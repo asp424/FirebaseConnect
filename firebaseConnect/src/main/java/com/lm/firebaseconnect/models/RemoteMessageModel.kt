@@ -1,14 +1,14 @@
 package com.lm.firebaseconnect.models
 
 import com.google.firebase.messaging.RemoteMessage
-import com.lm.firebaseconnect.State.CALLING_ID
-import com.lm.firebaseconnect.State.GET_INCOMING_CALL
-import com.lm.firebaseconnect.State.MESSAGE
-import com.lm.firebaseconnect.State.NAME
-import com.lm.firebaseconnect.State.OUTGOING_CALL
-import com.lm.firebaseconnect.State.TOKEN
-import com.lm.firebaseconnect.State.TYPE_MESSAGE
-import com.lm.firebaseconnect.State.WAIT
+import com.lm.firebaseconnect.States.CALLING_ID
+import com.lm.firebaseconnect.States.GET_INCOMING_CALL
+import com.lm.firebaseconnect.States.MESSAGE
+import com.lm.firebaseconnect.States.NAME
+import com.lm.firebaseconnect.States.OUTGOING_CALL
+import com.lm.firebaseconnect.States.TOKEN
+import com.lm.firebaseconnect.States.TYPE_MESSAGE
+import com.lm.firebaseconnect.States.WAIT
 
 data class RemoteMessageModel constructor(
     val typeMessage: String = WAIT,
@@ -18,7 +18,7 @@ data class RemoteMessageModel constructor(
     val token: String = "",
 ) {
 
-    class Instance() {
+    class Instance {
         private fun RemoteMessage.getValue(value: String) = data[value] ?: ""
         fun getFromRemoteMessage(remoteMessage: RemoteMessage) = with(remoteMessage) {
             RemoteMessageModel(

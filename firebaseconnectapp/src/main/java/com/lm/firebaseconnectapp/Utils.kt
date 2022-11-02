@@ -5,8 +5,8 @@ import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import com.lm.firebaseconnect.State.callState
-import com.lm.firebaseconnect.State.remoteMessageModel
+import com.lm.firebaseconnect.States.remoteMessageModel
+import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnectapp.core.App
 
 @Composable
@@ -34,8 +34,9 @@ fun startJitsiMit(context: Context, room: String) {
         setFeatureFlag("welcomepage.enabled", false)
         setAudioOnly(true)
         JitsiMeetActivity.launch(context, build())
-
     */
     // callState.value = remoteMessageModel.busy
-    callState.value = remoteMessageModel.testBusy
+    remoteMessageModel.testBusy.set
 }
+
+

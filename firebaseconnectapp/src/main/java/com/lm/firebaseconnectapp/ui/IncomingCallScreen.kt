@@ -19,8 +19,11 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.lm.firebaseconnect.State.INCOMING_CALL
-import com.lm.firebaseconnect.State.callState
+import com.lm.firebaseconnect.States.INCOMING_CALL
+import com.lm.firebaseconnect.States.RESET
+import com.lm.firebaseconnect.States.get
+import com.lm.firebaseconnect.States.getToken
+import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
@@ -32,8 +35,8 @@ import kotlinx.coroutines.delay
 fun IncomingCallScreen() {
     with(mainDep) {
         var screen by remember { mutableStateOf(false) }
-        LaunchedEffect(callState.value) {
-            screen = if (callState.value.typeMessage == INCOMING_CALL) {
+        LaunchedEffect(get) {
+            screen = if (INCOMING_CALL.isType) {
                 true
             } else {
                 delay(2000)
@@ -44,9 +47,7 @@ fun IncomingCallScreen() {
         Column(
             Modifier
                 .fillMaxSize()
-                .scale(
-                    animScale(screen)
-                ),
+                .scale(animScale(screen)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -62,12 +63,14 @@ fun IncomingCallScreen() {
                 ) {
                     FloatingActionButton(
                         onClick = {
-                            firebaseConnect.remoteMessages.reset(callState.value.token); ringtone.stop()
+                            firebaseConnect.remoteMessages.cancelCall(getToken, RESET)
+                            ringtone.stop()
                         },
                         shape = CircleShape, containerColor = Red
                     ) {
                         Icon(
-                            painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
+                            painterResource(R.drawable.ic_baseline_phone_disabled_24),
+                            null,
                             Modifier
                                 .size(50.dp)
                                 .padding(10.dp), White
@@ -75,8 +78,8 @@ fun IncomingCallScreen() {
                     }
                     FloatingActionButton(onClick = {
                         ringtone.stop()
-                        firebaseConnect.remoteMessages.answer(callState.value.token)
-                        startJitsiMit(context, callState.value.token)
+                        firebaseConnect.remoteMessages.answer(getToken)
+                        startJitsiMit(context, getToken)
                     }, shape = CircleShape, containerColor = Green) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_phone_24), null,
@@ -90,9 +93,9 @@ fun IncomingCallScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = callState.value.callingId, color = White)
+                    Text(text = get.callingId, color = White)
                     Text(
-                        text = callState.value.name, color = White
+                        text = get.name, color = White
                     )
                 }
             }
