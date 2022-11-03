@@ -18,12 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
-import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.ui.theme.listColors
+import com.lm.firebaseconnectapp.R
 import java.util.*
 
 @Composable
-fun DrawCircle(fullName: String, colorCircle: String, onClick: () -> Unit) {
+fun DrawCircle(fullName: String, colorCircle: String = "", onClick: () -> Unit) {
     val paint = Paint()
     val paint1 = Paint().asFrameworkPaint()
     val bounds = Rect()
@@ -66,13 +66,13 @@ fun DrawCircle(fullName: String, colorCircle: String, onClick: () -> Unit) {
                     radius = 26.dp.toPx(),
                     center = Offset(
                         27.dp.toPx(),
-                        24.dp.toPx()
+                        0.dp.toPx()
                     )
                 )
                 it.nativeCanvas.drawText(
                     letter,
                     27.dp.toPx() - bounds.width() / 2,
-                    24.dp.toPx() + bounds.height() / 2,
+                    0.dp.toPx() + bounds.height() / 2,
                     paint1
                 )
             }

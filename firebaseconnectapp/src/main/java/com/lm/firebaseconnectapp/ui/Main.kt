@@ -9,40 +9,32 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import com.lm.firebaseconnect.States.listUsers
 import com.lm.firebaseconnect.models.UIUsersStates
-import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
-import com.lm.firebaseconnectapp.ui.cells.CellCard
-import com.lm.firebaseconnectapp.ui.cells.ChangePhoto
-import com.lm.firebaseconnectapp.ui.cells.NameAndStatusBlockMainList
+import com.lm.firebaseconnectapp.ui.cells.UserCard
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun Main(
-    navController: NavHostController,
-    onCallClick: (UserModel) -> Unit
-) {
-    with(mainDep.firebaseConnect) {
-        SetMainScreenContent(content = {
-            if (listUsers.value is UIUsersStates.Success) {
-                Column(Modifier.fillMaxSize()) {
-                    (listUsers.value as UIUsersStates.Success).list.forEach { model ->
-                        CellCard(navController, model.id) {
-                            ChangePhoto(
-                                fullName = model.id,
-                                photoUrl =
-                                "https://qph.cf2.quoracdn.net/main-qimg-f92b2533456e0f5166866a4d463eb27d",
-                                color = "-16524603",
-                                onClick = {}, id = model.id
-                            ) {
-                                NameAndStatusBlockMainList(model, onCallClick)
-                            }
+fun Main() {
+    with(mainDep) {
+        with(firebaseConnect) {
+            with(uiStates) {
+                if (listUsers.value is UIUsersStates.Success) {
+                    Column(Modifier.fillMaxSize()) {
+                        (listUsers.value as UIUsersStates.Success).list.forEach { model ->
+                            UserCard(model,
+                                onCardClick = {
+                                    setChatId(model.id.toInt())
+                                    navController.navigate("chat")
+                                    model.setUserModelChat
+                                }, onIconClick = {
+
+                                })
                         }
                     }
-                }
-            } else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
-        })
+                } else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
+            }
+        }
     }
 }

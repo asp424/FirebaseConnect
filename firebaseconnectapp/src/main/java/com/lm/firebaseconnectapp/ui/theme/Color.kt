@@ -18,6 +18,8 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+val main = Color(0xFF00BCD4)
+val second = Color(0xFFFFFFFF)
 
 val Purple200 = Color(0xFFBB86FC)
 val Purple500 = Color(0xFF6200EE)
@@ -27,6 +29,7 @@ val Navy500_1 = Color(0xFF6D93AA)
 val Navy900 = Color(0xFF073042)
 val Green300 = Color(0xFF3DDC84)
 val Green900 = Color(0xFF00A956)
+val darkGreen = Color(0xFF3AB33F)
 val listColors = listOf(Green900, Color.Blue,
     Color.Magenta, Color.Red, Teal200, Navy900, Navy500, Navy500_1, Purple200, Purple500, Green300)
 

@@ -41,6 +41,16 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField(
+                "String",
+                "FCM_SERVER_KEY",
+                "\"AAAAoyEPC5o:APA91bFan2FPNVGsLjebfDbm51TUz0-KPhcl86TZe9CwyYoOmTr631B5Axd7eRJ3qfg5PUC4SAKCJkndfmPCf2rq7fl9X1xzkFsitgiqQbQq4gtRHAc3keGyKoIs1O4TzNPSdgBT5HbK\""
+            )
+            buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
+            buildConfigField(
+                "String",
+                "WEB_CLIENT_ID",
+                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\"")
         }
     }
 
@@ -82,6 +92,7 @@ dependencies {
 
     //Firebase
     implementation("com.google.firebase:firebase-messaging-ktx:23.1.0")
+    implementation (platform("com.google.firebase:firebase-bom:31.0.2"))
 
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")
@@ -100,4 +111,7 @@ dependencies {
     //Auth
     implementation("com.google.android.gms:play-services-auth:20.3.0")
     implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
+
+    //ColorPicker
+    implementation ("com.godaddy.android.colorpicker:compose-color-picker:0.5.0")
 }

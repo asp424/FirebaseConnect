@@ -3,7 +3,6 @@ package com.lm.firebaseconnectapp.ui
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,7 +10,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,11 +19,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.States.notifyState
-import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.States.writingState
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
@@ -70,7 +66,7 @@ fun Chat() {
                             }
                         }, modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(
-                            bottom = 100.dp, start = 10.dp, end = 10.dp, top = 60.dp
+                            bottom = 100.dp, start = 10.dp, end = 10.dp, top = 10.dp
                         ), state = state
                     )
 
@@ -136,38 +132,7 @@ fun Chat() {
                                 )
                         )
                     }
-                    LocalDensity.current.apply {
-                        FloatingActionButton(
-                            onClick = { deleteAllMessages() },
-                            shape = CircleShape, containerColor = Color.Red,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .offset(width - 50.dp, 10.dp)
-                        ) {
-                            Icon(Icons.Rounded.Delete, null, tint = Color.White)
-                        }
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(end = 35.dp, top = 35.dp)
-                    ) {
-                        Card(
-                            shape = CircleShape,
-                            modifier = Modifier,
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (onLineState.value) Color.Green else Color.Red
-                            ),
-                            border = BorderStroke(1.dp, Color.White)
-                        ) {
-                            Text(
-                                text = if (onLineState.value) "online" else "offline",
-                                modifier = Modifier.padding(5.dp),
-                                color = Color.White
-                            )
-                        }
-                    }
+
                 })
             } else {
                 Column(

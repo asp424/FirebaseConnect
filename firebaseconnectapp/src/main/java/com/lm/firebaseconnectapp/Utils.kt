@@ -21,22 +21,27 @@ val Context.appComponent
             else -> (applicationContext as App).appComponent
         }
 
-fun Context.longToast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-fun startJitsiMit(context: Context, room: String) {
-    /* JitsiMeetConferenceOptions.Builder().apply {
-        setServerURL(URL("https://meet.jit.si"))
-        setRoom(room)
-        setUserInfo(JitsiMeetUserInfo().apply {
-            displayName = "Пётр Геннадьевич"
-        })
-        setFeatureFlag("calendar.enabled", true)
-        setFeatureFlag("toolbox.alwaysVisible", true)
-        setFeatureFlag("welcomepage.enabled", false)
-        setAudioOnly(true)
-        JitsiMeetActivity.launch(context, build())
-    */
-    // callState.value = remoteMessageModel.busy
-    remoteMessageModel.testBusy.set
+val toast: Context.(String) -> Unit by lazy {
+    {
+        Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+    }
 }
+
+    fun startJitsiMit(context: Context, room: String) {
+        /* JitsiMeetConferenceOptions.Builder().apply {
+            setServerURL(URL("https://meet.jit.si"))
+            setRoom(room)
+            setUserInfo(JitsiMeetUserInfo().apply {
+                displayName = "Пётр Геннадьевич"
+            })
+            setFeatureFlag("calendar.enabled", true)
+            setFeatureFlag("toolbox.alwaysVisible", true)
+            setFeatureFlag("welcomepage.enabled", false)
+            setAudioOnly(true)
+            JitsiMeetActivity.launch(context, build())
+        */
+        // callState.value = remoteMessageModel.busy
+        remoteMessageModel.testBusy.set
+    }
 
 

@@ -14,7 +14,7 @@ object States {
 
     var notifyState = mutableStateOf(false)
 
-    var callState = mutableStateOf(RemoteMessageModel())
+    private var callState = mutableStateOf(RemoteMessageModel())
 
     val remoteMessageModel by lazy { RemoteMessageModel.Instance() }
 
@@ -34,9 +34,11 @@ object States {
     const val TOKEN = "registration_ids"
     const val DATA = "data"
     const val NAME = "name"
+    const val TITLE = "title"
     const val TYPE_MESSAGE = "typeMessage"
     const val INCOMING_CALL = "incomingCall"
     const val OUTGOING_CALL = "outgoingCall"
+    const val CALL = "call"
     const val ANSWER = "answer"
     const val REJECT = "reject"
     const val RESET = "reset"
@@ -47,4 +49,6 @@ object States {
     const val CALLING_ID = "callingId"
     const val GET_CHECK_FOR_CALL = "getCheckForCall"
     const val CHECK_FOR_CALL = "checkForCall"
+    const val NOTIFY_CALLBACK = "notifyCallback"
+    const val REJECTED_CALL = "rejectedCall"
 }

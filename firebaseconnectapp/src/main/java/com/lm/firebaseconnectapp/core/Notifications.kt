@@ -36,7 +36,7 @@ class Notifications(
             notificationBuilder.invoke(typeMessage).apply {
                 setAutoCancel(true)
                 setContentText(textMessage)
-                setContentTitle(name)
+                setContentTitle(title)
                 setCategory(CATEGORY_CALL)
                 setSmallIcon(R.drawable.ic_launcher_background)
                 priority = PRIORITY_MAX

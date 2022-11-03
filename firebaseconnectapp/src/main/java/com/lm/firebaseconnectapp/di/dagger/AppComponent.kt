@@ -6,11 +6,14 @@ import android.content.Intent
 import android.media.Ringtone
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
-import com.lm.firebaseconnectapp.MainActivity
+import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.data.FBMessageService
 import com.lm.firebaseconnectapp.data.FirebaseMessageServiceCallback
+import com.lm.firebaseconnectapp.data.SPreferences
+import com.lm.firebaseconnectapp.data.UiStates
+import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -40,8 +43,12 @@ interface AppComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(fBMessageService: FBMessageService)
     fun firebaseMessageServiceCallback(): FirebaseMessageServiceCallback
-    fun firebaseConnect(): FirebaseConnect
+    fun fBConnect(): FirebaseConnect
     @Named("Ringtone")
     fun ringtone(): Ringtone
     fun notificationManager(): NotificationManagerCompat
+    fun uiStates(): UiStates
+    fun sPreferences(): SPreferences
+    fun oneTapGoogleAuth(): OneTapGoogleAuth
+    fun firebaseAuth(): FirebaseAuth
 }

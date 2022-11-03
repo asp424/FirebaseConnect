@@ -25,6 +25,7 @@ fun SetImage(
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     Glide.with(LocalContext.current).asBitmap()
         .load(photoUrl)
+        .placeholder(R.drawable.ic_baseline_person_24)
         .into(object : CustomTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                 bitmap = resource

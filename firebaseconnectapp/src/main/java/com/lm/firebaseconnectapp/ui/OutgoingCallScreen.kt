@@ -1,6 +1,7 @@
 package com.lm.firebaseconnectapp.ui
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,64 +22,72 @@ import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
-import com.lm.firebaseconnect.models.UserModel
-import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.R
 import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun OutgoingCallScreen(callUserModel: UserModel) {
+fun OutgoingCallScreen() {
     with(mainDep.firebaseConnect) {
-        var screen by remember { mutableStateOf(false) }
+        with(mainDep.uiStates) {
+            var screen by remember { mutableStateOf(false) }
 
-        LaunchedEffect(get) {
-            screen =
-                if (OUTGOING_CALL.isType || GET_CHECK_FOR_CALL.isType || GET_INCOMING_CALL.isType
-                ) { true } else { delay(2000); false }
-        }
-        Column(
-            Modifier
-                .fillMaxSize()
-                .scale(
-                    animScale(
-                        screen
-                    )
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black)
-                        .padding(80.dp)
-                ) {
-                    FloatingActionButton(
-                        onClick = { remoteMessages.cancelCall(callUserModel.token, REJECT) },
-                        shape = CircleShape, containerColor = Color.Red, modifier =
-                        Modifier.scale(animScale(GET_INCOMING_CALL.isType))
+            LaunchedEffect(get) {
+                screen =
+                    if (OUTGOING_CALL.isType || GET_CHECK_FOR_CALL.isType || GET_INCOMING_CALL.isType
                     ) {
-                        Icon(
-                            painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
-                            Modifier
-                                .size(50.dp)
-                                .padding(10.dp), Color.White
-                        )
+                        true
+                    } else {
+                        delay(2000); false
+                    }
+            }
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .scale(animScale(screen)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black)
+                            .padding(80.dp)
+                    ) {
+                        FloatingActionButton(
+                            onClick = { remoteMessages.cancelCall(get.token, REJECT) },
+                            shape = CircleShape, containerColor = Color.Red, modifier =
+                            Modifier.scale(animScale(GET_INCOMING_CALL.isType))
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_baseline_phone_disabled_24), null,
+                                Modifier
+                                    .size(50.dp)
+                                    .padding(10.dp), Color.White
+                            )
+                        }
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = get.callingId, color = Color.White)
+                        Text(text = get.title, color = Color.White)
                     }
                 }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = callUserModel.id, color = Color.White)
-                    Text(text = get.name, color = Color.White)
-                }
+            }
+            BackHandler(
+                OUTGOING_CALL.isType || GET_CHECK_FOR_CALL.isType || GET_INCOMING_CALL.isType
+                        || getSettingsVisible
+            ) {
+                if (GET_INCOMING_CALL.isType) remoteMessages.cancelCall(get.token, REJECT)
+                if (getSettingsVisible) false.setSettingsVisible
             }
         }
     }

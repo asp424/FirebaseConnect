@@ -6,16 +6,20 @@ import com.lm.firebaseconnect.States.GET_INCOMING_CALL
 import com.lm.firebaseconnect.States.MESSAGE
 import com.lm.firebaseconnect.States.NAME
 import com.lm.firebaseconnect.States.OUTGOING_CALL
+import com.lm.firebaseconnect.States.TITLE
 import com.lm.firebaseconnect.States.TOKEN
 import com.lm.firebaseconnect.States.TYPE_MESSAGE
 import com.lm.firebaseconnect.States.WAIT
+import com.lm.firebaseconnect.States.get
+import com.lm.firebaseconnect.States.getToken
 
 data class RemoteMessageModel constructor(
     val typeMessage: String = WAIT,
     val textMessage: String = "",
-    val name: String = "",
+    val title: String = "",
     val callingId: String = "",
     val token: String = "",
+    val name: String = "",
 ) {
 
     class Instance {
@@ -24,20 +28,30 @@ data class RemoteMessageModel constructor(
             RemoteMessageModel(
                 typeMessage = getValue(TYPE_MESSAGE),
                 textMessage = getValue(MESSAGE),
-                name = getValue(NAME),
+                title = getValue(TITLE),
                 callingId = getValue(CALLING_ID),
                 token = getValue(TOKEN),
+                name = getValue(NAME),
             )
         }
 
-        val rejectCall get() = RemoteMessageModel(WAIT, name = "Отмена вызова")
+        val rejectCall get() = RemoteMessageModel(WAIT, title = "Отмена вызова",
+            callingId = get.callingId, name = get.name)
 
-        val getIncomingCall get() = RemoteMessageModel(GET_INCOMING_CALL, name = "Вызов...")
+        val getIncomingCall
+            get() = RemoteMessageModel(
+                GET_INCOMING_CALL, title = "Вызов...",
+                callingId = get.callingId, token = getToken, name = get.name
+            )
 
-        val outgoingCall get() = RemoteMessageModel(OUTGOING_CALL, name = "Отправка запроса...")
+        fun outgoingCall(id: String, name: String, token: String) = RemoteMessageModel(
+            OUTGOING_CALL, title = "Отправка запроса...", name = name, token = token,
+            callingId = id
+        )
 
-       // val busy get() = RemoteMessageModel(BUSY, name = "Взял трубку")
+        // val busy get() = RemoteMessageModel(BUSY, name = "Взял трубку")
 
-        val testBusy get() = RemoteMessageModel(WAIT, name = "Взял трубку")
+        val testBusy get() = RemoteMessageModel(WAIT, title = "Взял трубку",
+            callingId = get.callingId, name = get.name)
     }
 }

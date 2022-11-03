@@ -13,15 +13,22 @@ import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
 import com.lm.firebaseconnect.States.INCOMING_CALL
 import com.lm.firebaseconnect.States.MESSAGE
+import com.lm.firebaseconnect.States.NOTIFY_CALLBACK
 import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
+import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.core.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Named
 
 class FirebaseMessageServiceCallback(
@@ -39,31 +46,36 @@ class FirebaseMessageServiceCallback(
         getFromRemoteMessage(remoteMessage).also { model ->
             with(notifications) {
                 with(firebaseConnect.remoteMessages) {
+                    model.typeMessage.log
                     when (model.typeMessage) {
 
-                        MESSAGE -> if (!appIsInForeground()) {
-                            model.set
-                            showNotification()
-                            notificationSound.play()
-                            rejectCall.set
+                        MESSAGE -> {
+                            if (!appIsInForeground()) {
+                                model.set
+                                showNotification()
+                                notificationSound.play()
+                                rejectCall
+                                notifyCallback(model.token)
+                            }
                         }
 
                         CHECK_FOR_CALL -> checkForCall(model)
 
                         REJECT -> {
-                            model.set
-                                notificationManager.cancel(get.callingId.toInt())
+                            get.log
                             if (!appIsInForeground()) {
+                                model.set
+                                notificationManager.cancel(get.callingId.toInt())
                                 showNotification()
                                 notificationSound.play()
                             }
                             ringtone.stop()
-                            rejectCall.set
+                            rejectCall
                         }
 
                         ANSWER -> startJitsiMit(context, model.token)
 
-                        RESET -> rejectCall.set
+                        RESET -> rejectCall
 
                         GET_CHECK_FOR_CALL -> doCall(model)
 
@@ -74,6 +86,14 @@ class FirebaseMessageServiceCallback(
                         }
 
                         GET_INCOMING_CALL -> if (OUTGOING_CALL.isType) model.set
+
+                        NOTIFY_CALLBACK -> {
+                            CoroutineScope(IO).launch {
+                                notifyState.value = true
+                                delay(3000)
+                                notifyState.value = false
+                            }
+                        }
                     }
                 }
             }

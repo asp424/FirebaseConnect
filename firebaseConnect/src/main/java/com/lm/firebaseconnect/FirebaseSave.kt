@@ -16,42 +16,40 @@ class FirebaseSave(
     val myName: String, val crypto: Crypto
 ) {
 
-    fun deleteAllMessages() { Nodes.MESSAGES.node().child.removeValue() }
+    fun deleteAllMessages() { child.removeValue() }
 
-    fun sendMessage(text: String, remoteMessages: RemoteMessages) {
-        Nodes.MESSAGES.node().child.updateChildren(
-            mapOf(
-                databaseReference.push().key.toString() to crypto.cipherEncrypt(
-                    "${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}" +
-                            "$myName(${timeConverter.currentTime}): $text"
-                )
-            )
-        )
-        remoteMessages.message(text)
+    fun sendMessage(text: String, remoteMessages: RemoteMessages) =
+        with(crypto.cipherEncrypt("${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}" +
+                    "$myName(${timeConverter.currentTime}): $text")
+        ){
+        child.updateChildren(mapOf(databaseReference.push().key.toString() to this))
+            save(this, Nodes.LAST)
+            save(this, Nodes.LAST, digit = firebaseChat.chatId)
+            remoteMessages.message(text)
     }
 
-    private val String.child
-        get() = databaseReference.child(Nodes.CHATS.node()).child(pairPath).child(this)
+    private val child
+        get() = databaseReference.child(Nodes.CHATS.node()).child(firebaseChat.chatId.getPairPath)
 
     fun save(
-        value: String, node: Nodes, path: String = pairPath, digit: String = myDigit,
+        value: String, node: Nodes, path: String
+        = firebaseChat.chatId.getPairPath, digit: String = myDigit,
         onSave: () -> Unit = {}
     ) {
         databaseReference.child(digit).child(node.node()).updateChildren(mapOf(path to value))
             .addOnCompleteListener { onSave() }
     }
 
-    fun init() {
-        databaseReference.child(myDigit).get().addOnCompleteListener {
-            if (!it.result.hasChild(Nodes.CALL.node())) save(WAIT, Nodes.CALL, myDigit)
-            save(ONE, Nodes.ONLINE, myDigit)
+    val String.getPairPath
+        get() = if (myDigit.isNotEmpty() && isNotEmpty())
+            "${FIRST_USER_START}${maxOf(myDigit.toInt(), this.toInt())}${FIRST_USER_END}${
+            SECOND_USER_START
+        }${minOf(myDigit.toInt(), this.toInt())}${SECOND_USER_END}"
+    else "0"
+
+    val databaseReference by lazy {
+        with(FirebaseDatabase.getInstance()) {
+            reference
         }
     }
-
-    val pairPath
-        get() = "${FIRST_USER_START}${maxOf(myDigit, firebaseChat.chatId)}${FIRST_USER_END}${
-            SECOND_USER_START
-        }${minOf(myDigit, firebaseChat.chatId)}${SECOND_USER_END}"
-
-    val databaseReference by lazy { FirebaseDatabase.getInstance().reference }
 }

@@ -15,24 +15,26 @@ import com.lm.firebaseconnect.models.Nodes
 
 class FirebaseConnect private constructor(
     cryptoKey: String,
-    myName: String,
-    val myDigit: String,
     apiKey: String,
+    var myName: String = "",
+    var myDigit: String = "",
     var chatId: String = "",
 ) {
 
     class Instance(
         private val cryptoKey: String,
         private val apiKey: String,
-        private val myDigit: Int,
-        private val myName: String
     ) {
-        fun init() = FirebaseConnect(cryptoKey, myName, myDigit.toString(), apiKey)
+        fun init() = FirebaseConnect(cryptoKey, apiKey)
     }
 
     fun getAndSaveToken(onGet: (String) -> Unit = {}) = fcmProvider.getAndSaveToken { onGet(it) }
 
     fun setChatId(chatId: Int) = apply { this.chatId = chatId.toString() }
+
+    fun setMyName(name: String) = apply { this.myName = name }
+
+    fun setMyDigit(myDigit: String) = apply { this.myDigit = myDigit }
 
     fun setWriting() = firebaseSave.save(ONE, Nodes.WRITING)
 
@@ -62,7 +64,7 @@ class FirebaseConnect private constructor(
 
     @SuppressLint("RestrictedApi")
     @Composable
-    fun SetMainScreenContent(
+    fun SetContent(
         content: @Composable FirebaseConnect.() -> Unit
     ) {
         val context = LocalContext.current
@@ -94,7 +96,7 @@ class FirebaseConnect private constructor(
     private val valueEventListenerInstance by lazy { ValueEventListenerInstance(firebaseSave) }
 
     private val firebaseHandler by lazy {
-        FirebaseHandler(this, firebaseSave, childEventListenerInstance)
+        FirebaseHandler(this, firebaseSave, childEventListenerInstance, firebaseRead)
     }
 
     private val fcmProvider by lazy { FCMProvider(myDigit) }

@@ -5,7 +5,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
@@ -24,7 +23,7 @@ interface FBAuth {
             firebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     trySend(
-                    if (task.isSuccessful) FBRegStates.OnSuccess(Uri.EMPTY)
+                    if (task.isSuccessful) FBRegStates.OnSuccess(Uri.EMPTY, "")
                     else FBRegStates.OnError(task.exception?.message ?: "null")
                     )
                     close()

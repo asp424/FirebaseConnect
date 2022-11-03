@@ -4,12 +4,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.lm.firebaseconnect.FirebaseSave
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnect.models.RemoteLoadStates
-import com.lm.firebaseconnect.log
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class ValueEventListenerInstance(
     private val firebaseSave: FirebaseSave
@@ -29,7 +31,22 @@ class ValueEventListenerInstance(
         awaitClose { messagesPath.removeEventListener(this);"stopMessages".log }
     }
 
+    fun singleEventListener(onGet: (DataSnapshot) -> Unit) =
+        object : ValueEventListener {
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                onGet(snapshot)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+        }
+    }
+
     private val messagesPath
-        get() = firebaseSave.databaseReference
-            .child(Nodes.CHATS.node()).child(firebaseSave.pairPath).child(Nodes.MESSAGES.node())
+        get() = with(firebaseSave) {
+            databaseReference
+                .child(Nodes.CHATS.node())
+                .child(firebaseChat.chatId.getPairPath)
+        }
 }
