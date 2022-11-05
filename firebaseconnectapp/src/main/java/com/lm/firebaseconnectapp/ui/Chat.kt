@@ -31,11 +31,12 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Chat() {
+fun Chat(loadState: (Boolean) -> Unit) {
     val coroutine = rememberCoroutineScope()
     with(mainDep.firebaseConnect) {
         SetChatContent {
             if (listMessages.value is UIMessagesStates.Success) {
+                loadState(true)
                 val listMessages = (listMessages.value as UIMessagesStates.Success).list
                 Scaffold(content = {
                     val state = rememberLazyListState()
@@ -135,6 +136,7 @@ fun Chat() {
 
                 })
             } else {
+                loadState(false)
                 Column(
                     Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center

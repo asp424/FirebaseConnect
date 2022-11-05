@@ -35,9 +35,9 @@ class Crypto(private val cryptoKey: String) {
                         doFinal(android.util.Base64.decode(text, android.util.Base64.DEFAULT))
                     )
                 }
-            }.onFailure { return it.message.toString() }
+            }.onFailure { return "error" }
         }
-        return ""
+        return "error"
     }
 
     private fun Cipher.init(mode: Int) =

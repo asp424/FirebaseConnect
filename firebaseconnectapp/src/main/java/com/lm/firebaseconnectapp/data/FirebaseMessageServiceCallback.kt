@@ -22,7 +22,6 @@ import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
-import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.core.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +45,6 @@ class FirebaseMessageServiceCallback(
         getFromRemoteMessage(remoteMessage).also { model ->
             with(notifications) {
                 with(firebaseConnect.remoteMessages) {
-                    model.typeMessage.log
                     when (model.typeMessage) {
 
                         MESSAGE -> {
@@ -62,7 +60,6 @@ class FirebaseMessageServiceCallback(
                         CHECK_FOR_CALL -> checkForCall(model)
 
                         REJECT -> {
-                            get.log
                             if (!appIsInForeground()) {
                                 model.set
                                 notificationManager.cancel(get.callingId.toInt())

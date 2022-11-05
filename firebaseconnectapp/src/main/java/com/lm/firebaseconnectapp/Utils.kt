@@ -2,9 +2,11 @@ package com.lm.firebaseconnectapp
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnectapp.core.App
@@ -12,6 +14,11 @@ import com.lm.firebaseconnectapp.core.App
 @Composable
 fun animScale(target: Boolean, duration: Int = 300) = animateFloatAsState(
     if (target) 1f else 0f, tween(duration)
+).value
+
+@Composable
+fun animDp(target: Boolean, first: Dp, second: Dp, delay: Int = 300) = animateDpAsState(
+    if (target) first else second, tween(delay)
 ).value
 
 val Context.appComponent

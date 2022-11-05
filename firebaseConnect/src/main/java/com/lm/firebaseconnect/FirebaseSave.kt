@@ -1,14 +1,12 @@
 package com.lm.firebaseconnect
 
 import com.google.firebase.database.FirebaseDatabase
-import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.DIGIT_TAG_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.FIRST_USER_START
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_END
 import com.lm.firebaseconnect.FirebaseRead.Companion.SECOND_USER_START
-import com.lm.firebaseconnect.States.WAIT
 import com.lm.firebaseconnect.models.Nodes
 
 class FirebaseSave(
@@ -16,7 +14,13 @@ class FirebaseSave(
     val myName: String, val crypto: Crypto
 ) {
 
-    fun deleteAllMessages() { child.removeValue() }
+    fun deleteAllMessages() { child.removeValue()
+        with(crypto.cipherEncrypt("")
+        ) {
+            save(this, Nodes.LAST)
+            save(this, Nodes.LAST, digit = firebaseChat.chatId)
+        }
+    }
 
     fun sendMessage(text: String, remoteMessages: RemoteMessages) =
         with(crypto.cipherEncrypt("${DIGIT_TAG_START}$myDigit${DIGIT_TAG_END}" +
@@ -42,9 +46,9 @@ class FirebaseSave(
 
     val String.getPairPath
         get() = if (myDigit.isNotEmpty() && isNotEmpty())
-            "${FIRST_USER_START}${maxOf(myDigit.toInt(), this.toInt())}${FIRST_USER_END}${
+            "${FIRST_USER_START}${maxOf(myDigit.filter { it != '0' }.toInt(), filter { it != '0' }.toInt())}${FIRST_USER_END}${
             SECOND_USER_START
-        }${minOf(myDigit.toInt(), this.toInt())}${SECOND_USER_END}"
+        }${minOf(myDigit.filter { it != '0' }.toInt(), filter { it != '0' }. toInt())}${SECOND_USER_END}"
     else "0"
 
     val databaseReference by lazy {

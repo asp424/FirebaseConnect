@@ -1,12 +1,12 @@
 package com.lm.firebaseconnectapp.ui.cells
 
 import android.os.Build
-import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -19,15 +19,16 @@ import com.godaddy.android.colorpicker.harmony.HarmonyColorPicker
 import com.godaddy.android.colorpicker.toColorInt
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
-import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
-import com.lm.firebaseconnectapp.di.compose.MainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
-import com.lm.firebaseconnectapp.ui.RegScreen
+import com.lm.firebaseconnectapp.ui.NavRoutes
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun SettingsCard() {
+    val coroutine = rememberCoroutineScope()
     with(mainDep) {
         with(uiStates) {
             Column(
@@ -78,27 +79,31 @@ fun SettingsCard() {
                                 }
                             )
                         }
+                    }
+                    Column(Modifier.fillMaxSize().padding(bottom = 60.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
+                        ) {
                         val activity = LocalContext.current as MainActivity
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                             Button(
                                 onClick = {
                                     firebaseAuth.signOut()
-                                    firebaseConnect.setMyName("")
-                                    firebaseConnect.setMyDigit("")
-                                    firebaseConnect.setChatId(0)
-                                    false.setSettingsVisible
-                                    activity.setContent {
-                                        MainDep(activity.appComponent) { RegScreen() }
+                                    activity.signInClient.signOut()
+                                    firebaseConnect.firebaseHandler.stopMainListener()
+                                    coroutine.launch {
+                                        false.setSettingsVisible
+                                        delay(300)
+                                        navController.navigate(NavRoutes.REG.route)
+                                        false.setToolbarVisible
                                     }
                                 }, colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = getMainColor
-                                )
+                                ButtonDefaults.buttonColors(getMainColor)
                             ) { Text(text = "Sign out", color = getSecondColor) }
                         }
                     }
                 }
             }
+
         }
     }
 }

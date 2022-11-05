@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
@@ -36,11 +38,14 @@ fun SetImage(
             }
         })
     if (bitmap != null)
-        Image(bitmap = bitmap!!.asImageBitmap(), modifier = Modifier
-            .size(54.dp)
-            .clip(CircleShape)
-            .clickable { onClick1() }, contentDescription = null
-        )
+        Box(modifier = Modifier.padding(start = 4.dp)) {
+            Image(
+                bitmap = bitmap!!.asImageBitmap(), modifier = Modifier
+                    .size(51.dp)
+                    .clip(CircleShape)
+                    .clickable { onClick1() }, contentDescription = null
+            )
+        }
 }
 
 

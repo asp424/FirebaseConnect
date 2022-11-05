@@ -19,21 +19,29 @@ import com.lm.firebaseconnectapp.ui.cells.UserCard
 fun Main() {
     with(mainDep) {
         with(firebaseConnect) {
-            with(uiStates) {
-                if (listUsers.value is UIUsersStates.Success) {
-                    Column(Modifier.fillMaxSize()) {
-                        (listUsers.value as UIUsersStates.Success).list.forEach { model ->
-                            UserCard(model,
-                                onCardClick = {
-                                    setChatId(model.id.toInt())
-                                    navController.navigate("chat")
-                                    model.setUserModelChat
-                                }, onIconClick = {
+            SetContent {
+                with(uiStates) {
+                    if (listUsers.value is UIUsersStates.Success) {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                        ) {
+                            (listUsers.value as UIUsersStates.Success).list.forEach { model ->
+                                UserCard(model,
+                                    onCardClick = {
+                                        setChatId(model.id.toInt())
+                                        model.setUserModelChat
+                                        navController.navigate("chat")
+                                    }, onIconClick = {
 
-                                })
+                                    })
+                            }
                         }
-                    }
-                } else Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
+                    } else Box(
+                        Modifier.fillMaxSize(),
+                        Alignment.Center
+                    ) { CircularProgressIndicator() }
+                }
             }
         }
     }

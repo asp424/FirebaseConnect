@@ -11,6 +11,8 @@ sealed interface Nodes{
     object MY: Nodes
     object CALL: Nodes
     object LAST: Nodes
+    object NAME: Nodes
+    object ICON: Nodes
 
     fun node() = when(this){
         MESSAGES -> "messages"
@@ -23,5 +25,7 @@ sealed interface Nodes{
         MY -> "myDigit"
         CALL -> "call"
         LAST -> "last"
+        NAME -> "name"
+        ICON -> "icon"
     }
 }

@@ -45,9 +45,7 @@ interface OneTapGoogleAuth {
         onError: String.() -> Unit
     ): Job
 
-    class Base @Inject constructor(
-        private val fbAuth: FBAuth
-    ) : OneTapGoogleAuth {
+    class Base @Inject constructor(private val fbAuth: FBAuth) : OneTapGoogleAuth {
 
         override fun handleResultAndFBReg(result: ActivityResult, signInClient: SignInClient) =
             callbackFlow {
@@ -55,16 +53,20 @@ interface OneTapGoogleAuth {
                     try {
                         signInClient.getSignInCredentialFromIntent(result.data).apply {
                             val token = googleIdToken
-                            if (token.isNullOrEmpty()) trySendBlocking(FBRegStates.OnError("null"))
+                            if (token.isNullOrEmpty())
+                                trySendBlocking(FBRegStates.OnError("Token is null"))
                             else launch {
                                 fbAuth.startAuthWithGoogleId(token).collect {
                                     trySend(
                                         when (it) {
-                                            is FBRegStates.OnSuccess -> FBRegStates.OnSuccess(
+                                            is FBRegStates.OnSuccess ->
+                                                FBRegStates.OnSuccess(
                                                 profilePictureUri, displayName
                                             )
-                                            is FBRegStates.OnError -> FBRegStates.OnError(it.message)
-                                            is FBRegStates.OnClose -> FBRegStates.OnClose("close")
+                                            is FBRegStates.OnError ->
+                                                FBRegStates.OnError(it.message)
+                                            is FBRegStates.OnClose ->
+                                                FBRegStates.OnClose("close")
                                         }
                                     )
                                     close()
@@ -74,14 +76,14 @@ interface OneTapGoogleAuth {
                     } catch (e: ApiException) {
                         trySend(
                             when (e.statusCode) {
-                                CANCELED -> FBRegStates.OnClose(e.message ?: "cancelled")
-                                NETWORK_ERROR -> FBRegStates.OnClose(e.message ?: "network error")
-                                else -> FBRegStates.OnError(e.message ?: "error")
+                                CANCELED -> FBRegStates.OnClose(e.message ?: "Cancelled")
+                                NETWORK_ERROR -> FBRegStates.OnClose(e.message ?: "Network error")
+                                else -> FBRegStates.OnError(e.message ?: "Error message is null")
                             }
                         )
                         close(e)
                     }
-                }
+                } else trySend(FBRegStates.OnError("Activity result in not OK"))
                 awaitClose()
             }.flowOn(IO)
 
@@ -93,7 +95,7 @@ interface OneTapGoogleAuth {
                     onResult(OTGRegState.OnSuccess(result.pendingIntent.intentSender))
                 }
                 .addOnFailureListener {
-                    onResult(OTGRegState.OnError(it.localizedMessage ?: "null"))
+                    onResult(OTGRegState.OnError(it.localizedMessage ?: "Error message is null"))
                 }
         }
 
@@ -116,7 +118,7 @@ interface OneTapGoogleAuth {
             onSuccess: FBRegStates.OnSuccess.() -> Unit,
             onError: String.() -> Unit
         ) = with(appComponent) {
-            scope.launch(IO) {
+            scope.launch(Main) {
                 oneTapGoogleAuth().handleResultAndFBReg(result, signInClient).collect {
                     when (it) {
                         is FBRegStates.OnSuccess -> onSuccess(it)

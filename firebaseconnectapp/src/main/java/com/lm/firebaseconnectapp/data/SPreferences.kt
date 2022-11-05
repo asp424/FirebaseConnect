@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 interface SPreferences {
 
-    fun saveIconUri(uri: Uri?): SPreferences
+    fun saveIconUri(uri: Uri): SPreferences
 
     fun readIconUri(): Uri?
 
@@ -31,7 +31,7 @@ interface SPreferences {
         private val sharedPreferences: SharedPreferences,
     ) : SPreferences {
 
-        override fun saveIconUri(uri: Uri?) = apply {
+        override fun saveIconUri(uri: Uri) = apply {
             sharedPreferences.edit()
                 .putString(Uri.EMPTY.toString(), uri.toString()).apply()
         }

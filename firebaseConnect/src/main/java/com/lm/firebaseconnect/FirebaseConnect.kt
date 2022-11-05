@@ -1,6 +1,7 @@
 package com.lm.firebaseconnect
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -33,6 +34,10 @@ class FirebaseConnect private constructor(
     fun setChatId(chatId: Int) = apply { this.chatId = chatId.toString() }
 
     fun setMyName(name: String) = apply { this.myName = name }
+
+    fun saveIcon(uri: Uri) = firebaseSave.save(uri.toString(), Nodes.ICON, path = myDigit)
+
+    fun saveName(name: String) = firebaseSave.save(name, Nodes.NAME, path = myDigit)
 
     fun setMyDigit(myDigit: String) = apply { this.myDigit = myDigit }
 
@@ -78,7 +83,7 @@ class FirebaseConnect private constructor(
                 remember { context.getActivity()?.apply { lifecycle.addObserver(observer) } }
             rememberUpdatedState(activity).value.apply {
                 DisposableEffect(this) {
-                    onDispose {}
+                    onDispose { activity?.lifecycle?.removeObserver(observer)}
                 }
             }
             content(this@FirebaseConnect)
@@ -95,8 +100,8 @@ class FirebaseConnect private constructor(
 
     private val valueEventListenerInstance by lazy { ValueEventListenerInstance(firebaseSave) }
 
-    private val firebaseHandler by lazy {
-        FirebaseHandler(this, firebaseSave, childEventListenerInstance, firebaseRead)
+    val firebaseHandler by lazy {
+        FirebaseHandler(firebaseSave, childEventListenerInstance, firebaseRead)
     }
 
     private val fcmProvider by lazy { FCMProvider(myDigit) }

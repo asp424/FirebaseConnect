@@ -41,7 +41,7 @@ fun DrawCircle(fullName: String, colorCircle: String = "", onClick: () -> Unit) 
     }
     val context = LocalContext.current
     Canvas(modifier = Modifier
-        .width(54.dp)
+        .width(55.dp)
         .clickable { onClick() },
         onDraw = {
             paint1.apply {
@@ -63,7 +63,7 @@ fun DrawCircle(fullName: String, colorCircle: String = "", onClick: () -> Unit) 
                 paint.color = colorR
                 it.drawCircle(
                     paint = paint,
-                    radius = 26.dp.toPx(),
+                    radius = 27.dp.toPx(),
                     center = Offset(
                         27.dp.toPx(),
                         0.dp.toPx()

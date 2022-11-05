@@ -41,13 +41,14 @@ class FirebaseRead(
 
     fun String.getMessage() =
         with(firebaseSave.crypto.cipherDecrypt(this)) {
-            Pair(
-                with(firebaseSave.timeConverter) {
-                    substringAfter(DIGIT_TAG_END).currentTimeZoneTime()
-                }, if (substringAfter(DIGIT_TAG_START).substringBefore(DIGIT_TAG_END) ==
-                    firebaseSave.myDigit
-                ) MY_COLOR else CHAT_ID_COLOR
-            )
+            if (this != "error" && isNotEmpty())
+                Pair(
+                    with(firebaseSave.timeConverter) {
+                        substringAfter(DIGIT_TAG_END).currentTimeZoneTime()
+                    }, if (substringAfter(DIGIT_TAG_START).substringBefore(DIGIT_TAG_END) ==
+                        firebaseSave.myDigit
+                    ) MY_COLOR else CHAT_ID_COLOR
+                ) else Pair("", CHAT_ID_COLOR)
         }
 
     fun startListener() = with(firebaseSave) {
@@ -77,8 +78,6 @@ class FirebaseRead(
         const val SECOND_USER_END = "<*s>"
         const val DIGIT_TAG_START = "<N>"
         const val DIGIT_TAG_END = "</N>"
-        const val RING = "RING"
-        const val CLEAR_NOTIFY = "none"
         const val MY_COLOR = "green"
         const val CHAT_ID_COLOR = "black"
     }

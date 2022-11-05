@@ -36,14 +36,14 @@ fun UserCard(
             ) {
                 Box(Modifier.fillMaxHeight(), contentAlignment = CenterStart) {
                     Row(Modifier.wrapContentWidth(), Arrangement.Start, CenterVertically) {
-                        if ("a".isEmpty() && name.isNotEmpty())
-                            DrawCircle(name, onClick = onIconClick)
+                        if (name.isEmpty())
+                            DrawCircle(name.ifEmpty { id }, onClick = onIconClick)
                         else SetImage(
-                            "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/2x/firebase_28dp.png",
+                            iconUri,
                             onIconClick
                         )
                         Column() {
-                            Text(text = id, modifier = Modifier.padding(start = 6.dp))
+                            Text(text = name.ifEmpty { id }, modifier = Modifier.padding(start = 6.dp))
                             Text(
                                 text = if (isWriting) "печатает..."
                                 else {
