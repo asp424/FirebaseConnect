@@ -10,39 +10,40 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnectapp.data.SPreferences
-import com.lm.firebaseconnectapp.data.UiStates
 import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
-import com.lm.firebaseconnectapp.di.dagger.AppComponent
+import com.lm.firebaseconnectapp.ui.UiInteractor
+import com.lm.firebaseconnectapp.ui.UiStates
 
 data class MainDependencies(
     val firebaseConnect: FirebaseConnect,
     val ringtone: Ringtone,
-    val uiStates: UiStates,
     val sPreferences: SPreferences,
     val firebaseAuth: FirebaseAuth,
     val oneTapGoogleAuth: OneTapGoogleAuth,
-    val navController: NavHostController
+    val navController: NavHostController,
+    val uiInteractor: UiInteractor
 )
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainDep(
-    appComponent: AppComponent,
+    fBConnect: FirebaseConnect,
+    ringtone: Ringtone,
+    sPreferences: SPreferences,
+    firebaseAuth: FirebaseAuth,
+    oneTapGoogleAuth: OneTapGoogleAuth,
+    uiInteractor: UiInteractor,
     content: @Composable () -> Unit
-) = with(appComponent) {
-    CompositionLocalProvider(
-        Local provides MainDependencies(
-            fBConnect(),
-            ringtone(),
-            uiStates(),
-            sPreferences(),
-            firebaseAuth(),
-            oneTapGoogleAuth(),
-            rememberAnimatedNavController()
-        ),
-        content = content
-    )
-}
+) = CompositionLocalProvider(
+    Local provides MainDependencies(
+        fBConnect,
+        ringtone,
+        sPreferences,
+        firebaseAuth,
+        oneTapGoogleAuth,
+        rememberAnimatedNavController(),
+        uiInteractor), content = content
+)
 
 private val Local = staticCompositionLocalOf<MainDependencies> { error("No value provided") }
 

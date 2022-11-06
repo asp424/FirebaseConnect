@@ -41,7 +41,7 @@ fun SetImage(
         Box(modifier = Modifier.padding(start = 4.dp)) {
             Image(
                 bitmap = bitmap!!.asImageBitmap(), modifier = Modifier
-                    .size(51.dp)
+                    .size(46.dp)
                     .clip(CircleShape)
                     .clickable { onClick1() }, contentDescription = null
             )

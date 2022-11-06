@@ -44,9 +44,9 @@ class FirebaseRead(
             if (this != "error" && isNotEmpty())
                 Pair(
                     with(firebaseSave.timeConverter) {
-                        substringAfter(DIGIT_TAG_END).currentTimeZoneTime()
-                    }, if (substringAfter(DIGIT_TAG_START).substringBefore(DIGIT_TAG_END) ==
-                        firebaseSave.myDigit
+                        substringAfter(D_T_E).currentTimeZoneTime()
+                    }, if (substringAfter(D_T_S).substringBefore(D_T_E) ==
+                        firebaseSave.firebaseChat.myDigit
                     ) MY_COLOR else CHAT_ID_COLOR
                 ) else Pair("", CHAT_ID_COLOR)
         }
@@ -54,6 +54,7 @@ class FirebaseRead(
     fun startListener() = with(firebaseSave) {
         messagesJob.cancel()
         save(ONE, Nodes.ONLINE)
+        firebaseSave.save(ONE, Nodes.ONLINE, firebaseSave.firebaseChat.myDigit)
         messagesJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
     }
 
@@ -72,12 +73,12 @@ class FirebaseRead(
     var messagesJob: Job = Job()
 
     companion object {
-        const val FIRST_USER_START = "<f>"
-        const val FIRST_USER_END = "<*f>"
-        const val SECOND_USER_START = "<s>"
-        const val SECOND_USER_END = "<*s>"
-        const val DIGIT_TAG_START = "<N>"
-        const val DIGIT_TAG_END = "</N>"
+        const val F_U_S = "<f>"
+        const val F_U_E = "<*f>"
+        const val S_U_S = "<s>"
+        const val S_U_E = "<*s>"
+        const val D_T_S = "<N>"
+        const val D_T_E = "</N>"
         const val MY_COLOR = "green"
         const val CHAT_ID_COLOR = "black"
     }

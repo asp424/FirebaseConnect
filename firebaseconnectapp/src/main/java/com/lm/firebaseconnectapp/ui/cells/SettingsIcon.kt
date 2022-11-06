@@ -12,10 +12,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.settingsIconClick
 
 @Composable
 fun SettingsIcon() {
-    with(mainDep.uiStates) {
         Box(
             modifier = Modifier.scale(animScale(getIsMainMode)).padding(start = 20.dp)
         ) {
@@ -24,5 +26,4 @@ fun SettingsIcon() {
                     .clickable(onClick = settingsIconClick), tint = getSecondColor
             )
         }
-    }
 }

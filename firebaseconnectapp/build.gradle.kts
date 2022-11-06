@@ -114,4 +114,7 @@ dependencies {
 
     //ColorPicker
     implementation ("com.godaddy.android.colorpicker:compose-color-picker:0.5.0")
+
+    //Leak Canary
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
 }

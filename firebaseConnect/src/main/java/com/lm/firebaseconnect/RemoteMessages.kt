@@ -7,6 +7,7 @@ import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnect.States.CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.DATA
 import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
+import com.lm.firebaseconnect.States.ICON
 import com.lm.firebaseconnect.States.INCOMING_CALL
 import com.lm.firebaseconnect.States.MESSAGE
 import com.lm.firebaseconnect.States.NAME
@@ -70,16 +71,16 @@ class RemoteMessages(
     }
 
     fun checkForCall(remoteMessageModel: RemoteMessageModel) {
-
         with(firebaseRead.firebaseSave) {
             databaseReference
-                .child(myDigit)
+                .child(firebaseChat.myDigit)
                 .child(Nodes.CALL.node())
                 .child(remoteMessageModel.callingId.getPairPath)
                 .addListenerForSingleValueEvent(firebaseRead.valueListener
                     .singleEventListener() {
                         if (it.value.toString() != REJECTED_CALL) {
                             if (it.value.toString() == CALL) {
+                                "call".log
                                 if (WAIT.isType)
                                     sendRemoteMessage(
                                         "Связь установлена",
@@ -121,9 +122,11 @@ fun cancelCall(token: String, typeMessage: String) =
 
 val rejectCall get() = remoteMessageModel.rejectCall.set
 
-private val getMyName get() = firebaseRead.firebaseSave.myName
+private val getMyName get() = firebaseRead.firebaseSave.firebaseChat.myName
 
-private val getMyDigit get() = firebaseRead.firebaseSave.myDigit
+private val getMyIcon get() = firebaseRead.firebaseSave.firebaseChat.myIcon
+
+private val getMyDigit get() = firebaseRead.firebaseSave.firebaseChat.myDigit
 
 private val getChatId get() = firebaseRead.firebaseSave.firebaseChat.chatId
 
@@ -134,7 +137,8 @@ private fun sendRemoteMessage(
         fCMApi.sendRemoteMessage(
             JSONObject().put(
                 DATA, JSONObject().put(TYPE_MESSAGE, typeMessage)
-                    .put(TITLE, title).put(MESSAGE, message).put(NAME, getMyName)
+                    .put(TITLE, title).put(MESSAGE, message)
+                    .put(NAME, getMyName).put(ICON, getMyIcon)
                     .put(CALLING_ID, getMyDigit).put(TOKEN, myToken)
             ).put(TOKEN, JSONArray().put(token)).toString(), header
         )?.enqueue(object : Callback<String?> {

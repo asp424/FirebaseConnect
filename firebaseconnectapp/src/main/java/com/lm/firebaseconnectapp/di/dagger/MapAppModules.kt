@@ -13,13 +13,14 @@ import dagger.Module
         RingtoneModule::class,
         NotificationSoundModule::class,
         AppIsRunCheckerModule::class,
-        UiStatesModule::class,
         SPreferencesModule::class,
         SharedPreferencesModule::class,
         FBAuthInstanceModule::class,
         OneTapGoogleAuthModule::class,
         FBAuthModule::class,
-        FBAuthInstanceModule::class
+        FBAuthInstanceModule::class,
+        IntentHandlerModule::class,
+        UiInteractorModule::class
     ]
 )
 interface MapAppModules

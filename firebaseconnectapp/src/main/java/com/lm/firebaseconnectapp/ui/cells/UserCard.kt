@@ -36,14 +36,9 @@ fun UserCard(
             ) {
                 Box(Modifier.fillMaxHeight(), contentAlignment = CenterStart) {
                     Row(Modifier.wrapContentWidth(), Arrangement.Start, CenterVertically) {
-                        if (name.isEmpty())
-                            DrawCircle(name.ifEmpty { id }, onClick = onIconClick)
-                        else SetImage(
-                            iconUri,
-                            onIconClick
-                        )
-                        Column() {
-                            Text(text = name.ifEmpty { id }, modifier = Modifier.padding(start = 6.dp))
+                        SetImage(iconUri, onIconClick)
+                        Column(modifier = Modifier.padding(start = 10.dp)) {
+                            Text(text = name.ifEmpty { id })
                             Text(
                                 text = if (isWriting) "печатает..."
                                 else {
@@ -51,18 +46,15 @@ fun UserCard(
                                         "${lastMessage.substring(0, 30)}..."
                                     else lastMessage
                                 },
-                                modifier = Modifier.padding(start = 6.dp, top = 2.dp),
+                                modifier = Modifier.padding(top = 2.dp),
                                 fontSize = 12.sp,
                                 fontStyle = Italic
                             )
                         }
                     }
-                    Box(Modifier.offset(44.dp, 20.dp)) {
+                    Box(Modifier.offset(43.dp, 16.dp)) {
                         Canvas(Modifier.scale(animScale(onLine))) {
-                            drawCircle(
-                                darkGreen,
-                                5.dp.toPx()
-                            )
+                            drawCircle(darkGreen, 5.dp.toPx())
                         }
                     }
                 }

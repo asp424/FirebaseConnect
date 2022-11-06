@@ -14,17 +14,14 @@ import com.google.android.gms.common.api.CommonStatusCodes.CANCELED
 import com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR
 import com.lm.firebaseconnectapp.BuildConfig
 import com.lm.firebaseconnectapp.di.dagger.AppComponent
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface OneTapGoogleAuth {
@@ -34,12 +31,12 @@ interface OneTapGoogleAuth {
     fun startAuth(signInClient: SignInClient, onResult: (OTGRegState) -> Unit)
 
     fun startOTGAuth(
-        regLauncher: ActivityResultLauncher<IntentSenderRequest>, appComponent: AppComponent,
+        regLauncher: ActivityResultLauncher<IntentSenderRequest>, oneTapGoogleAuth: OneTapGoogleAuth,
         signInClient: SignInClient, onError: String.() -> Unit
     )
 
     fun handleResult(
-        result: ActivityResult, appComponent: AppComponent, scope: LifecycleCoroutineScope,
+        result: ActivityResult,
         signInClient: SignInClient,
         onSuccess: FBRegStates.OnSuccess.() -> Unit,
         onError: String.() -> Unit
@@ -100,9 +97,9 @@ interface OneTapGoogleAuth {
         }
 
         override fun startOTGAuth(
-            regLauncher: ActivityResultLauncher<IntentSenderRequest>, appComponent: AppComponent,
+            regLauncher: ActivityResultLauncher<IntentSenderRequest>, oneTapGoogleAuth: OneTapGoogleAuth,
             signInClient: SignInClient, onError: String.() -> Unit
-        ) = appComponent.oneTapGoogleAuth().startAuth(signInClient) {
+        ) = oneTapGoogleAuth.startAuth(signInClient) {
             when (it) {
                 is OTGRegState.OnSuccess -> regLauncher.launch(
                     IntentSenderRequest.Builder(it.intentSender).build()
@@ -113,13 +110,13 @@ interface OneTapGoogleAuth {
 
         @RequiresApi(Build.VERSION_CODES.P)
         override fun handleResult(
-            result: ActivityResult, appComponent: AppComponent, scope: LifecycleCoroutineScope,
+            result: ActivityResult,
             signInClient: SignInClient,
             onSuccess: FBRegStates.OnSuccess.() -> Unit,
             onError: String.() -> Unit
-        ) = with(appComponent) {
-            scope.launch(Main) {
-                oneTapGoogleAuth().handleResultAndFBReg(result, signInClient).collect {
+        ): Job =
+            CoroutineScope(Main).launch {
+                handleResultAndFBReg(result, signInClient).collect {
                     when (it) {
                         is FBRegStates.OnSuccess -> onSuccess(it)
                         is FBRegStates.OnError -> withContext(Main) { onError(it.message) }
@@ -127,7 +124,6 @@ interface OneTapGoogleAuth {
                     }
                 }
             }
-        }
 
         private val requestOptions by lazy {
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()

@@ -23,90 +23,89 @@ import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.getUserModelChat
 
 @Composable
 fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconClick: () -> Unit) {
     with(userModel) {
         with(mainDep) {
             with(firebaseConnect) {
-                with(uiStates) {
-                    Row(
+                Row(
+                    Modifier
+                        .fillMaxSize()
+                        .scale(scale)
+                        .padding(start = 10.dp)
+                        .padding(10.dp),
+                    Arrangement.Absolute.SpaceBetween,
+                    Alignment.CenterVertically
+                ) {
+                    Box(
                         Modifier
-                            .fillMaxSize()
-                            .scale(scale)
-                            .padding(start = 10.dp)
-                            .padding(10.dp),
-                        Arrangement.Absolute.SpaceBetween,
-                        Alignment.CenterVertically
+                            .fillMaxHeight()
+                            .scale(animScale(!getIsMainMode)),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        Box(
-                            Modifier
-                                .fillMaxHeight()
-                                .scale(animScale(!getIsMainMode)),
-                            contentAlignment = Alignment.CenterStart
+                        Row(
+                            Modifier.wrapContentWidth(),
+                            Arrangement.Start,
+                            Alignment.CenterVertically
                         ) {
-                            Row(
-                                Modifier.wrapContentWidth(),
-                                Arrangement.Start,
-                                Alignment.CenterVertically
+                            SetImage(iconUri, onIconClick)
+                            Column(
+                                Modifier.padding(start = 10.dp),
+                                verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                if (name.isEmpty())
-                                    DrawCircle(name.ifEmpty { id }, onClick = onIconClick)
-                                else SetImage(
-                                    iconUri,
-                                    onIconClick
+                                Text(
+                                    text = name.ifEmpty { id },
+                                    color = getSecondColor
                                 )
-                                Column(Modifier.padding(start = 10.dp), verticalArrangement = Arrangement.SpaceBetween) {
-                                    Text(
-                                        text = name.ifEmpty { id },
-                                        color = getSecondColor
-                                    )
-                                    Card(
-                                        shape = CircleShape,
-                                        modifier = Modifier
-                                            .padding(top = 6.dp)
-                                            .scale(
-                                                animScale(
-                                                    target = onLineVisible
-                                                )
-                                            ),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = if (onLineState.value) Color.Green else Color.Red
+                                Card(
+                                    shape = CircleShape,
+                                    modifier = Modifier
+                                        .padding(top = 6.dp)
+                                        .scale(
+                                            animScale(
+                                                target = onLineVisible
+                                            )
                                         ),
-                                        border = BorderStroke(1.dp, Color.White)
-                                    ) {
-                                        Text(
-                                            text = if (onLineState.value) "online" else "offline",
-                                            modifier = Modifier.padding(start = 5.dp, end = 5.dp),
-                                            color = Color.White, fontSize = 10.sp
-                                        )
-                                    }
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (onLineState.value) Color.Green else Color.Red
+                                    ),
+                                    border = BorderStroke(1.dp, Color.White)
+                                ) {
+                                    Text(
+                                        text = if (onLineState.value) "online" else "offline",
+                                        modifier = Modifier.padding(start = 5.dp, end = 5.dp),
+                                        color = Color.White, fontSize = 10.sp
+                                    )
                                 }
                             }
                         }
-                        Row(Modifier.padding(start = 20.dp, top = 5.dp)) {
-                            Icon(
-                                Icons.Default.Call, null, modifier = Modifier
-                                    .clickable(
-                                        onClick = remember {
-                                            {
-                                                remoteMessages.initialCall(getUserModelChat)
-                                            }
-                                        })
-                                    .padding(end = 10.dp)
+                    }
+                    Row(Modifier.padding(start = 20.dp, top = 5.dp)) {
+                        Icon(
+                            Icons.Default.Call, null, modifier = Modifier
+                                .clickable(
+                                    onClick = remember {
+                                        {
+                                            remoteMessages.initialCall(getUserModelChat)
+                                        }
+                                    })
+                                .padding(end = 10.dp)
+                                .size(32.dp)
+                                .scale(animScale(!getIsMainMode)),
+                            tint = getSecondColor
+                        )
+                        Box(Modifier.padding(start = 10.dp)) {
+                            Icon(Icons.Rounded.Delete, null,
+                                tint = getSecondColor,
+                                modifier = Modifier
                                     .size(32.dp)
-                                    .scale(animScale(!getIsMainMode)),
-                                tint = getSecondColor
+                                    .scale(animScale(!getIsMainMode))
+                                    .clickable { deleteAllMessages() }
                             )
-                            Box(Modifier.padding(start = 10.dp)) {
-                                Icon(Icons.Rounded.Delete, null,
-                                    tint = getSecondColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .scale(animScale(!getIsMainMode))
-                                        .clickable { deleteAllMessages() }
-                                )
-                            }
                         }
                     }
                 }

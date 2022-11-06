@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui
+package com.lm.firebaseconnectapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -36,10 +36,7 @@ fun IncomingCallScreen() {
     with(mainDep) {
         var screen by remember { mutableStateOf(false) }
         LaunchedEffect(get) {
-            screen = if (INCOMING_CALL.isType) {
-                true
-            } else {
-                delay(2000)
+            screen = if (INCOMING_CALL.isType) true else { delay(2000)
                 false
             }
         }

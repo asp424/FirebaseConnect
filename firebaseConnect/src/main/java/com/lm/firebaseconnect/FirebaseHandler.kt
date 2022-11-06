@@ -23,16 +23,19 @@ class FirebaseHandler(
 ) {
 
     fun startMainListener() {
-        CoroutineScope(IO).launch {
-            with(firebaseSave) { save(ONE, Nodes.ONLINE, myDigit) }
+        job.cancel()
+        job = CoroutineScope(IO).launch {
+            with(firebaseSave) { save(ONE, Nodes.ONLINE, firebaseChat.myDigit) }
             listener().collect { t ->
                 listUsers.value = UIUsersStates.Success(t.filter())
             }
         }.apply { listJobs.add(this) }
     }
 
+    var job: Job = Job()
+
     fun stopMainListener() {
-        listJobs.onEach { it.cancel() }; with(firebaseSave) { save(ZERO, Nodes.ONLINE, myDigit) }
+        with(firebaseSave) { save(ZERO, Nodes.ONLINE, firebaseChat.myDigit) }; listJobs.onEach { it.cancel() }
     }
 
     private val listJobs by lazy { mutableListOf<Job>() }

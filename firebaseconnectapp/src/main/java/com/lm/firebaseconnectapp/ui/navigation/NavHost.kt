@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui
+package com.lm.firebaseconnectapp.ui.navigation
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
@@ -14,18 +14,24 @@ import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
+import com.lm.firebaseconnectapp.ui.UiStates.getSettingsVisible
+import com.lm.firebaseconnectapp.ui.UiStates.setIsMainMode
+import com.lm.firebaseconnectapp.ui.UiStates.setNavState
+import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
+import com.lm.firebaseconnectapp.ui.UiStates.setUserModelChat
 import com.lm.firebaseconnectapp.ui.cells.SettingsCard
 import com.lm.firebaseconnectapp.ui.cells.TopBar
+import com.lm.firebaseconnectapp.ui.screens.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun NavHost(startScreen: NavRoutes) {
     with(mainDep) {
-        with(uiStates) {
-            var onlineVisible by remember{ mutableStateOf(false) }
+            var onlineVisible by remember { mutableStateOf(false) }
             Column() {
                 TopBar(onlineVisible) {}
                 AnimatedNavHost(
@@ -50,19 +56,23 @@ fun NavHost(startScreen: NavRoutes) {
                                 else -> exitLeftToRight
                             }
                         }) {
-                        Main()
+                        MainScreen()
                         LaunchedEffect(true) {
                             true.setIsMainMode
-                            NavRoutes.EMPTY.setNavState
+                            setNavState(NavRoutes.EMPTY)
                         }
                     }
 
                     composable(NavRoutes.CHAT.route, enterTransition = { enterRightToLeft },
                         exitTransition = { exitLeftToRight }) {
-                        Chat{ onlineVisible = it }
                         LaunchedEffect(true) {
                             false.setIsMainMode
+                            firebaseConnect
+                                .setChatId(sPreferences.readChatUserModel().id.toInt())
+                            setUserModelChat(sPreferences.readChatUserModel())
+                            firebaseConnect.firebaseRead.startListener()
                         }
+                        ChatScreen { onlineVisible = it }
                     }
                 }
             }
@@ -75,8 +85,8 @@ fun NavHost(startScreen: NavRoutes) {
                     NavRoutes.CHAT.route -> {
                         if (GET_INCOMING_CALL.isType)
                             firebaseConnect.remoteMessages.cancelCall(get.token, REJECT)
-                                else {
-                                    if (!OUTGOING_CALL.isType) navController.navigate(NavRoutes.MAIN.route)
+                        else {
+                            if (!OUTGOING_CALL.isType) navController.navigate(NavRoutes.MAIN.route)
                         }
                     }
 
@@ -88,9 +98,5 @@ fun NavHost(startScreen: NavRoutes) {
                 }
             }
         }
-    }
 }
 
-enum class NavRoutes(val route: String) {
-    MAIN("main"), CHAT("chat"), REG("reg"), EMPTY("")
-}

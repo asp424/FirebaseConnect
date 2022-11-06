@@ -21,7 +21,14 @@ import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
-import com.lm.firebaseconnectapp.ui.NavRoutes
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.getSettingsVisible
+import com.lm.firebaseconnectapp.ui.UiStates.setMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.setSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
+import com.lm.firebaseconnectapp.ui.UiStates.setToolbarVisible
+import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -30,7 +37,6 @@ import kotlinx.coroutines.launch
 fun SettingsCard() {
     val coroutine = rememberCoroutineScope()
     with(mainDep) {
-        with(uiStates) {
             Column(
                 Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -87,23 +93,21 @@ fun SettingsCard() {
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                             Button(
                                 onClick = {
-                                    firebaseAuth.signOut()
-                                    activity.signInClient.signOut()
-                                    firebaseConnect.firebaseHandler.stopMainListener()
-                                    coroutine.launch {
-                                        false.setSettingsVisible
-                                        delay(300)
-                                        navController.navigate(NavRoutes.REG.route)
-                                        false.setToolbarVisible
+                                    uiInteractor.signOutFromGoogle(activity.signInClient) {
+                                        firebaseAuth.signOut()
+                                        firebaseConnect.firebaseHandler.stopMainListener()
+                                        coroutine.launch {
+                                            false.setSettingsVisible
+                                            delay(300)
+                                            navController.navigate(NavRoutes.REG.route)
+                                            setToolbarVisible(false)
+                                        }
                                     }
-                                }, colors =
-                                ButtonDefaults.buttonColors(getMainColor)
+                                }, colors = ButtonDefaults.buttonColors(getMainColor)
                             ) { Text(text = "Sign out", color = getSecondColor) }
                         }
                     }
                 }
             }
-
-        }
     }
 }

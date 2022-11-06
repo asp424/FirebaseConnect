@@ -34,6 +34,7 @@ object States {
     const val TOKEN = "registration_ids"
     const val DATA = "data"
     const val NAME = "name"
+    const val ICON = "icon"
     const val TITLE = "title"
     const val TYPE_MESSAGE = "typeMessage"
     const val INCOMING_CALL = "incomingCall"

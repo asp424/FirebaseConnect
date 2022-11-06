@@ -4,7 +4,6 @@ import com.google.firebase.database.DataSnapshot
 import com.lm.firebaseconnect.FirebaseRead
 import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.States.writingState
-import com.lm.firebaseconnect.log
 
 data class UserModel(
     val name: String = "",
@@ -14,7 +13,7 @@ data class UserModel(
     val isWriting: Boolean = false,
     val listMessages: List<String> = emptyList(),
     val iconUri: String = "",
-    val lastMessage: String = "last message",
+    val lastMessage: String = "",
 )
 
 fun DataSnapshot.getUserModel(
@@ -23,7 +22,7 @@ fun DataSnapshot.getUserModel(
     firebaseRead: FirebaseRead
 ) = UserModel(
     id = key ?: "",
-    name = getValue(key ?: "", Nodes.NAME).apply { log },
+    name = getValue(key ?: "", Nodes.NAME),
     onLine = getValue(key ?: "", Nodes.ONLINE).apply {
         if (key == chatId) onLineState.value = (this == "1")
     } == "1",
@@ -38,6 +37,6 @@ fun DataSnapshot.getUserModel(
 )
 
 fun DataSnapshot.getValue(path: String, node: Nodes) =
-    child(node.node()).child(path).value?.run { toString() }?:""
+    child(node.node()).child(path).value?.run { toString() } ?: ""
 
 

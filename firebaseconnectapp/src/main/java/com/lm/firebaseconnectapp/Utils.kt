@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Dp
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnectapp.core.App
+import com.lm.firebaseconnectapp.presentation.MainActivity
 
 @Composable
 fun animScale(target: Boolean, duration: Int = 300) = animateFloatAsState(
@@ -33,6 +34,9 @@ val toast: Context.(String) -> Unit by lazy {
         Toast.makeText(this, it, Toast.LENGTH_LONG).show()
     }
 }
+
+fun MainActivity.showToast(text: String) = toast(this, text)
+
 
     fun startJitsiMit(context: Context, room: String) {
         /* JitsiMeetConferenceOptions.Builder().apply {

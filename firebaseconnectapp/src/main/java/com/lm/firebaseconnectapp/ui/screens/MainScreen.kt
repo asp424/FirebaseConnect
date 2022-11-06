@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui
+package com.lm.firebaseconnectapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -12,15 +12,16 @@ import androidx.compose.ui.Modifier
 import com.lm.firebaseconnect.States.listUsers
 import com.lm.firebaseconnect.models.UIUsersStates
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.cells.UserCard
+import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun Main() {
+fun MainScreen() {
     with(mainDep) {
         with(firebaseConnect) {
             SetContent {
-                with(uiStates) {
                     if (listUsers.value is UIUsersStates.Success) {
                         Column(
                             Modifier
@@ -29,9 +30,8 @@ fun Main() {
                             (listUsers.value as UIUsersStates.Success).list.forEach { model ->
                                 UserCard(model,
                                     onCardClick = {
-                                        setChatId(model.id.toInt())
-                                        model.setUserModelChat
-                                        navController.navigate("chat")
+                                        sPreferences.saveChatUserModel(model)
+                                        setNavState(NavRoutes.CHAT)
                                     }, onIconClick = {
 
                                     })
@@ -44,5 +44,4 @@ fun Main() {
                 }
             }
         }
-    }
 }

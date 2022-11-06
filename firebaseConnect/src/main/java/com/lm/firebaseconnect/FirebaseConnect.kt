@@ -17,9 +17,10 @@ import com.lm.firebaseconnect.models.Nodes
 class FirebaseConnect private constructor(
     cryptoKey: String,
     apiKey: String,
-    var myName: String = "",
-    var myDigit: String = "",
-    var chatId: String = "",
+    var myName: String = "hui",
+    var myDigit: String = "555",
+    var chatId: String = "666",
+    var myIcon: String = "777",
 ) {
 
     class Instance(
@@ -35,9 +36,17 @@ class FirebaseConnect private constructor(
 
     fun setMyName(name: String) = apply { this.myName = name }
 
-    fun saveIcon(uri: Uri) = firebaseSave.save(uri.toString(), Nodes.ICON, path = myDigit)
+    fun setMyIcon(myIcon: String) = apply { this.myIcon = myIcon }
 
-    fun saveName(name: String) = firebaseSave.save(name, Nodes.NAME, path = myDigit)
+    fun setAndSaveName(name: String) {
+        firebaseSave.save(name, Nodes.NAME, path = myDigit)
+        setMyName(name)
+    }
+
+    fun setAndSaveIcon(uri: Uri) = apply {
+        firebaseSave.save(uri.toString(), Nodes.ICON, path = myDigit)
+        setMyIcon(uri.toString())
+    }
 
     fun setMyDigit(myDigit: String) = apply { this.myDigit = myDigit }
 
@@ -55,9 +64,17 @@ class FirebaseConnect private constructor(
             DisposableEffect(this) {
                 with(firebaseRead) {
                     val observer = LifecycleEventObserver { _, event ->
-                        if (Lifecycle.Event.ON_CREATE == event) initStates()
-                        if (Lifecycle.Event.ON_RESUME == event) startListener()
-                        if (Lifecycle.Event.ON_PAUSE == event) onPause()
+                        if (Lifecycle.Event.ON_CREATE == event) {
+                            initStates()
+                            firebaseHandler.startMainListener()
+                        }
+                        if (Lifecycle.Event.ON_RESUME == event) {
+                            startListener()
+                        }
+                        if (Lifecycle.Event.ON_PAUSE == event) {
+                            onPause()
+                            firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.firebaseChat.myDigit)
+                        }
                     }
                     lifecycle.addObserver(observer)
                     onDispose { onPause(); lifecycle.removeObserver(observer) }
@@ -77,13 +94,15 @@ class FirebaseConnect private constructor(
             val observer = LifecycleEventObserver { _, event ->
                 if (Lifecycle.Event.ON_CREATE == event) initStates()
                 if (Lifecycle.Event.ON_RESUME == event) firebaseHandler.startMainListener()
-                if (Lifecycle.Event.ON_PAUSE == event) firebaseHandler.stopMainListener()
+                if (Lifecycle.Event.ON_PAUSE == event) {
+                    firebaseHandler.stopMainListener()
+                }
             }
             val activity =
                 remember { context.getActivity()?.apply { lifecycle.addObserver(observer) } }
             rememberUpdatedState(activity).value.apply {
                 DisposableEffect(this) {
-                    onDispose { activity?.lifecycle?.removeObserver(observer)}
+                    onDispose { activity?.lifecycle?.removeObserver(observer) }
                 }
             }
             content(this@FirebaseConnect)
@@ -91,7 +110,7 @@ class FirebaseConnect private constructor(
     }
 
     private val firebaseSave by lazy {
-        FirebaseSave(myDigit, this, timeConverter, myName, crypto)
+        FirebaseSave(this, timeConverter, crypto)
     }
 
     private val timeConverter by lazy { TimeConverter() }
@@ -108,7 +127,7 @@ class FirebaseConnect private constructor(
 
     private val crypto by lazy { Crypto(cryptoKey) }
 
-    private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
+    val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
     val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
 

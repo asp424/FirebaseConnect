@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui
+package com.lm.firebaseconnectapp.ui.navigation
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi

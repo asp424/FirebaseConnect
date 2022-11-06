@@ -3,6 +3,7 @@ package com.lm.firebaseconnectapp.data
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.net.toUri
+import com.lm.firebaseconnect.models.UserModel
 import javax.inject.Inject
 
 interface SPreferences {
@@ -19,13 +20,17 @@ interface SPreferences {
 
     fun readSecondColor(): Int
 
-    fun setName(id: String): SPreferences
+    fun saveName(id: String): SPreferences
 
     fun getName(): String
 
-    fun setMyId(id: String)
+    fun saveMyId(id: String)
 
     fun getMyId(): String
+
+    fun saveChatUserModel(model: UserModel)
+
+    fun readChatUserModel(): UserModel
 
     class Base @Inject constructor(
         private val sharedPreferences: SharedPreferences,
@@ -34,6 +39,24 @@ interface SPreferences {
         override fun saveIconUri(uri: Uri) = apply {
             sharedPreferences.edit()
                 .putString(Uri.EMPTY.toString(), uri.toString()).apply()
+        }
+
+        override fun saveChatUserModel(model: UserModel) = with(model) {
+            sharedPreferences.edit()
+                .putString("userModelId", id)
+                .putString("userModelName", name)
+                .putString("userModelToken", token)
+                .putString("userModelIcon", iconUri)
+                .apply()
+        }
+
+        override fun readChatUserModel() = with(sharedPreferences) {
+            UserModel(
+                id = getString("userModelId", "") ?: "",
+                name = getString("userModelName", "") ?: "",
+                token = getString("userModelToken", "") ?: "",
+                iconUri = getString("userModelIcon", "") ?: ""
+            )
         }
 
         override fun readIconUri() = sharedPreferences
@@ -52,17 +75,17 @@ interface SPreferences {
         override fun readSecondColor() =
             sharedPreferences.getInt("secondColor", (0xFFFFFFFF).toInt())
 
-        override fun setName(id: String) = apply {
+        override fun saveName(id: String) = apply {
             sharedPreferences.edit().putString("name", id).apply()
         }
 
-        override fun getName() = sharedPreferences.getString("name", "")?:""
+        override fun getName() = sharedPreferences.getString("name", "") ?: ""
 
-        override fun setMyId(id: String) {
+        override fun saveMyId(id: String) {
             sharedPreferences.edit().putString("mYid", id).apply()
         }
 
         override fun getMyId() =
-            sharedPreferences.getString("mYid", "")?:""
+            sharedPreferences.getString("mYid", "") ?: ""
     }
 }

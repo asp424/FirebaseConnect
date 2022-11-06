@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui
+package com.lm.firebaseconnectapp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -12,17 +12,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.toast
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun RegScreen() {
+    val activity = LocalContext.current as MainActivity
     with(mainDep) {
-        with(uiStates) {
-            val activity = LocalContext.current as MainActivity
             Column(
                 Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -31,13 +31,11 @@ fun RegScreen() {
                 Button(
                     onClick = {
                         oneTapGoogleAuth.startOTGAuth(
-                            activity.regLauncher, activity.appComponent, activity.signInClient
+                            activity.googleOneTapLauncher, oneTapGoogleAuth, activity.signInClient
                         ) { toast }
                     }, colors =
                     ButtonDefaults.buttonColors(containerColor = getMainColor)
                 ) { Text(text = "Sign in with google", color = getSecondColor) }
             }
-
         }
-    }
 }
