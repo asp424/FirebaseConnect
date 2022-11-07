@@ -52,7 +52,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private fun answerAction(context: Context, intent: Intent) {
         firebaseConnect.remoteMessages.answer(getToken)
-        startJitsiMit(context, getToken)
+        startJitsiMit(context, getToken, firebaseConnect.myName, firebaseConnect.myIcon)
         cancelNotification(intent)
     }
 

@@ -24,6 +24,12 @@ object States {
 
     val String.isType get() = callState.value.typeMessage == this
 
+    val callScreenVisible get() = INCOMING_CALL.isType || outComingCallVisible
+
+    val outComingCallVisible get() = OUTGOING_CALL.isType
+            || GET_CHECK_FOR_CALL.isType
+            || GET_INCOMING_CALL.isType
+
     val getToken get() = callState.value.token
 
     val get get() = callState.value

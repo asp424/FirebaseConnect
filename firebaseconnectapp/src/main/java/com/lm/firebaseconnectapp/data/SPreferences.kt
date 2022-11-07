@@ -22,11 +22,11 @@ interface SPreferences {
 
     fun saveName(id: String): SPreferences
 
-    fun getName(): String
+    fun readName(): String
 
     fun saveMyId(id: String)
 
-    fun getMyId(): String
+    fun readMyId(): String
 
     fun saveChatUserModel(model: UserModel)
 
@@ -79,13 +79,13 @@ interface SPreferences {
             sharedPreferences.edit().putString("name", id).apply()
         }
 
-        override fun getName() = sharedPreferences.getString("name", "") ?: ""
+        override fun readName() = sharedPreferences.getString("name", "") ?: ""
 
         override fun saveMyId(id: String) {
             sharedPreferences.edit().putString("mYid", id).apply()
         }
 
-        override fun getMyId() =
+        override fun readMyId() =
             sharedPreferences.getString("mYid", "") ?: ""
     }
 }

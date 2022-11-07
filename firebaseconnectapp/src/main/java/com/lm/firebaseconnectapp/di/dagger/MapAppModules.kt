@@ -20,7 +20,8 @@ import dagger.Module
         FBAuthModule::class,
         FBAuthInstanceModule::class,
         IntentHandlerModule::class,
-        UiInteractorModule::class
+        UiInteractorModule::class,
+        NotificationReceiverModule::class
     ]
 )
 interface MapAppModules

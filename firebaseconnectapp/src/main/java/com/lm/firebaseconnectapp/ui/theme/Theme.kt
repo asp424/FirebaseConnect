@@ -14,12 +14,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
+import com.lm.firebaseconnectapp.core.NotificationReceiver
 import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
 import com.lm.firebaseconnectapp.di.compose.MainDep
 import com.lm.firebaseconnectapp.ui.UiInteractor
 import com.lm.firebaseconnectapp.ui.UiStates
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.UiStates.setMainColor
 import com.lm.firebaseconnectapp.ui.UiStates.setSecondColor
 
@@ -43,6 +45,7 @@ fun MainTheme(
     firebaseAuth: FirebaseAuth,
     oneTapGoogleAuth: OneTapGoogleAuth,
     uiInteractor: UiInteractor,
+    notificationReceiver: NotificationReceiver,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -53,6 +56,7 @@ fun MainTheme(
         sPreferences,
         firebaseAuth,
         oneTapGoogleAuth,
+        notificationReceiver,
         uiInteractor
     ) {
         LaunchedEffect(true){
@@ -72,6 +76,7 @@ fun MainTheme(
             getMainColor.also { color ->
                 LaunchedEffect(color) {
                     (view.context as Activity).window.statusBarColor = color.toArgb()
+                    (view.context as Activity).window.navigationBarColor = color.toArgb()
                     WindowCompat.getInsetsController((view.context as Activity).window, view)
                         .isAppearanceLightStatusBars = darkTheme
                 }

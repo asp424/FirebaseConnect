@@ -25,19 +25,20 @@ import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.writingState
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates.setOnlineVisible
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ChatScreen(loadState: (Boolean) -> Unit) {
+fun ChatScreen() {
     val coroutine = rememberCoroutineScope()
     with(mainDep) {
         with(firebaseConnect) {
             SetChatContent {
                 if (listMessages.value is UIMessagesStates.Success) {
-                    loadState(true)
+                    setOnlineVisible(true)
                     val listMessages = (listMessages.value as UIMessagesStates.Success).list
                     Scaffold(content = {
                         val state = rememberLazyListState()
@@ -136,7 +137,7 @@ fun ChatScreen(loadState: (Boolean) -> Unit) {
                         }
                     })
                 } else {
-                    loadState(false)
+                    setOnlineVisible(false)
                     Column(
                         Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center

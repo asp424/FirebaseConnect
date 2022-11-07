@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.RemoteMessage
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States.ANSWER
+import com.lm.firebaseconnect.States.BUSY
 import com.lm.firebaseconnect.States.CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
@@ -18,10 +19,13 @@ import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
+import com.lm.firebaseconnect.States.getToken
 import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
+import com.lm.firebaseconnect.log
+import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnectapp.core.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.CoroutineScope
@@ -70,11 +74,12 @@ class FirebaseMessageServiceCallback(
                             rejectCall
                         }
 
-                        ANSWER -> startJitsiMit(context, model.token)
-
+                        ANSWER -> firebaseRead.readNode(Nodes.TOKEN, getMyDigit) {
+                        startJitsiMit(context, it, firebaseConnect.myName, firebaseConnect.myIcon)
+                    }
                         RESET -> rejectCall
 
-                        GET_CHECK_FOR_CALL -> doCall(model)
+                        GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) { doCall(model); model.set }
 
                         INCOMING_CALL -> {
                             model.set
@@ -82,13 +87,22 @@ class FirebaseMessageServiceCallback(
                             ringtone.play()
                         }
 
-                        GET_INCOMING_CALL -> if (OUTGOING_CALL.isType) model.set
+                        GET_INCOMING_CALL -> {
+                            if (OUTGOING_CALL.isType) model.set
+                        }
 
                         NOTIFY_CALLBACK -> {
                             CoroutineScope(IO).launch {
                                 notifyState.value = true
                                 delay(3000)
                                 notifyState.value = false
+                            }
+                        }
+                        BUSY -> {
+                            CoroutineScope(IO).launch{
+                                model.set
+                                delay(500)
+                                rejectCall
                             }
                         }
                     }

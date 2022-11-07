@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
@@ -22,7 +22,8 @@ import com.lm.firebaseconnectapp.R
 @Composable
 fun SetImage(
     photoUrl: String,
-    onClick1: () -> Unit
+    sizeFlag: Boolean = true,
+    onClick1: () -> Unit = {}
 ) {
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     Glide.with(LocalContext.current).asBitmap()
@@ -38,12 +39,13 @@ fun SetImage(
             }
         })
     if (bitmap != null)
-        Box(modifier = Modifier.padding(start = 4.dp)) {
+        Box {
             Image(
-                bitmap = bitmap!!.asImageBitmap(), modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .clickable { onClick1() }, contentDescription = null
+                bitmap = bitmap!!.asImageBitmap(), modifier = with(
+                    if (sizeFlag)
+                        Modifier.size(42.dp)
+                    else Modifier.size(120.dp)
+                ) { clickable { onClick1() } }.clip(CircleShape), contentDescription = null
             )
         }
 }

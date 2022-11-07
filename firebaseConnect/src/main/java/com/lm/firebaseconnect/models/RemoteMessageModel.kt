@@ -1,6 +1,7 @@
 package com.lm.firebaseconnect.models
 
 import com.google.firebase.messaging.RemoteMessage
+import com.lm.firebaseconnect.States.BUSY
 import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
 import com.lm.firebaseconnect.States.ICON
@@ -47,12 +48,13 @@ data class RemoteMessageModel constructor(
                 callingId = get.callingId, token = getToken, name = get.name
             )
 
-        fun outgoingCall(id: String, name: String, token: String) = RemoteMessageModel(
+        fun outgoingCall(id: String, name: String, token: String, icon: String) = RemoteMessageModel(
             OUTGOING_CALL, title = "Отправка запроса...", name = name, token = token,
-            callingId = id
+            callingId = id, icon = icon
         )
 
-        // val busy get() = RemoteMessageModel(BUSY, name = "Взял трубку")
+        val busy get() = RemoteMessageModel(BUSY, title = "Взял трубку",
+            callingId = get.callingId, name = get.name)
 
         val testBusy get() = RemoteMessageModel(WAIT, title = "Взял трубку",
             callingId = get.callingId, name = get.name)

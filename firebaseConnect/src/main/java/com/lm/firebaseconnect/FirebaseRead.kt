@@ -18,14 +18,14 @@ import kotlinx.coroutines.launch
 
 class FirebaseRead(
     val firebaseSave: FirebaseSave,
-    val valueListener: ValueEventListenerInstance
+    private val valueListener: ValueEventListenerInstance
 ) {
-    fun readNode(node: Nodes, digit: String, onRead: (String) -> Unit) =
-        firebaseSave.databaseReference.child(digit).child(node.node()).child(digit).get()
+    fun readNode(node: Nodes, digit: String, key: String = digit, onRead: (String) -> Unit) =
+        firebaseSave.databaseReference.child(digit).child(node.node()).child(key).get()
             .addOnCompleteListener {
                 it.result?.also { resultNotNull ->
                     resultNotNull.key?.also { keyNotNull ->
-                        if (keyNotNull == digit) onRead(resultNotNull.value.toString())
+                        if (keyNotNull == key) onRead(resultNotNull.value.toString())
                     }
                 }
             }

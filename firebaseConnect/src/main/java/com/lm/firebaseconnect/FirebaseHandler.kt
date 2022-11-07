@@ -43,7 +43,7 @@ class FirebaseHandler(
     private suspend fun List<DataSnapshot>.filter() = withContext(IO) {
         with(firebaseSave) {
             filter { it.key != null }.filter {
-                //it.key != firebaseConnect.myDigit &&
+                it.key != firebaseChat.myDigit &&
                 it.key!!.isDigitsOnly()
             }.map {
                 it.getUserModel(

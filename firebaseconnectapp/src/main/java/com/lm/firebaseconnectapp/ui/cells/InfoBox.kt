@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lm.firebaseconnect.States.WAIT
+import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.animScale
@@ -52,7 +54,7 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                             Arrangement.Start,
                             Alignment.CenterVertically
                         ) {
-                            SetImage(iconUri, onIconClick)
+                            SetImage(iconUri, onClick1 = onIconClick)
                             Column(
                                 Modifier.padding(start = 10.dp),
                                 verticalArrangement = Arrangement.SpaceBetween
@@ -78,7 +80,7 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                                     Text(
                                         text = if (onLineState.value) "online" else "offline",
                                         modifier = Modifier.padding(start = 5.dp, end = 5.dp),
-                                        color = Color.White, fontSize = 10.sp
+                                        color = Color.White, fontSize = 14.sp
                                     )
                                 }
                             }
@@ -95,7 +97,7 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                                     })
                                 .padding(end = 10.dp)
                                 .size(32.dp)
-                                .scale(animScale(!getIsMainMode)),
+                                .scale(animScale(!getIsMainMode && WAIT.isType)),
                             tint = getSecondColor
                         )
                         Box(Modifier.padding(start = 10.dp)) {

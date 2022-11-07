@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
+import com.lm.firebaseconnectapp.core.NotificationReceiver
 import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
 import com.lm.firebaseconnectapp.ui.UiInteractor
@@ -21,7 +22,8 @@ data class MainDependencies(
     val firebaseAuth: FirebaseAuth,
     val oneTapGoogleAuth: OneTapGoogleAuth,
     val navController: NavHostController,
-    val uiInteractor: UiInteractor
+    val uiInteractor: UiInteractor,
+    val notificationReceiver: NotificationReceiver
 )
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -32,6 +34,7 @@ fun MainDep(
     sPreferences: SPreferences,
     firebaseAuth: FirebaseAuth,
     oneTapGoogleAuth: OneTapGoogleAuth,
+    notificationReceiver: NotificationReceiver,
     uiInteractor: UiInteractor,
     content: @Composable () -> Unit
 ) = CompositionLocalProvider(
@@ -42,7 +45,7 @@ fun MainDep(
         firebaseAuth,
         oneTapGoogleAuth,
         rememberAnimatedNavController(),
-        uiInteractor), content = content
+        uiInteractor, notificationReceiver), content = content
 )
 
 private val Local = staticCompositionLocalOf<MainDependencies> { error("No value provided") }

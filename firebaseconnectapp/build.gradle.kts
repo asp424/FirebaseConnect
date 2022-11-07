@@ -85,7 +85,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     //JitsiMeet
-  //  implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
+    implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
 
     //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
@@ -116,5 +116,5 @@ dependencies {
     implementation ("com.godaddy.android.colorpicker:compose-color-picker:0.5.0")
 
     //Leak Canary
-    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
+   // debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
 }

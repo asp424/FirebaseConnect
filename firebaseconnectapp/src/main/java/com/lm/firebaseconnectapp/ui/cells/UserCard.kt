@@ -1,5 +1,6 @@
 package com.lm.firebaseconnectapp.ui.cells
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.animScale
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.theme.darkGreen
 
 @Composable
@@ -26,24 +29,23 @@ fun UserCard(
         OutlinedCard(
             Modifier
                 .clickable(onClick = onCardClick)
-                .height(90.dp)
-                .padding(5.dp)
+                .height(60.dp)
+                .padding(1.dp), border = BorderStroke(1.dp, getMainColor)
         ) {
             Row(
                 Modifier
-                    .fillMaxSize()
-                    .padding(10.dp), SpaceBetween, CenterVertically
+                    .fillMaxSize().padding(start = 8.dp), SpaceBetween, CenterVertically
             ) {
                 Box(Modifier.fillMaxHeight(), contentAlignment = CenterStart) {
                     Row(Modifier.wrapContentWidth(), Arrangement.Start, CenterVertically) {
-                        SetImage(iconUri, onIconClick)
-                        Column(modifier = Modifier.padding(start = 10.dp)) {
-                            Text(text = name.ifEmpty { id })
+                        SetImage(iconUri, onClick1 = onIconClick)
+                        Column(modifier = Modifier.padding(start = 12.dp).offset(0.dp, (-2).dp)) {
+                            Text(text = name.ifEmpty { id }, fontSize = 15.sp)
                             Text(
                                 text = if (isWriting) "печатает..."
                                 else {
-                                    if (lastMessage.length >= 30)
-                                        "${lastMessage.substring(0, 30)}..."
+                                    if (lastMessage.length >= 40)
+                                        "${lastMessage.substring(0, 40)}..."
                                     else lastMessage
                                 },
                                 modifier = Modifier.padding(top = 2.dp),
@@ -52,7 +54,7 @@ fun UserCard(
                             )
                         }
                     }
-                    Box(Modifier.offset(43.dp, 16.dp)) {
+                    Box(Modifier.offset(38.dp, 12.dp)) {
                         Canvas(Modifier.scale(animScale(onLine))) {
                             drawCircle(darkGreen, 5.dp.toPx())
                         }
