@@ -3,7 +3,6 @@ package com.lm.firebaseconnectapp.data
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.net.toUri
-import com.lm.firebaseconnect.models.UserModel
 import javax.inject.Inject
 
 interface SPreferences {
@@ -28,9 +27,9 @@ interface SPreferences {
 
     fun readMyId(): String
 
-    fun saveChatUserModel(model: UserModel)
+    fun saveChatId(id: String): String
 
-    fun readChatUserModel(): UserModel
+    fun readChatId(): String
 
     class Base @Inject constructor(
         private val sharedPreferences: SharedPreferences,
@@ -41,23 +40,12 @@ interface SPreferences {
                 .putString(Uri.EMPTY.toString(), uri.toString()).apply()
         }
 
-        override fun saveChatUserModel(model: UserModel) = with(model) {
-            sharedPreferences.edit()
-                .putString("userModelId", id)
-                .putString("userModelName", name)
-                .putString("userModelToken", token)
-                .putString("userModelIcon", iconUri)
-                .apply()
+        override fun saveChatId(id: String) = id.apply {
+            sharedPreferences.edit().putString("chatId", id).apply()
         }
 
-        override fun readChatUserModel() = with(sharedPreferences) {
-            UserModel(
-                id = getString("userModelId", "") ?: "",
-                name = getString("userModelName", "") ?: "",
-                token = getString("userModelToken", "") ?: "",
-                iconUri = getString("userModelIcon", "") ?: ""
-            )
-        }
+        override fun readChatId()
+        = sharedPreferences.getString("chatId", "") ?: ""
 
         override fun readIconUri() = sharedPreferences
             .getString(Uri.EMPTY.toString(), "")?.toUri()

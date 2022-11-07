@@ -9,6 +9,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.BUSY
+import com.lm.firebaseconnect.States.CALL_STATE
 import com.lm.firebaseconnect.States.CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
@@ -19,7 +20,6 @@ import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
-import com.lm.firebaseconnect.States.getToken
 import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
@@ -49,6 +49,8 @@ class FirebaseMessageServiceCallback(
         getFromRemoteMessage(remoteMessage).also { model ->
             with(notifications) {
                 with(firebaseConnect.remoteMessages) {
+                    firebaseRead.firebaseSave.save(model.typeMessage, Nodes.CALL,
+                        path = CALL_STATE, digit = model.destinationId)
                     when (model.typeMessage) {
 
                         MESSAGE -> {
@@ -57,7 +59,7 @@ class FirebaseMessageServiceCallback(
                                 showNotification()
                                 notificationSound.play()
                                 rejectCall
-                                notifyCallback(model.token)
+                                notifyCallback(model.token, model.destinationId)
                             }
                         }
 
@@ -75,13 +77,14 @@ class FirebaseMessageServiceCallback(
                         }
 
                         ANSWER -> firebaseRead.readNode(Nodes.TOKEN, getMyDigit) {
-                        startJitsiMit(context, it, firebaseConnect.myName, firebaseConnect.myIcon)
-                    }
+                            startJitsiMit(context, it, firebaseConnect.myName, firebaseConnect.myIcon)
+                        }
                         RESET -> rejectCall
 
-                        GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) { doCall(model); model.set }
+                        GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) { doCall(); model.set }
 
                         INCOMING_CALL -> {
+                            model.log
                             model.set
                             if (!appIsInForeground()) showNotification()
                             ringtone.play()
@@ -110,15 +113,4 @@ class FirebaseMessageServiceCallback(
             }
         }
     }
-
-/*
-    private val sharedPreferences by lazy {
-        context.getSharedPreferences("checkForFirst", MODE_PRIVATE)
-    }
-
-    private fun SharedPreferences.save(value: String) = edit().putString("callState", value).apply()
-
-    private fun SharedPreferences.read() = getString("callState", "")
-
- */
 }

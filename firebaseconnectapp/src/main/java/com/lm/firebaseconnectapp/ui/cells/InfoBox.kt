@@ -21,18 +21,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lm.firebaseconnect.States.WAIT
 import com.lm.firebaseconnect.States.isType
-import com.lm.firebaseconnect.States.onLineState
-import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
+import com.lm.firebaseconnectapp.ui.UiStates.getOnlineVisible
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
-import com.lm.firebaseconnectapp.ui.UiStates.getUserModelChat
 
 @Composable
-fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconClick: () -> Unit) {
-    with(userModel) {
-        with(mainDep) {
+fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
+    with(mainDep) {
+        sPreferences.getChatModel(firebaseConnect).also { userModel ->
             with(firebaseConnect) {
                 Row(
                     Modifier
@@ -50,36 +48,38 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Row(
-                            Modifier.wrapContentWidth(),
+                            Modifier
+                                .wrapContentWidth()
+                                .scale(
+                                    animScale(
+                                        target = getOnlineVisible
+                                    )
+                                ),
                             Arrangement.Start,
                             Alignment.CenterVertically
                         ) {
-                            SetImage(iconUri, onClick1 = onIconClick)
+                            SetImage(userModel.iconUri, onClick1 = onIconClick)
                             Column(
                                 Modifier.padding(start = 10.dp),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = name.ifEmpty { id },
+                                    text = userModel.name.ifEmpty { userModel.id },
                                     color = getSecondColor
                                 )
                                 Card(
                                     shape = CircleShape,
                                     modifier = Modifier
-                                        .padding(top = 6.dp)
-                                        .scale(
-                                            animScale(
-                                                target = onLineVisible
-                                            )
-                                        ),
+                                        .padding(top = 3.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = if (onLineState.value) Color.Green else Color.Red
+                                        containerColor = if (userModel.onLine) Color.Green else Color.Red
                                     ),
                                     border = BorderStroke(1.dp, Color.White)
                                 ) {
                                     Text(
-                                        text = if (onLineState.value) "online" else "offline",
-                                        modifier = Modifier.padding(start = 5.dp, end = 5.dp),
+                                        text = if (userModel.onLine) "online" else "offline",
+                                        modifier = Modifier.padding(start = 5.dp, end = 5.dp,
+                                            top = 2.dp, bottom = 2.dp),
                                         color = Color.White, fontSize = 14.sp
                                     )
                                 }
@@ -90,11 +90,7 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                         Icon(
                             Icons.Default.Call, null, modifier = Modifier
                                 .clickable(
-                                    onClick = remember {
-                                        {
-                                            remoteMessages.initialCall(getUserModelChat)
-                                        }
-                                    })
+                                    onClick = remember { { remoteMessages.initialCall() } })
                                 .padding(end = 10.dp)
                                 .size(32.dp)
                                 .scale(animScale(!getIsMainMode && WAIT.isType)),
@@ -105,7 +101,7 @@ fun InfoBox(scale: Float, userModel: UserModel, onLineVisible: Boolean, onIconCl
                                 tint = getSecondColor,
                                 modifier = Modifier
                                     .size(32.dp)
-                                    .scale(animScale(!getIsMainMode))
+                                    .scale(animScale(!getIsMainMode && getOnlineVisible))
                                     .clickable { deleteAllMessages() }
                             )
                         }

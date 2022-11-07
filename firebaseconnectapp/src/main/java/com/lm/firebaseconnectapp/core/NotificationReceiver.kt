@@ -14,6 +14,7 @@ import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnect.States.MESSAGE
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
+import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.getToken
 import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.appComponent
@@ -46,7 +47,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun rejectAction(intent: Intent) {
-        firebaseConnect.remoteMessages.cancelCall(getToken, RESET)
+        firebaseConnect.remoteMessages.cancelCall(RESET, getToken, get.destinationId)
         cancelNotification(intent)
     }
 

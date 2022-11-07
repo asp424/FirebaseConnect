@@ -35,7 +35,8 @@ class FirebaseHandler(
     var job: Job = Job()
 
     fun stopMainListener() {
-        with(firebaseSave) { save(ZERO, Nodes.ONLINE, firebaseChat.myDigit) }; listJobs.onEach { it.cancel() }
+        with(firebaseSave) { save(ZERO, Nodes.ONLINE, firebaseChat.myDigit) }
+        listJobs.onEach { it.cancel() }
     }
 
     private val listJobs by lazy { mutableListOf<Job>() }
@@ -45,12 +46,7 @@ class FirebaseHandler(
             filter { it.key != null }.filter {
                 it.key != firebaseChat.myDigit &&
                 it.key!!.isDigitsOnly()
-            }.map {
-                it.getUserModel(
-                    it.key!!.getPairPath,
-                    firebaseSave.firebaseChat.chatId, firebaseRead
-                )
-            }
+            }.map { it.getUserModel(it.key!!.getPairPath, firebaseRead) }
         }
     }
 

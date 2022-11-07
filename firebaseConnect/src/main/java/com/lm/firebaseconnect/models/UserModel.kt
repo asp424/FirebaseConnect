@@ -2,8 +2,6 @@ package com.lm.firebaseconnect.models
 
 import com.google.firebase.database.DataSnapshot
 import com.lm.firebaseconnect.FirebaseRead
-import com.lm.firebaseconnect.States.onLineState
-import com.lm.firebaseconnect.States.writingState
 
 data class UserModel(
     val name: String = "",
@@ -11,29 +9,25 @@ data class UserModel(
     val id: String = "",
     val onLine: Boolean = false,
     val isWriting: Boolean = false,
-    val listMessages: List<String> = emptyList(),
+    // val listMessages: List<String> = emptyList(),
     val iconUri: String = "",
     val lastMessage: String = "",
 )
 
 fun DataSnapshot.getUserModel(
     pairPath: String,
-    chatId: String,
     firebaseRead: FirebaseRead
 ) = UserModel(
     id = key ?: "",
     name = getValue(key ?: "", Nodes.NAME),
-    onLine = getValue(key ?: "", Nodes.ONLINE).apply {
-        if (key == chatId) onLineState.value = (this == "1")
-    } == "1",
-    isWriting = getValue(pairPath, Nodes.WRITING).apply {
-        if (key == chatId) writingState.value = (this == "1")
-    } == "1",
+    onLine = getValue(key ?: "", Nodes.ONLINE) == "1",
+    isWriting = getValue(pairPath, Nodes.WRITING) == "1",
     token = getValue(key ?: "", Nodes.TOKEN),
     lastMessage = with(firebaseRead) {
         getValue(pairPath, Nodes.LAST).getMessage().first.ifEmpty { "Сообщений пока нет" }
     },
-    iconUri = getValue(key ?: "", Nodes.ICON)
+    iconUri = getValue(key ?: "", Nodes.ICON),
+    // listMessages = listOf()
 )
 
 fun DataSnapshot.getValue(path: String, node: Nodes) =

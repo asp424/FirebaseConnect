@@ -109,7 +109,7 @@ class FirebaseConnect private constructor(
         }
     }
 
-    private val firebaseSave by lazy {
+    val firebaseSave by lazy {
         FirebaseSave(this, timeConverter, crypto)
     }
 
@@ -123,13 +123,13 @@ class FirebaseConnect private constructor(
         FirebaseHandler(firebaseSave, childEventListenerInstance, firebaseRead)
     }
 
-    private val fcmProvider by lazy { FCMProvider(myDigit) }
+    private val fcmProvider by lazy { FCMProvider(myDigit, apiKey) }
 
     private val crypto by lazy { Crypto(cryptoKey) }
 
-    val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
+    private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
-    val remoteMessages by lazy { RemoteMessages(apiKey, firebaseRead) }
+    val remoteMessages by lazy { RemoteMessages(firebaseRead, fcmProvider) }
 
     companion object {
         const val ZERO = "0"

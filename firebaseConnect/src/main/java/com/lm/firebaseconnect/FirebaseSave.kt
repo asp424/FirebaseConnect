@@ -56,17 +56,22 @@ class FirebaseSave(
             }${S_U_E}"
         else "000000"
 
+    fun getPairPathFromRemoteMessage(myDigit: String, chatId: String) = if (checkDigits(myDigit, chatId))
+            "${F_U_S}${maxOf(myDigit.removeZero, chatId.removeZero)}${F_U_E}${S_U_S}${
+                minOf(myDigit.removeZero, chatId.removeZero)
+            }${S_U_E}"
+        else "111111"
+
+    private fun checkDigits(myDigit: String, chatId: String) =
+        myDigit.any { it.isDigit() } && chatId.any { it.isDigit() }
 
     private val String.checkMyDigit
         get() = firebaseChat.myDigit.any { it.isDigit() } && any { it.isDigit() }
 
     private val myRemoveZero get() = firebaseChat.myDigit.removeZero
 
-    private val String.removeZero get() = filter { it != '0' }.toInt()
+    private val String.removeZero get() = takeIf { it.isNotEmpty() }
+        ?.filter { it != '0' }?.toInt()?: 1984
 
-    val databaseReference by lazy {
-        with(FirebaseDatabase.getInstance()) {
-            reference
-        }
-    }
+    val databaseReference by lazy { with(FirebaseDatabase.getInstance()) { reference } }
 }

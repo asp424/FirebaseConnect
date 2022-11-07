@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.animScale
-import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
-import com.lm.firebaseconnectapp.ui.UiStates.setNavState
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.theme.darkGreen
 
 @Composable
@@ -30,7 +29,7 @@ fun UserCard(
             Modifier
                 .clickable(onClick = onCardClick)
                 .height(60.dp)
-                .padding(1.dp), border = BorderStroke(1.dp, getMainColor)
+                .padding(1.dp), border = BorderStroke(1.dp, getSecondColor)
         ) {
             Row(
                 Modifier
