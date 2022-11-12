@@ -26,8 +26,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     //Firebase
+    implementation (platform("com.google.firebase:firebase-bom:31.0.2"))
     implementation("com.google.firebase:firebase-database-ktx:20.1.0")
     implementation("com.google.firebase:firebase-messaging-ktx:23.1.0")
+    implementation ("com.google.firebase:firebase-storage-ktx:20.1.0")
 
     //Retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")

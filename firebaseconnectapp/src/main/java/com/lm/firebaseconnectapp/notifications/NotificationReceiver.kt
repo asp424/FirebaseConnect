@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.core
+package com.lm.firebaseconnectapp.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,12 +11,13 @@ import androidx.core.app.NotificationManagerCompat
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.CALLING_ID
+import com.lm.firebaseconnect.States.INCOMING_CALL
 import com.lm.firebaseconnect.States.MESSAGE
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.getToken
-import com.lm.firebaseconnect.log
+import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.startJitsiMit
@@ -37,33 +38,50 @@ class NotificationReceiver : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onReceive(context: Context?, intent: Intent?) {
         context?.apply {
-            appComponent.inject(this@NotificationReceiver)
+           appComponent.inject(this@NotificationReceiver)
             when (intent?.action) {
-                ANSWER -> answerAction(context, intent)
                 REJECT -> rejectAction(intent)
+                ANSWER -> answerAction(context, intent)
                 MESSAGE -> messageAction(context, intent)
+                INCOMING_CALL -> incomingCallAction(context)
             }
         }
     }
 
     private fun rejectAction(intent: Intent) {
-        firebaseConnect.remoteMessages.cancelCall(RESET, getToken, get.destinationId)
+        firebaseConnect.remoteMessages.cancelCall(RESET, getToken, get.destinationId, get.callingId)
         cancelNotification(intent)
     }
 
     private fun answerAction(context: Context, intent: Intent) {
-        firebaseConnect.remoteMessages.answer(getToken)
-        startJitsiMit(context, getToken, firebaseConnect.myName, firebaseConnect.myIcon)
-        cancelNotification(intent)
+        firebaseConnect.remoteMessages.callMessage(ANSWER, get.destinationId, get.token)
+        firebaseConnect.firebaseRead.readNode(
+            Nodes.NAME, get.destinationId, get.destinationId
+        ) { name ->
+            firebaseConnect.firebaseRead.readNode(
+                Nodes.ICON, get.destinationId, get.destinationId
+            ) { icon ->
+                startJitsiMit(context, getToken, name, icon)
+                cancelNotification(intent)
+            }
+        }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun messageAction(context: Context, intent: Intent) {
-        intent.extras?.getString(CALLING_ID).log
         val newIntent = Intent(context, MainActivity::class.java).apply {
             action = MESSAGE
             flags = FLAG_ACTIVITY_NEW_TASK
             intent.extras?.let { putExtras(it) }
+        }
+        context.startActivity(newIntent)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun incomingCallAction(context: Context) {
+        val newIntent = Intent(context, MainActivity::class.java).apply {
+            flags = FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(newIntent)
     }

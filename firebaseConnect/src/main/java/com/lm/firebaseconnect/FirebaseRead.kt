@@ -1,15 +1,18 @@
 package com.lm.firebaseconnect
 
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
 import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.States.writingState
+import com.lm.firebaseconnect.TimeConverter.Companion.T_T_E
 import com.lm.firebaseconnect.listeners.ValueEventListenerInstance
 import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnect.models.RemoteLoadStates
 import com.lm.firebaseconnect.models.UIMessagesStates
+import com.lm.firebaseconnect.models.UserModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
@@ -34,45 +37,84 @@ class FirebaseRead(
         CoroutineScope(IO).launch {
             callbackFlow { with(valueListener) { eventListener() } }.collect {
                 if (it is RemoteLoadStates.Success) {
-                    onMessage(it.data.children.map { v -> v.value.toString().getMessage() })
+                    onMessage(it.data.children.map { v -> v.value.toString()
+                        .getMessage(v.key?:"") })
                 } else listOf(((it as RemoteLoadStates.Failure<*>).data as DatabaseError).message)
             }
         }
 
-    fun String.getMessage() =
+    private fun String.getMessage(keyMessage: String) =
         with(firebaseSave.crypto.cipherDecrypt(this)) {
             if (this != "error" && isNotEmpty())
                 Pair(
                     with(firebaseSave.timeConverter) {
-                        substringAfter(D_T_E).currentTimeZoneTime()
-                    }, if (substringAfter(D_T_S).substringBefore(D_T_E) ==
-                        firebaseSave.firebaseChat.myDigit
+                       substringAfter(D_T_E).currentTimeZoneTime().addKey(keyMessage)
+                    }, if (parseDigit() == firebaseSave.firebaseConnect.myDigit
                     ) MY_COLOR else CHAT_ID_COLOR
                 ) else Pair("", CHAT_ID_COLOR)
         }
 
+    private fun String.parseDigit() = substringAfter(D_T_S).substringBefore(D_T_E)
+
+    fun String.getTime() = substringAfter("(").substringBefore("):")
+
+    private fun String.addKey(messageKey: String) = "${messageKey.key()}${this@addKey}"
+
+    private fun String.key() = "$M_K_S$this$M_K_E"
+    fun String.parseKey() = substringAfter(M_K_S).substringBefore(M_K_E)
+
+    fun String.removeKey() = substringAfter("):")
+
+    fun DataSnapshot.getUserModel(
+        pairPath: String,
+        firebaseRead: FirebaseRead,
+        chatsSnapshot: DataSnapshot?
+    ) = UserModel(
+        id = key ?: "",
+        name = getValue(key ?: "", Nodes.NAME),
+        onLine = getValue(key ?: "", Nodes.ONLINE) == "1",
+        isWriting = getValue(pairPath, Nodes.WRITING) == "1",
+        token = getValue(key ?: "", Nodes.TOKEN),
+        lastMessage = with(firebaseRead) {
+            getValue(pairPath, Nodes.LAST)
+                .getMessage("").first.removeKey().ifEmpty { "Сообщений пока нет" }
+        },
+        iconUri = getValue(key ?: "", Nodes.ICON),
+        // listMessages = with (firebaseRead) {
+        //     chatsSnapshot?.child(pairPath)?.children?.map { it.value.toString().getMessage() }
+        //         ?: emptyList()
+        // }
+    )
+
+    fun DataSnapshot.getValue(path: String, node: Nodes) =
+        child(node.node()).child(path).value?.run { toString() } ?: ""
+
     fun startListener() = with(firebaseSave) {
-        messagesJob.cancel()
-        save(ONE, Nodes.ONLINE)
-        firebaseSave.save(ONE, Nodes.ONLINE, firebaseSave.firebaseChat.myDigit)
-        messagesJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
+        messageJob.cancel()
+        messageJob = startMessagesListener { listMessages.value = UIMessagesStates.Success(it) }
     }
 
     fun initStates() {
+        UIMessagesStates.Loading
         onLineState.value = false
         writingState.value = false
-        listMessages.value = UIMessagesStates.Loading
     }
 
+    private fun stopListener() {
+        UIMessagesStates.Loading
+    }
+
+    private var messageJob: Job = Job()
+
     fun onPause() {
-        messagesJob.cancel()
+        stopListener()
         firebaseSave.save(ZERO, Nodes.ONLINE)
         firebaseSave.save(ZERO, Nodes.WRITING)
     }
 
-    var messagesJob: Job = Job()
-
     companion object {
+        const val M_K_S = "<k>"
+        const val M_K_E = "</k>"
         const val F_U_S = "<f>"
         const val F_U_E = "<*f>"
         const val S_U_S = "<s>"

@@ -1,6 +1,7 @@
 package com.lm.firebaseconnectapp.core
 
 import android.content.Intent
+import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States
 import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnectapp.data.SPreferences
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 interface IntentHandler {
 
-    fun onCreate(intent: Intent, onValidIntent: () -> Unit, onEmptyIntent: () -> Unit)
+    fun onCreate(intent: Intent, firebaseConnect: FirebaseConnect): NavRoutes
 
     fun onNewIntent(intent: Intent)
 
@@ -19,16 +20,10 @@ interface IntentHandler {
         private val sPreferences: SPreferences
     ) : IntentHandler {
 
-        override fun onCreate(
-            intent: Intent,
-            onValidIntent: () -> Unit,
-            onEmptyIntent: () -> Unit
-        ) {
-            if (intent.action == States.MESSAGE) {
+        override fun onCreate(intent: Intent, firebaseConnect: FirebaseConnect) =
+            if (intent.action == States.MESSAGE) NavRoutes.CHAT.apply {
                 sPreferences.saveChatId(intent.getValue(CALLING_ID))
-                onValidIntent()
-            } else onEmptyIntent()
-        }
+            } else NavRoutes.MAIN
 
         override fun onNewIntent(intent: Intent) {
             if (intent.action == States.MESSAGE) {
@@ -37,9 +32,11 @@ interface IntentHandler {
                     setNavState(NavRoutes.CHAT)
             }
         }
+
+        private fun Intent.getValue(key: String) = getStringExtra(key) ?: ""
     }
 }
 
-private fun Intent.getValue(key: String) = getStringExtra(key) ?: ""
+
 
 

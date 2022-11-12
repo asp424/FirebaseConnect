@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.data.one_tap_google
+package com.lm.firebaseconnectapp.data.one_tap_google_auth
 
 import android.app.Activity.RESULT_OK
 import android.os.Build
@@ -6,14 +6,12 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.LifecycleCoroutineScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes.CANCELED
 import com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR
 import com.lm.firebaseconnectapp.BuildConfig
-import com.lm.firebaseconnectapp.di.dagger.AppComponent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main

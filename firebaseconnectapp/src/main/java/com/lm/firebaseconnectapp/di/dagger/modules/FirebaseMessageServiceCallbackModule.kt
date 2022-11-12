@@ -4,8 +4,8 @@ import android.app.Application
 import android.media.Ringtone
 import androidx.core.app.NotificationManagerCompat
 import com.lm.firebaseconnect.FirebaseConnect
-import com.lm.firebaseconnectapp.core.Notifications
-import com.lm.firebaseconnectapp.data.FirebaseMessageServiceCallback
+import com.lm.firebaseconnectapp.notifications.Notifications
+import com.lm.firebaseconnectapp.service.FirebaseMessageServiceCallback
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -22,6 +22,7 @@ class FirebaseMessageServiceCallbackModule {
         notifications: Notifications,
         @Named("Ringtone") ringtone: Ringtone,
         @Named("Notify") notificationSound: Ringtone,
+        @Named("isRun")
         appIsRunChecker: () -> Boolean
     ) = FirebaseMessageServiceCallback(
         context, firebaseConnect,

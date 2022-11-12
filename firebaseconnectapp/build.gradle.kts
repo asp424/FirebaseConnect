@@ -23,6 +23,7 @@ android {
 
     buildTypes {
         debug {
+            //  isMinifyEnabled = true
             buildConfigField(
                 "String",
                 "FCM_SERVER_KEY",
@@ -36,7 +37,7 @@ android {
             )
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -50,14 +51,11 @@ android {
             buildConfigField(
                 "String",
                 "WEB_CLIENT_ID",
-                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\"")
+                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\""
+            )
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -76,6 +74,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    buildToolsVersion = "33.0.0"
 }
 
 dependencies {
@@ -85,22 +84,25 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     //JitsiMeet
-    implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
+    // implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
 
     //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
 
     //Firebase
     implementation("com.google.firebase:firebase-messaging-ktx:23.1.0")
-    implementation (platform("com.google.firebase:firebase-bom:31.0.2"))
 
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("com.google.android.material:material:1.7.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
     //Compose
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:1.4.0-alpha01")
+    implementation("androidx.compose.material:material-icons-core:1.3.1")
+    implementation("androidx.compose.material:material-icons-extended:1.3.1")
     implementation("androidx.compose.material3:material3:1.1.0-alpha01")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha")
 
@@ -113,8 +115,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
 
     //ColorPicker
-    implementation ("com.godaddy.android.colorpicker:compose-color-picker:0.5.0")
+    implementation("com.godaddy.android.colorpicker:compose-color-picker:0.5.0")
 
     //Leak Canary
-   // debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
+    // debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
 }

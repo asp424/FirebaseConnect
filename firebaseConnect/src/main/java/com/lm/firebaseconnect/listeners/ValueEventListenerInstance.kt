@@ -10,43 +10,40 @@ import com.lm.firebaseconnect.models.RemoteLoadStates
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class ValueEventListenerInstance(
     private val firebaseSave: FirebaseSave
 ) {
 
-    suspend fun ProducerScope<RemoteLoadStates>.eventListener() = object : ValueEventListener {
-
-        override fun onDataChange(snapshot: DataSnapshot) {
-            trySendBlocking(RemoteLoadStates.Success(snapshot))
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-            trySendBlocking(RemoteLoadStates.Failure(error))
-        }
-    }.apply {
-        messagesPath.addValueEventListener(this)
-        awaitClose { messagesPath.removeEventListener(this);"stopMessages".log }
-    }
-
-    fun singleEventListener(onGet: (DataSnapshot) -> Unit) =
-        object : ValueEventListener {
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                onGet(snapshot)
+    suspend fun ProducerScope<RemoteLoadStates>.eventListener() {
+        listener.apply {
+            with(firebaseSave)
+            {
+                firebaseConnect.chatId.messagesPath.addValueEventListener(this@apply)
+                awaitClose {
+                    firebaseConnect.chatId
+                        .messagesPath.removeEventListener(this@apply);"stopMessages".log
+                }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-
         }
     }
 
-    private val messagesPath
+    private val ProducerScope<RemoteLoadStates>.listener
+        get() =
+            object : ValueEventListener {
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    trySendBlocking(RemoteLoadStates.Success(snapshot))
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    trySendBlocking(RemoteLoadStates.Failure(error))
+                }
+            }
+    private val String.messagesPath
         get() = with(firebaseSave) {
             databaseReference
                 .child(Nodes.CHATS.node())
-                .child(firebaseChat.chatId.getPairPath)
+                .child(getPairPath)
         }
 }

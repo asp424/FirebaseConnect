@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.data.one_tap_google
+package com.lm.firebaseconnectapp.data.one_tap_google_auth
 
 import android.content.IntentSender
 

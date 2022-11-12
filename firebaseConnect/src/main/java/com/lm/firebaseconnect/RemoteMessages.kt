@@ -1,6 +1,5 @@
 package com.lm.firebaseconnect
 
-import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.BUSY
 import com.lm.firebaseconnect.States.CALL
 import com.lm.firebaseconnect.States.CALLING_ID
@@ -11,7 +10,6 @@ import com.lm.firebaseconnect.States.ICON
 import com.lm.firebaseconnect.States.INCOMING_CALL
 import com.lm.firebaseconnect.States.MESSAGE
 import com.lm.firebaseconnect.States.NAME
-import com.lm.firebaseconnect.States.NOTIFY_CALLBACK
 import com.lm.firebaseconnect.States.REJECTED_CALL
 import com.lm.firebaseconnect.States.TITLE
 import com.lm.firebaseconnect.States.TOKEN
@@ -64,9 +62,12 @@ class RemoteMessages(
             firebaseRead.readNode(
                 Nodes.CALL, destinationId, getPairPathFromRemoteMessage(destinationId, callingId)
             ) { callState ->
-                if (callState == CALL && WAIT.isType)
-                    getCheckForCall(GET_CHECK_FOR_CALL, destinationId, token)
-                else getCheckForCall(BUSY, destinationId, token)
+                if (callState == CALL) {
+                    if (WAIT.isType) {
+                        callMessage(GET_CHECK_FOR_CALL, destinationId, token)
+                        remoteMessageModel.checkForCall
+                    } else callMessage(BUSY, destinationId, token)
+                }
             }
         }
     }
@@ -79,20 +80,16 @@ class RemoteMessages(
         }
     }
 
-    fun notifyCallback(token: String, destinationId: String) =
-        sendRemoteMessage(NOTIFY_CALLBACK, NOTIFY_CALLBACK, NOTIFY_CALLBACK, token, destinationId)
-
-    fun answer(token: String) = sendRemoteMessage("Взял трубу", "Взял трубу", ANSWER, token)
 
     val rejectCall get() = remoteMessageModel.rejectCall.set
 
-    private val getMyName get() = firebaseRead.firebaseSave.firebaseChat.myName
+    private val getMyName get() = firebaseRead.firebaseSave.firebaseConnect.myName
 
-    private val getMyIcon get() = firebaseRead.firebaseSave.firebaseChat.myIcon
+    private val getMyIcon get() = firebaseRead.firebaseSave.firebaseConnect.myIcon
 
-    val getMyDigit get() = firebaseRead.firebaseSave.firebaseChat.myDigit
+    val getMyDigit get() = firebaseRead.firebaseSave.firebaseConnect.myDigit
 
-    private val getChatId get() = firebaseRead.firebaseSave.firebaseChat.chatId
+    private val getChatId get() = firebaseRead.firebaseSave.firebaseConnect.chatId
 
     private fun sendRemoteMessage(
         title: String,
@@ -118,19 +115,19 @@ class RemoteMessages(
         }
     }
 
-    private fun getCheckForCall(typeMessage: String, destinationId: String, token: String) {
+    fun cancelCall(typeMessage: String, token: String, destinationId: String, callingId: String) {
+        fcmProvider.send(cancelInbox(typeMessage, destinationId, callingId), token)
+        rejectCall
+    }
+
+    private fun cancelInbox(typeMessage: String, destinationId: String, callingId: String) =
+        JSONObject().put(TYPE_MESSAGE, typeMessage).put(DESTINATION_ID, destinationId)
+            .put(CALLING_ID, callingId).put(NAME, getMyName)
+
+    fun callMessage(typeMessage: String, destinationId: String, token: String) =
         fcmProvider.send(
             JSONObject()
                 .put(TYPE_MESSAGE, typeMessage)
                 .put(DESTINATION_ID, destinationId), token
         )
-    }
-
-    fun cancelCall(typeMessage: String, token: String, callingId: String) {
-        fcmProvider.send(cancelInbox(typeMessage, callingId), token)
-        rejectCall
-    }
-
-    private fun cancelInbox(typeMessage: String, callingId: String) =
-        JSONObject().put(TYPE_MESSAGE, typeMessage).put(CALLING_ID, callingId)
 }

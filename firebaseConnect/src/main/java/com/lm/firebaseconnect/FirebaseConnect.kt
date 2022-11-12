@@ -58,6 +58,10 @@ class FirebaseConnect private constructor(
 
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
 
+    fun String.messageKey() = with(firebaseRead){ parseKey() }
+
+    fun String.removeMessageKey() = with(firebaseRead){ removeKey() }
+
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
         rememberUpdatedState(LocalLifecycleOwner.current).value.apply {
@@ -69,11 +73,12 @@ class FirebaseConnect private constructor(
                             firebaseHandler.startMainListener()
                         }
                         if (Lifecycle.Event.ON_RESUME == event) {
-                            startListener()
+                            firebaseSave.save(ONE, Nodes.ONLINE)
+                            firebaseSave.save(ONE, Nodes.ONLINE, firebaseSave.firebaseConnect.myDigit)
                         }
                         if (Lifecycle.Event.ON_PAUSE == event) {
                             onPause()
-                            firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.firebaseChat.myDigit)
+                            firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.firebaseConnect.myDigit)
                         }
                     }
                     lifecycle.addObserver(observer)
@@ -109,7 +114,7 @@ class FirebaseConnect private constructor(
         }
     }
 
-    val firebaseSave by lazy {
+    private val firebaseSave by lazy {
         FirebaseSave(this, timeConverter, crypto)
     }
 
@@ -123,13 +128,15 @@ class FirebaseConnect private constructor(
         FirebaseHandler(firebaseSave, childEventListenerInstance, firebaseRead)
     }
 
-    private val fcmProvider by lazy { FCMProvider(myDigit, apiKey) }
+    private val fcmProvider by lazy { FCMProvider(this, apiKey) }
 
     private val crypto by lazy { Crypto(cryptoKey) }
 
-    private val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
+    val firebaseRead by lazy { FirebaseRead(firebaseSave, valueEventListenerInstance) }
 
     val remoteMessages by lazy { RemoteMessages(firebaseRead, fcmProvider) }
+
+    val firebaseStorage by lazy { FirebaseStorage() }
 
     companion object {
         const val ZERO = "0"

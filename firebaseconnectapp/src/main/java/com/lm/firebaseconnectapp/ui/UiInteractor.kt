@@ -1,6 +1,7 @@
 package com.lm.firebaseconnectapp.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.media.Ringtone
 import android.net.Uri
@@ -16,12 +17,13 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnectapp.core.IntentHandler
-import com.lm.firebaseconnectapp.core.NotificationReceiver
+import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.data.SPreferences
-import com.lm.firebaseconnectapp.data.one_tap_google.FBRegStates
-import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
+import com.lm.firebaseconnectapp.data.one_tap_google_auth.FBRegStates
+import com.lm.firebaseconnectapp.data.one_tap_google_auth.OneTapGoogleAuth
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
+import com.lm.firebaseconnectapp.record_sound.Recorder
 import com.lm.firebaseconnectapp.toast
 import com.lm.firebaseconnectapp.ui.UiStates.getNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
@@ -34,7 +36,7 @@ import javax.inject.Named
 
 interface UiInteractor {
 
-    val SignInClient.regCallBack: (ActivityResult) -> Unit
+    fun SignInClient.regCallBack(context: Context): (ActivityResult) -> Unit
 
     fun onCreate(intent: Intent, mainActivity: MainActivity)
 
@@ -53,43 +55,48 @@ interface UiInteractor {
         private val notificationManager: NotificationManagerCompat,
         private val firebaseAuth: FirebaseAuth,
         private val intentHandler: IntentHandler,
-        private val notificationReceiver: NotificationReceiver
+        private val notificationReceiver: NotificationReceiver,
+        private val recorder: Recorder
     ) : UiInteractor {
 
         override fun onCreate(intent: Intent, mainActivity: MainActivity) {
-            intentHandler.onCreate(intent, onEmptyIntent = {
-                setDataForEmulator(NavRoutes.MAIN, 0, mainActivity)
-                //setData(NavRoutes.MAIN, 0, mainActivity)
-            }, onValidIntent = { setData(NavRoutes.CHAT, 1, mainActivity) })
+            setData(intentHandler.onCreate(intent, firebaseConnect), mainActivity)
+        }
+
+        private val setData: (NavRoutes, MainActivity) -> Unit by lazy {
+            { r, a ->
+                getUid {
+                    this?.also { id ->
+                        firebaseConnect.setMyDigit(id).setIcon.setName
+                        start(r, a)
+                        setToolbarVisible(true)
+                    } ?: start(NavRoutes.REG, mainActivity = a)
+                }
+            }
         }
 
         override fun onNewIntent(intent: Intent) = intentHandler.onNewIntent(intent)
 
-        override val SignInClient.regCallBack: (ActivityResult) -> Unit get() =
-            { oneTapGoogleAuth.handleResult(it, this, saveData) { toast } }
+        override fun SignInClient.regCallBack(context: Context): (ActivityResult) -> Unit =
+            { oneTapGoogleAuth.handleResult(it, this, saveData) { toast(context, this) } }
 
         override fun signOutFromGoogle(signInClient: SignInClient, onOut: () -> Unit) {
             signInClient.signOut().addOnCompleteListener { if (it.isSuccessful) onOut() }
         }
 
         @RequiresApi(Build.VERSION_CODES.P)
-        private fun start(startScreen: NavRoutes, flag: Int = 0, mainActivity: MainActivity) {
+        private fun start(startScreen: NavRoutes, mainActivity: MainActivity) {
             notificationManager.cancelAll()
-            if (flag == 0) setSavedChatModel
             mainActivity.setContent {
                 MainTheme(
                     firebaseConnect, ringtone, sPreferences, firebaseAuth, oneTapGoogleAuth,
-                    this, notificationReceiver
+                    this, notificationReceiver, recorder
                 ) { NavHost(startScreen); setNavController }
             }
         }
 
-        private val setSavedChatModel get() = with(sPreferences.readChatId()) {
-                if (isNotEmpty() && all { it.isDigit() }) firebaseConnect.setChatId(toInt())
-            }
-
-        private val setDataForEmulator: (NavRoutes, Int, MainActivity) -> Unit by lazy {
-            { r, f, a ->
+        private val setDataForEmulator: (NavRoutes, MainActivity) -> Unit by lazy {
+            { r, a ->
                 firebaseConnect.setMyDigit("8")
                     .setAndSaveIcon(
                         "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/2x/firebase_28dp.png"
@@ -97,33 +104,27 @@ interface UiInteractor {
                     )
                     .setAndSaveName("Emulator")
                 firebaseConnect.getAndSaveToken()
-                start(r, f, a)
+                start(r, a)
                 setToolbarVisible(true)
             }
         }
 
-        private val setNavController @Composable get() = with(mainDep) {
-                    LaunchedEffect(getNavState) {
-                        if (getNavState.route.isNotEmpty()) navController.navigate(getNavState.route)
-                    }
-                }
-
-        private val setData: (NavRoutes, Int, MainActivity) -> Unit by lazy {
-            { r, f, a -> getUid {
-                    this?.also { id ->
-                        firebaseConnect.setMyDigit(id).setIcon.setName
-                        start(r, f, a)
-                        setToolbarVisible(true)
-                    } ?: start(NavRoutes.REG, mainActivity = a)
+        private val setNavController
+            @Composable get() = with(mainDep) {
+                LaunchedEffect(getNavState) {
+                    if (getNavState.route.isNotEmpty())
+                        navController.navigate(getNavState.route)
                 }
             }
-        }
 
-        private val FirebaseConnect.setName get() = sPreferences.readName().also { name ->
-            if (name.isEmpty()) setMyName("Empty name") else setMyName(name); getAndSaveToken()
-                }
 
-        private val FirebaseConnect.setIcon get() = apply {
+        private val FirebaseConnect.setName
+            get() = sPreferences.readName().also { name ->
+                if (name.isEmpty()) setMyName("Empty name") else setMyName(name); getAndSaveToken()
+            }
+
+        private val FirebaseConnect.setIcon
+            get() = apply {
                 with(sPreferences) {
                     readIconUri()?.toString()?.takeIf { it.isNotEmpty() }?.apply {
                         setMyIcon(toString())
@@ -145,12 +146,14 @@ interface UiInteractor {
             }
         }
 
-        private val Uri?.saveIconUri get() = this?.also { uri ->
+        private val Uri?.saveIconUri
+            get() = this?.also { uri ->
                 sPreferences.saveIconUri(uri)
                 firebaseConnect.setAndSaveIcon(uri)
             }
 
-        private val String?.saveName get() = this?.also { name ->
+        private val String?.saveName
+            get() = this?.also { name ->
                 sPreferences.saveName(name)
                 with(firebaseConnect) { setAndSaveName(name); getAndSaveToken() }
             }
@@ -163,7 +166,8 @@ interface UiInteractor {
             }
         }
 
-        private val String.checkId get() =
-            if (isNotEmpty()) filter { v -> v.isDigit() && v != '0' } else null
+        private val String.checkId
+            get() =
+                if (isNotEmpty()) filter { v -> v.isDigit() && v != '0' } else null
     }
 }

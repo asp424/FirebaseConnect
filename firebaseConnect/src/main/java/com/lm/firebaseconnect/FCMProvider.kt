@@ -17,15 +17,15 @@ import retrofit2.http.HeaderMap
 import retrofit2.http.POST
 
 class FCMProvider(
-    private val myDigit: String, private val apiKey: String
+    private val firebaseConnect: FirebaseConnect, private val apiKey: String
 ) {
     fun getAndSaveToken(onGet: (String) -> Unit) = with(fcm.token) {
         addOnCompleteListener {
             if (it.isSuccessful) {
                 it.result.toString().also { token ->
-                    databaseReference.child(myDigit)
+                    databaseReference.child(firebaseConnect.myDigit)
                         .child(Nodes.TOKEN.node())
-                        .updateChildren(mapOf(myDigit to token))
+                        .updateChildren(mapOf(firebaseConnect.myDigit to token))
                     onGet(token)
                 }
             }

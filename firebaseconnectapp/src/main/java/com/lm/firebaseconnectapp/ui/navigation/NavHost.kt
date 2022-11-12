@@ -64,6 +64,7 @@ fun NavHost(startScreen: NavRoutes) {
                     LaunchedEffect(true) {
                         setIsMainMode(false)
                     }
+
                     ChatScreen()
                 }
             }
@@ -71,24 +72,25 @@ fun NavHost(startScreen: NavRoutes) {
         SettingsCard()
         CallScreen()
         BackHandler() {
-            when (navController.currentDestination?.route) {
-                NavRoutes.CHAT.route -> {
-                    if (GET_INCOMING_CALL.isType)
-                        firebaseConnect.remoteMessages.cancelCall(
-                            REJECT, sPreferences.getChatModel(firebaseConnect).token,
-                            firebaseConnect.myDigit
+            with(sPreferences.getChatModel(firebaseConnect)) {
+                when (navController.currentDestination?.route) {
+                    NavRoutes.CHAT.route -> {
+                        if (GET_INCOMING_CALL.isType) firebaseConnect.remoteMessages.cancelCall(
+                            REJECT, token, id, firebaseConnect.myDigit
                         )
-                    else {
-                        if (!OUTGOING_CALL.isType) navController.navigate(NavRoutes.MAIN.route)
-                        else firebaseConnect.remoteMessages.cancel(sPreferences.getChatModel(firebaseConnect).id)
+                        else {
+                            if (!OUTGOING_CALL.isType) navController.navigate(NavRoutes.MAIN.route)
+                            else firebaseConnect.remoteMessages.cancel(id)
+                        }
                     }
-                }
 
-                NavRoutes.MAIN.route -> {
-                    if (getSettingsVisible) false.setSettingsVisible
-                    else activity.finish()
+                    NavRoutes.MAIN.route -> {
+                        if (getSettingsVisible) false.setSettingsVisible
+                        else activity.finish()
+                    }
+
+                    NavRoutes.REG.route -> activity.finish()
                 }
-                NavRoutes.REG.route -> activity.finish()
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.data
+package com.lm.firebaseconnectapp.service
 
 import android.content.Context
 import android.media.Ringtone
@@ -24,12 +24,12 @@ import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
-import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.Nodes
-import com.lm.firebaseconnectapp.core.Notifications
+import com.lm.firebaseconnectapp.notifications.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Named
@@ -41,7 +41,7 @@ class FirebaseMessageServiceCallback(
     private val notificationManager: NotificationManagerCompat,
     @Named("Ringtone") private val ringtone: Ringtone,
     @Named("Notify") private val notificationSound: Ringtone,
-    private val appIsInForeground: () -> Boolean
+    @Named("isRun") private val appIsInForeground: () -> Boolean
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -49,8 +49,11 @@ class FirebaseMessageServiceCallback(
         getFromRemoteMessage(remoteMessage).also { model ->
             with(notifications) {
                 with(firebaseConnect.remoteMessages) {
-                    firebaseRead.firebaseSave.save(model.typeMessage, Nodes.CALL,
-                        path = CALL_STATE, digit = model.destinationId)
+                    firebaseRead.firebaseSave.save(
+                        model.typeMessage, Nodes.CALL,
+                        path = CALL_STATE,
+                        digit = model.destinationId
+                    )
                     when (model.typeMessage) {
 
                         MESSAGE -> {
@@ -59,11 +62,13 @@ class FirebaseMessageServiceCallback(
                                 showNotification()
                                 notificationSound.play()
                                 rejectCall
-                                notifyCallback(model.token, model.destinationId)
+                                callMessage(NOTIFY_CALLBACK, model.destinationId, model.token)
                             }
                         }
 
-                        CHECK_FOR_CALL -> checkForCall(model)
+                        CHECK_FOR_CALL -> {
+                            checkForCall(model)
+                        }
 
                         REJECT -> {
                             if (!appIsInForeground()) {
@@ -76,15 +81,27 @@ class FirebaseMessageServiceCallback(
                             rejectCall
                         }
 
-                        ANSWER -> firebaseRead.readNode(Nodes.TOKEN, getMyDigit) {
-                            startJitsiMit(context, it, firebaseConnect.myName, firebaseConnect.myIcon)
+                        ANSWER -> {
+                            CoroutineScope(Main).launch {
+                                remoteMessageModel.answer
+                                delay(1000)
+                                firebaseRead.readNode(Nodes.TOKEN, getMyDigit) {
+                                    startJitsiMit(
+                                        context,
+                                        it,
+                                        firebaseConnect.myName,
+                                        firebaseConnect.myIcon
+                                    )
+                                }
+                            }
                         }
                         RESET -> rejectCall
 
-                        GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) { doCall(); model.set }
+                        GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) {
+                            doCall(); model.set
+                        }
 
                         INCOMING_CALL -> {
-                            model.log
                             model.set
                             if (!appIsInForeground()) showNotification()
                             ringtone.play()
@@ -102,9 +119,9 @@ class FirebaseMessageServiceCallback(
                             }
                         }
                         BUSY -> {
-                            CoroutineScope(IO).launch{
+                            CoroutineScope(IO).launch {
                                 model.set
-                                delay(500)
+                                delay(1000)
                                 rejectCall
                             }
                         }

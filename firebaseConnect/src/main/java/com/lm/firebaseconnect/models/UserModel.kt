@@ -12,25 +12,11 @@ data class UserModel(
     // val listMessages: List<String> = emptyList(),
     val iconUri: String = "",
     val lastMessage: String = "",
+    // val listMessages: List<Pair<String, String>> = emptyList()
 )
 
-fun DataSnapshot.getUserModel(
-    pairPath: String,
-    firebaseRead: FirebaseRead
-) = UserModel(
-    id = key ?: "",
-    name = getValue(key ?: "", Nodes.NAME),
-    onLine = getValue(key ?: "", Nodes.ONLINE) == "1",
-    isWriting = getValue(pairPath, Nodes.WRITING) == "1",
-    token = getValue(key ?: "", Nodes.TOKEN),
-    lastMessage = with(firebaseRead) {
-        getValue(pairPath, Nodes.LAST).getMessage().first.ifEmpty { "Сообщений пока нет" }
-    },
-    iconUri = getValue(key ?: "", Nodes.ICON),
-    // listMessages = listOf()
-)
 
-fun DataSnapshot.getValue(path: String, node: Nodes) =
-    child(node.node()).child(path).value?.run { toString() } ?: ""
+
+
 
 

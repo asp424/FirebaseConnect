@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.data
+package com.lm.firebaseconnectapp.service
 
 import android.annotation.SuppressLint
 import android.os.Build

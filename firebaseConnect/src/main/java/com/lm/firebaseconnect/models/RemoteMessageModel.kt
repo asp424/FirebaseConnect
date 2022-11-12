@@ -1,8 +1,10 @@
 package com.lm.firebaseconnect.models
 
 import com.google.firebase.messaging.RemoteMessage
+import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.BUSY
 import com.lm.firebaseconnect.States.CALLING_ID
+import com.lm.firebaseconnect.States.CHECK_FOR_CALL
 import com.lm.firebaseconnect.States.DESTINATION_ID
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
 import com.lm.firebaseconnect.States.ICON
@@ -46,6 +48,8 @@ data class RemoteMessageModel constructor(
         val rejectCall get() = RemoteMessageModel(WAIT, title = "Отмена вызова",
             callingId = get.callingId, name = get.name)
 
+        val answer get() = RemoteMessageModel(ANSWER).set
+
         val getIncomingCall
             get() = RemoteMessageModel(
                 GET_INCOMING_CALL, title = "Вызов...",
@@ -53,6 +57,8 @@ data class RemoteMessageModel constructor(
             )
 
         val setOutgoingCall get() = RemoteMessageModel(OUTGOING_CALL).set
+
+        val checkForCall get() = RemoteMessageModel(CHECK_FOR_CALL).set
 
         val busy get() = RemoteMessageModel(BUSY, title = "Взял трубку",
             callingId = get.callingId, name = get.name)

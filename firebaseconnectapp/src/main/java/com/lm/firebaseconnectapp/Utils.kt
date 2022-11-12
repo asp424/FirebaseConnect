@@ -1,5 +1,6 @@
 package com.lm.firebaseconnectapp
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,17 +10,25 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.Dp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.lm.firebaseconnect.States.ANSWER
+import com.lm.firebaseconnect.States.BUSY
+import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
+import com.lm.firebaseconnect.States.GET_INCOMING_CALL
+import com.lm.firebaseconnect.States.OUTGOING_CALL
+import com.lm.firebaseconnect.States.REJECT
+import com.lm.firebaseconnect.States.RESET
+import com.lm.firebaseconnect.States.WAIT
+import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.core.App
+import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
-import org.jitsi.meet.sdk.BroadcastEvent
-import org.jitsi.meet.sdk.JitsiMeetActivity
-import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
-import org.jitsi.meet.sdk.JitsiMeetUserInfo
+import kotlinx.coroutines.delay
 import java.net.URL
 
 @Composable
@@ -41,14 +50,14 @@ val Context.appComponent
 
 val toast: Context.(String) -> Unit by lazy {
     {
-        Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
     }
 }
 
-fun MainActivity.showToast(text: String) = toast(this, text)
+fun Context.showToast(text: String) = toast(this, text)
 
 fun startJitsiMit(context: Context, room: String, name: String, icon: String) {
-    JitsiMeetConferenceOptions.Builder().apply {
+   /* JitsiMeetConferenceOptions.Builder().apply {
         setServerURL(URL("https://meet.jit.si"))
         setRoom(room)
         setUserInfo(JitsiMeetUserInfo().apply {
@@ -57,16 +66,16 @@ fun startJitsiMit(context: Context, room: String, name: String, icon: String) {
         })
         setConfigOverride("prejoinPageEnabled", false)
         setFeatureFlag("prejoinPageEnabled", false)
-        setFeatureFlag("invite.enabled",false)
+        setFeatureFlag("invite.enabled", false)
         setAudioOnly(true)
         JitsiMeetActivity.launch(context, build())
 
-        remoteMessageModel.busy.set
-        // remoteMessageModel.testBusy.set
         registerForBroadcastMessages(context)
     }
-}
 
+    */
+}
+/*
 private fun registerForBroadcastMessages(context: Context) {
     val intentFilter = IntentFilter()
 
@@ -92,10 +101,46 @@ private fun onBroadcastReceived(intent: Intent?, context: Context) {
                 remoteMessageModel.rejectCall.set
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiver)
             }
+
             else -> event.type.log
         }
     }
 }
+
+ */
+
+@Composable
+fun SoundController() {
+    with(mainDep) {
+        LaunchedEffect(get) {
+            when (get.typeMessage) {
+
+                OUTGOING_CALL -> waitSound.start()
+                GET_CHECK_FOR_CALL -> {
+                    waitSound.stop()
+                    waitSound.prepareAsync()
+                    callSound.start()
+                }
+                REJECT -> {
+                    waitSound.stop()
+                    waitSound.prepareAsync()
+                    callSound.stop()
+                    callSound.prepareAsync()
+                }
+
+                WAIT -> {
+                    waitSound.stop()
+                    waitSound.prepareAsync()
+                    callSound.stop()
+                    callSound.prepareAsync()
+                }
+                else -> {}
+            }
+        }
+    }
+}
+
+
 
 
 

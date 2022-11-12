@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.data.one_tap_google
+package com.lm.firebaseconnectapp.data.one_tap_google_auth
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth

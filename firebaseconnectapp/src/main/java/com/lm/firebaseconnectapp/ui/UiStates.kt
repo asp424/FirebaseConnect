@@ -2,6 +2,9 @@ package com.lm.firebaseconnectapp.ui
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import com.lm.firebaseconnect.models.UserModel
+import com.lm.firebaseconnectapp.record_sound.PlayerStates
+import com.lm.firebaseconnectapp.record_sound.RecordState
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 import com.lm.firebaseconnectapp.ui.theme.main
 import com.lm.firebaseconnectapp.ui.theme.second
@@ -10,6 +13,8 @@ import com.lm.firebaseconnectapp.ui.theme.second
 @Stable
 object UiStates {
     private var toolbarVisible: MutableState<Boolean> = mutableStateOf(false)
+    private var playerState: MutableState<PlayerStates> = mutableStateOf(PlayerStates.NULL)
+    private var recordState: MutableState<RecordState> = mutableStateOf(RecordState.NULL)
     private var navState: MutableState<NavRoutes> = mutableStateOf(NavRoutes.EMPTY)
     private var isMainMode: MutableState<Boolean> = mutableStateOf(true)
     private var settingsVisible: MutableState<Boolean> = mutableStateOf(false)
@@ -17,6 +22,10 @@ object UiStates {
     private val secondColor: MutableState<Color> = mutableStateOf(second)
     private val onlineVisible = mutableStateOf(false)
     val getMainColor get() = mainColor.value
+
+    val getPlayerState get() = playerState.value
+
+    val getRecordState get() = recordState.value
     val getNavState get() = navState.value
     val getOnlineVisible get() = onlineVisible.value
     val getToolbarVisible get() = toolbarVisible.value
@@ -28,6 +37,11 @@ object UiStates {
     fun setToolbarVisible(boolean: Boolean) = run { toolbarVisible.value = boolean }
     fun setOnlineVisible(boolean: Boolean) = run { onlineVisible.value = boolean }
     fun setNavState(navRoute: NavRoutes) = run { navState.value = navRoute }
+
+    fun setPlayerState(state: PlayerStates) = run { playerState.value = state }
+
+    fun setRecordState(state: RecordState) = run { recordState.value = state }
+
     val Boolean.setSettingsVisible get() = run { settingsVisible.value = this }
     val getSecondColor get() = secondColor.value
     val settingsIconClick

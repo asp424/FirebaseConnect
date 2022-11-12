@@ -1,6 +1,6 @@
 package com.lm.firebaseconnectapp.di.dagger.modules
 
-import com.lm.firebaseconnectapp.data.one_tap_google.OneTapGoogleAuth
+import com.lm.firebaseconnectapp.data.one_tap_google_auth.OneTapGoogleAuth
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton
