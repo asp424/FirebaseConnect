@@ -8,12 +8,16 @@ import com.lm.firebaseconnectapp.record_sound.RecordState
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 import com.lm.firebaseconnectapp.ui.theme.main
 import com.lm.firebaseconnectapp.ui.theme.second
+import kotlin.time.Duration
 
 @Immutable
 @Stable
 object UiStates {
     private var toolbarVisible: MutableState<Boolean> = mutableStateOf(false)
     private var playerState: MutableState<PlayerStates> = mutableStateOf(PlayerStates.NULL)
+    private var currentPlayTimestamp: MutableState<String> = mutableStateOf("")
+    private var voiceDuration: MutableState<Duration> = mutableStateOf(Duration.ZERO)
+    private var buttonPlayOffset: MutableState<Boolean> = mutableStateOf(false)
     private var recordState: MutableState<RecordState> = mutableStateOf(RecordState.NULL)
     private var navState: MutableState<NavRoutes> = mutableStateOf(NavRoutes.EMPTY)
     private var isMainMode: MutableState<Boolean> = mutableStateOf(true)
@@ -23,7 +27,13 @@ object UiStates {
     private val onlineVisible = mutableStateOf(false)
     val getMainColor get() = mainColor.value
 
+    val getVoiceDuration get() = voiceDuration.value
+
+    val getButtonPlayOffset get() = buttonPlayOffset.value
+
     val getPlayerState get() = playerState.value
+
+    val getCurrentPlayTimestamp get() = currentPlayTimestamp.value
 
     val getRecordState get() = recordState.value
     val getNavState get() = navState.value
@@ -32,6 +42,12 @@ object UiStates {
     val getSettingsVisible get() = settingsVisible.value
     val getIsMainMode get() = isMainMode.value
     fun setIsMainMode(boolean: Boolean) = run { isMainMode.value = boolean }
+
+    fun setButtonPlayOffset(boolean: Boolean) = run { buttonPlayOffset.value = boolean }
+
+    fun setCurrentPlayTimestamp(timestamp: String) = run { currentPlayTimestamp.value = timestamp }
+
+    fun setVoiceDuration(duration: Duration) = run { voiceDuration.value = duration }
     val Color.setMainColor get() = run { mainColor.value = this }
     val Color.setSecondColor get() = run { secondColor.value = this }
     fun setToolbarVisible(boolean: Boolean) = run { toolbarVisible.value = boolean }

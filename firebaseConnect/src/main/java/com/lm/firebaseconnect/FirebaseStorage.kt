@@ -26,11 +26,10 @@ class FirebaseStorage {
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun readSound(timestamp: String, onComplete: (ByteArray) -> Unit) {
-        storage.child("sounds/$timestamp.mp3")
-            .getBytes(1024 * 1024)
-            .addOnSuccessListener { onComplete(it) }
-            .addOnFailureListener { onComplete(ByteArray(0)) }
+    fun readSound(timestamp: String, onComplete: (String) -> Unit) {
+        storage.child("sounds/$timestamp.mp3").downloadUrl.addOnCompleteListener {
+            if (it.isSuccessful) onComplete(it.result.toString())
+        }.addOnFailureListener { onComplete(it.message.toString()) }
     }
 
     private val String.child get() = storage.child("sounds/${this}.mp3")

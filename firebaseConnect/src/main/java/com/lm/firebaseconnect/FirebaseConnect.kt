@@ -54,13 +54,14 @@ class FirebaseConnect private constructor(
 
     fun setNoWriting() = firebaseSave.save(ZERO, Nodes.WRITING)
 
-    fun sendMessage(text: String) = firebaseSave.sendMessage(text, remoteMessages)
+    fun sendMessage(text: String, onSend: () -> Unit) =
+        firebaseSave.sendMessage(text, remoteMessages, onSend)
 
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
 
-    fun String.messageKey() = with(firebaseRead){ parseKey() }
+    fun String.messageKey() = with(firebaseRead) { parseKey() }
 
-    fun String.removeMessageKey() = with(firebaseRead){ removeKey() }
+    fun String.removeMessageKey() = with(firebaseRead) { removeKey() }
 
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
@@ -74,11 +75,19 @@ class FirebaseConnect private constructor(
                         }
                         if (Lifecycle.Event.ON_RESUME == event) {
                             firebaseSave.save(ONE, Nodes.ONLINE)
-                            firebaseSave.save(ONE, Nodes.ONLINE, firebaseSave.firebaseConnect.myDigit)
+                            firebaseSave.save(
+                                ONE,
+                                Nodes.ONLINE,
+                                firebaseSave.firebaseConnect.myDigit
+                            )
                         }
                         if (Lifecycle.Event.ON_PAUSE == event) {
                             onPause()
-                            firebaseSave.save(ZERO, Nodes.ONLINE, firebaseSave.firebaseConnect.myDigit)
+                            firebaseSave.save(
+                                ZERO,
+                                Nodes.ONLINE,
+                                firebaseSave.firebaseConnect.myDigit
+                            )
                         }
                     }
                     lifecycle.addObserver(observer)
