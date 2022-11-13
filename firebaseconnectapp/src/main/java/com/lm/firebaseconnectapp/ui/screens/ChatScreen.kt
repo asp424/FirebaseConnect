@@ -32,6 +32,8 @@ import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates
+import com.lm.firebaseconnectapp.ui.UiStates.setButtonPlayOffset
 import com.lm.firebaseconnectapp.ui.cells.chat.NotificationAnimation
 import com.lm.firebaseconnectapp.ui.cells.chat.input.RecordButton
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.RecordingAnimation

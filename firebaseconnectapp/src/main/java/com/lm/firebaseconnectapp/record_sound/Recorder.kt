@@ -6,30 +6,27 @@ import android.content.ContextWrapper
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import com.lm.firebaseconnect.FirebaseConnect
+import com.lm.firebaseconnect.FirebaseRead.Companion.M_K_E
+import com.lm.firebaseconnect.States.listMessages
+import com.lm.firebaseconnect.log
+import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.showToast
-import com.lm.firebaseconnectapp.ui.UiStates
-import com.lm.firebaseconnectapp.ui.UiStates.getPlayerState
+import com.lm.firebaseconnectapp.ui.UiStates.getCurrentPlayTimestamp
 import com.lm.firebaseconnectapp.ui.UiStates.getRecordState
-import com.lm.firebaseconnectapp.ui.UiStates.getVoiceDuration
+import com.lm.firebaseconnectapp.ui.UiStates.playerSessionId
+import com.lm.firebaseconnectapp.ui.UiStates.playingSendTime
+import com.lm.firebaseconnectapp.ui.UiStates.playingSenderName
 import com.lm.firebaseconnectapp.ui.UiStates.setButtonPlayOffset
 import com.lm.firebaseconnectapp.ui.UiStates.setCurrentPlayTimestamp
 import com.lm.firebaseconnectapp.ui.UiStates.setPlayerState
 import com.lm.firebaseconnectapp.ui.UiStates.setRecordState
 import com.lm.firebaseconnectapp.ui.UiStates.setVoiceDuration
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 
 class Recorder @Inject constructor(
@@ -38,6 +35,8 @@ class Recorder @Inject constructor(
     private val context: Application,
     private val firebaseConnect: FirebaseConnect
 ) {
+
+    private var currentList: List<String> = emptyList()
 
     private var recorder: MediaRecorder? = null
 
@@ -91,25 +90,19 @@ class Recorder @Inject constructor(
     }
 
     private fun create(url: String, onCreate: () -> Unit) {
-        if (getPlayerState == PlayerStates.NULL) {
-            player = MediaPlayer()
-            player?.apply {
-                runCatching {
-                    if (url.startsWith("https")) {
-                        setDataSource(url)
-                        prepare()
-                        setOnPreparedListener {
-                            setVoiceDuration(duration.milliseconds)
-                            onCreate()
-                        }
-                        setOnCompletionListener {
-                            setPlayerState(PlayerStates.NULL)
-                        }
-                    } else context.showToast(url)
-                }.onFailure {
-                    context.showToast(it.message.toString())
-                    setPlayerState(PlayerStates.NULL)
-                }
+        playerSessionId.value = 0
+        player = MediaPlayer()
+        player?.apply {
+            runCatching {
+                if (url.startsWith("https")) {
+                    setDataSource(url)
+                    prepare()
+                    setOnPreparedListener { onPrepare(onCreate) }
+                    setOnCompletionListener { onComplete() }
+                } else context.showToast(url)
+            }.onFailure {
+                context.showToast(it.message.toString())
+                setPlayerState(PlayerStates.NULL)
             }
         }
     }
@@ -118,6 +111,8 @@ class Recorder @Inject constructor(
         player?.apply {
             runCatching {
                 start()
+                playerSessionId.value = player?.audioSessionId ?: 0
+                setCurrentList()
             }.onSuccess {
                 setPlayerState(PlayerStates.PLAYING)
             }.onFailure { context.showToast(it.message.toString()) }
@@ -125,12 +120,13 @@ class Recorder @Inject constructor(
     }
 
     fun String.stopAndPlay() {
+        setButtonPlayOffset(true)
         setVoiceDuration(ZERO)
         stopPlay {
-            firebaseConnect.firebaseStorage.readSound(substringAfter(IS_RECORD)
-                .apply { setCurrentPlayTimestamp(this) }) {
+            firebaseConnect.firebaseStorage.readSound(
+                apply { setCurrentPlayTimestamp(this) }) {
                 if (it.isNotEmpty()) {
-                    create(it) { play(); setButtonPlayOffset(false) }
+                    create(it) { play() }
                 } else context.showToast("File not found")
             }
         }
@@ -151,7 +147,7 @@ class Recorder @Inject constructor(
         }
     }
 
-    private fun stopPlay(onStop: () -> Unit) {
+    fun stopPlay(onStop: () -> Unit = {}) {
         runCatching {
             player?.apply {
                 release()
@@ -159,7 +155,6 @@ class Recorder @Inject constructor(
             }
         }.onSuccess {
             onStop()
-            setPlayerState(PlayerStates.NULL)
         }.onFailure { context.showToast(it.message.toString()) }
     }
 
@@ -168,6 +163,57 @@ class Recorder @Inject constructor(
             ContextWrapper(context)
                 .getDir("sounds", Context.MODE_PRIVATE), "${this}.mp3"
         )
+
+    private fun onComplete() {
+        playerSessionId.value = 0
+        getPlayingMessage {
+            if (getCurrentIndex != currentList.lastIndex)
+                currentList[getCurrentIndex + 1].apply {
+                    setCurrentSendingTime()
+                    setCurrentSenderName()
+                }.substringAfter(IS_RECORD).stopAndPlay()
+            else {
+                setPlayerState(PlayerStates.NULL)
+                playingSendTime.value = ""
+                playingSenderName.value = ""
+                setVoiceDuration(ZERO)
+            }
+        }
+    }
+
+    private fun onPrepare(onDo: () -> Unit) {
+        player?.apply {
+            setVoiceDuration(duration.milliseconds)
+            playerSessionId.value = player?.audioSessionId ?: 0
+            onDo()
+        }
+    }
+
+    private fun setCurrentList() {
+        currentList = if (listMessages.value is UIMessagesStates.Success) {
+            (listMessages.value as UIMessagesStates.Success).list.map { it.first }
+                .filter { it.contains(IS_RECORD) }.apply {
+                    log
+                find { it.contains(getCurrentPlayTimestamp) }?.apply {
+                    setCurrentSendingTime(); setCurrentSenderName()
+                }
+            }
+        } else emptyList()
+    }
+
+    private fun getPlayingMessage(onFind: String.() -> Unit) {
+        onFind(currentList.find { it.substringAfter(IS_RECORD) == getCurrentPlayTimestamp } ?: "")
+    }
+
+    private fun String.setCurrentSendingTime() {
+        playingSendTime.value = with(firebaseConnect.firebaseRead) { getTime() }
+    }
+
+    private fun String.setCurrentSenderName() {
+        playingSenderName.value = substringAfter(M_K_E).substringBefore("(")
+    }
+
+    private val String.getCurrentIndex get() = currentList.indexOf(this)
 
     private val timeStamp get() = Calendar.getInstance().time.time
 

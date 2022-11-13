@@ -2,7 +2,12 @@ package com.lm.firebaseconnectapp.data
 
 import android.content.SharedPreferences
 import android.net.Uri
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
+import com.chibde.visualizer.CircleBarVisualizer
+import com.lm.firebaseconnectapp.ui.UiStates.setMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.setSecondColor
 import javax.inject.Inject
 
 interface SPreferences {
@@ -35,6 +40,10 @@ interface SPreferences {
         private val sharedPreferences: SharedPreferences,
     ) : SPreferences {
 
+        init {
+                Color(readMainColor()).setMainColor
+                Color(readSecondColor()).setSecondColor
+        }
         override fun saveIconUri(uri: Uri) = apply {
             sharedPreferences.edit()
                 .putString(Uri.EMPTY.toString(), uri.toString()).apply()

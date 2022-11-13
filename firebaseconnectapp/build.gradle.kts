@@ -61,6 +61,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeCompilerVersion
@@ -119,4 +120,7 @@ dependencies {
 
     //Leak Canary
     // debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
+
+    //Visualizer
+    implementation ("io.github.gautamchibde:audiovisualizer:2.2.5")
 }

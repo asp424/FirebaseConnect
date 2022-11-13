@@ -112,7 +112,8 @@ interface UiInteractor {
         private val setNavController
             @Composable get() = with(mainDep) {
                 LaunchedEffect(getNavState) {
-                    if (getNavState.route.isNotEmpty())
+                    if (getNavState != NavRoutes.EMPTY &&
+                        navController.currentDestination?.route != getNavState.route)
                         navController.navigate(getNavState.route)
                 }
             }

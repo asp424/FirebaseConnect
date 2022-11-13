@@ -38,8 +38,6 @@ object States {
         callScreenVisibleController()
     }
 
-
-
     val isOutgoingCall get() =
         OUTGOING_CALL.isType|| GET_INCOMING_CALL.isType|| GET_CHECK_FOR_CALL.isType
 

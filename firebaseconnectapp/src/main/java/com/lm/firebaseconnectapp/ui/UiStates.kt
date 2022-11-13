@@ -1,8 +1,12 @@
 package com.lm.firebaseconnectapp.ui
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.record_sound.PlayerStates
 import com.lm.firebaseconnectapp.record_sound.RecordState
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
@@ -16,6 +20,9 @@ object UiStates {
     private var toolbarVisible: MutableState<Boolean> = mutableStateOf(false)
     private var playerState: MutableState<PlayerStates> = mutableStateOf(PlayerStates.NULL)
     private var currentPlayTimestamp: MutableState<String> = mutableStateOf("")
+    var playerSessionId: MutableState<Int> = mutableStateOf(0)
+    var playingSendTime: MutableState<String> = mutableStateOf("")
+    var playingSenderName: MutableState<String> = mutableStateOf("")
     private var voiceDuration: MutableState<Duration> = mutableStateOf(Duration.ZERO)
     private var buttonPlayOffset: MutableState<Boolean> = mutableStateOf(false)
     private var recordState: MutableState<RecordState> = mutableStateOf(RecordState.NULL)

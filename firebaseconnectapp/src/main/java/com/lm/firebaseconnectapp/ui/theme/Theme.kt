@@ -61,10 +61,7 @@ fun MainTheme(
         uiInteractor,
         recorder
     ) {
-        LaunchedEffect(true){
-            Color(sPreferences.readMainColor()).setMainColor
-            Color(sPreferences.readSecondColor()).setSecondColor
-        }
+
         val colorScheme = when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
