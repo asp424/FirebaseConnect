@@ -12,27 +12,21 @@ class TimeConverter {
         "${substringBefore(T_T_S)}${parseTimestamp().getTime()}${substringAfter(T_T_E)}"
 
 
-    private fun String.parseTimestamp() = substringAfter(T_T_S).substringBefore(T_T_E)
+    fun String.parseTimestamp() = substringAfter(T_T_S).substringBefore(T_T_E)
 
-    private fun String.getTime() = with(formatDate("H:mm", this)) {
-        when (calendar.get(Calendar.DAY_OF_YEAR) - formatDate("D", this@getTime).toInt()) {
-            1 -> "yesterday at $this"
-            0 -> this
-            else -> formatDate("d.MM.yy ", this@getTime)
-        }
-    }
+    private fun String.getTime() = formatDate(this)
 
     @SuppressLint("SimpleDateFormat")
-    private fun formatDate(value: String, date: String): String {
+    private fun formatDate(date: String): String {
         date.toLongOrNull()?.also {
-            return SimpleDateFormat(value).apply { timeZone = TimeZone.getDefault() }.format(it)
+            return SimpleDateFormat("H:mm").apply { timeZone = TimeZone.getDefault() }.format(it)
         }
         return "0"
     }
 
     private val calendar get() = Calendar.getInstance()
 
-    companion object{
+    companion object {
         const val T_T_S = "<T>"
         const val T_T_E = "</T>"
     }

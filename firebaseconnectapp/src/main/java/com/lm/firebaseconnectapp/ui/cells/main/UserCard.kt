@@ -54,8 +54,8 @@ fun UserCard(
                                 else {
                                     if (lastMessage.trimStart().startsWith(IS_RECORD)) "Голосовое сообщение"
                                     else {
-                                        if (lastMessage.length >= 40)
-                                            "${lastMessage.substring(0, 40)}...".trimStart()
+                                        if (lastMessage.length >= 30)
+                                            "${lastMessage.substring(0, 30)}...".trimStart()
                                         else lastMessage.trimStart()
                                     }
                                 },

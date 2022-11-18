@@ -19,6 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FirebaseConnect">
+
         <activity
             android:name=".presentation.IntentActivity"
             android:exported="false" />
@@ -27,7 +28,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.FirebaseConnect"
-            android:windowSoftInputMode="adjustResize">
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

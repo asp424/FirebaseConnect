@@ -1,12 +1,12 @@
 package com.lm.firebaseconnectapp.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.record_sound.PlayerStates
 import com.lm.firebaseconnectapp.record_sound.RecordState
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
@@ -14,7 +14,6 @@ import com.lm.firebaseconnectapp.ui.theme.main
 import com.lm.firebaseconnectapp.ui.theme.second
 import kotlin.time.Duration
 
-@Immutable
 @Stable
 object UiStates {
     private var toolbarVisible: MutableState<Boolean> = mutableStateOf(false)
@@ -72,3 +71,7 @@ object UiStates {
             { if (getSettingsVisible) false.setSettingsVisible else true.setSettingsVisible }
         }
 }
+
+
+
+

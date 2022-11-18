@@ -69,10 +69,7 @@ class FirebaseSave(
 
     fun getPairPathFromRemoteMessage(myDigit: String, chatId: String) =
         if (checkDigits(myDigit, chatId)) "${F_U_S}${
-            maxOf(
-                myDigit.removeZero,
-                chatId.removeZero
-            )
+            maxOf(myDigit.removeZero, chatId.removeZero)
         }${F_U_E}${S_U_S}${
             minOf(myDigit.removeZero, chatId.removeZero)
         }${S_U_E}"

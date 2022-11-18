@@ -24,14 +24,12 @@ import com.lm.firebaseconnectapp.ui.UiStates.setVoiceDuration
 import java.io.File
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 
 
 class Recorder @Inject constructor(
-    private val mediaRecorder:
-    Function1<@JvmSuppressWildcards String, @JvmSuppressWildcards MediaRecorder?>,
+    private val mediaRecorder: Function1<@JvmSuppressWildcards String, @JvmSuppressWildcards MediaRecorder?>,
     private val context: Application,
     private val firebaseConnect: FirebaseConnect
 ) {
@@ -123,8 +121,7 @@ class Recorder @Inject constructor(
         setButtonPlayOffset(true)
         setVoiceDuration(ZERO)
         stopPlay {
-            firebaseConnect.firebaseStorage.readSound(
-                apply { setCurrentPlayTimestamp(this) }) {
+            firebaseConnect.firebaseStorage.readSound(apply { setCurrentPlayTimestamp(this) }) {
                 if (it.isNotEmpty()) {
                     create(it) { play() }
                 } else context.showToast("File not found")
@@ -160,18 +157,16 @@ class Recorder @Inject constructor(
 
     private val String.filePath
         get() = File(
-            ContextWrapper(context)
-                .getDir("sounds", Context.MODE_PRIVATE), "${this}.mp3"
+            ContextWrapper(context).getDir("sounds", Context.MODE_PRIVATE), "${this}.mp3"
         )
 
     private fun onComplete() {
         playerSessionId.value = 0
         getPlayingMessage {
-            if (getCurrentIndex != currentList.lastIndex)
-                currentList[getCurrentIndex + 1].apply {
-                    setCurrentSendingTime()
-                    setCurrentSenderName()
-                }.substringAfter(IS_RECORD).stopAndPlay()
+            if (getCurrentIndex != currentList.lastIndex) currentList[getCurrentIndex + 1].apply {
+                setCurrentSendingTime()
+                setCurrentSenderName()
+            }.substringAfter(IS_RECORD).stopAndPlay()
             else {
                 setPlayerState(PlayerStates.NULL)
                 playingSendTime.value = ""
@@ -191,22 +186,25 @@ class Recorder @Inject constructor(
 
     private fun setCurrentList() {
         currentList = if (listMessages.value is UIMessagesStates.Success) {
-            (listMessages.value as UIMessagesStates.Success).list.map { it.first }
-                .filter { it.contains(IS_RECORD) }.apply {
-                    log
-                find { it.contains(getCurrentPlayTimestamp) }?.apply {
-                    setCurrentSendingTime(); setCurrentSenderName()
-                }
+            with((listMessages.value as UIMessagesStates.Success).list) {
+                filter {
+                    it.type == 2
+                }.map { it.timeStamp }.apply {
+                        log
+                        find { it.contains(getCurrentPlayTimestamp) }?.apply {
+                            setCurrentSendingTime(); setCurrentSenderName()
+                        }
+                    }
             }
         } else emptyList()
     }
 
     private fun getPlayingMessage(onFind: String.() -> Unit) {
-        onFind(currentList.find { it.substringAfter(IS_RECORD) == getCurrentPlayTimestamp } ?: "")
+        onFind(currentList.find { it == getCurrentPlayTimestamp } ?: "")
     }
 
     private fun String.setCurrentSendingTime() {
-        playingSendTime.value = with(firebaseConnect.firebaseRead) { getTime() }
+        playingSendTime.value = this
     }
 
     private fun String.setCurrentSenderName() {

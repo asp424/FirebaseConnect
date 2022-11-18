@@ -9,7 +9,6 @@ import androidx.annotation.RequiresApi
 import com.google.android.gms.auth.api.identity.Identity
 import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.core.Permissions
-import com.lm.firebaseconnectapp.showToast
 import com.lm.firebaseconnectapp.ui.UiInteractor
 import javax.inject.Inject
 
@@ -42,7 +41,6 @@ class MainActivity : ComponentActivity() {
 
         uiInteractor.onCreate(intent, this)
         permissions.launchIfHasPermissions(this){
-            showToast("Заебись")
         }
     }
 

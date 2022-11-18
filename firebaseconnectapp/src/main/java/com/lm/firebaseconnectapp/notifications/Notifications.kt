@@ -95,8 +95,6 @@ class Notifications(
             REJECT -> "Пропущенный вызов"
             INCOMING_CALL -> "Входящий вызов"
             else -> ""
-        }.apply {
-            get.textMessage.log
         }
 
     private val text

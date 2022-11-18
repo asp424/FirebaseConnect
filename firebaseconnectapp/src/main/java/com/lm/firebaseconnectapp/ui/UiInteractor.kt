@@ -28,6 +28,7 @@ import com.lm.firebaseconnectapp.toast
 import com.lm.firebaseconnectapp.ui.UiStates.getNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setToolbarVisible
+import com.lm.firebaseconnectapp.ui.cells.TopBar
 import com.lm.firebaseconnectapp.ui.navigation.NavHost
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 import com.lm.firebaseconnectapp.ui.theme.MainTheme

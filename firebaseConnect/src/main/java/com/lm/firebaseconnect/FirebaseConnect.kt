@@ -54,14 +54,10 @@ class FirebaseConnect private constructor(
 
     fun setNoWriting() = firebaseSave.save(ZERO, Nodes.WRITING)
 
-    fun sendMessage(text: String, onSend: () -> Unit) =
+    fun sendMessage(text: String, onSend: () -> Unit = {}) =
         firebaseSave.sendMessage(text, remoteMessages, onSend)
 
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
-
-    fun String.messageKey() = with(firebaseRead) { parseKey() }
-
-    fun String.removeMessageKey() = with(firebaseRead) { removeKey() }
 
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {

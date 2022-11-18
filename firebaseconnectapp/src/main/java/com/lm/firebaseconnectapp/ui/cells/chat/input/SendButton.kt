@@ -2,6 +2,7 @@ package com.lm.firebaseconnectapp.ui.cells.chat.input
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -22,7 +23,8 @@ fun MutableState<String>.SendButton() {
     val sendButtonClick = with(mainDep.firebaseConnect) {
         remember {
             {
-                if (value.isNotEmpty()) sendMessage(value){ value = "" }
+                if (value.isNotEmpty()) sendMessage(value)
+                value = ""
                 setNoWriting()
             }
         }
@@ -32,6 +34,7 @@ fun MutableState<String>.SendButton() {
         sendButtonClick,
         Modifier
             .size(46.dp)
+            .padding(end = 1.dp)
             .offset(0.dp, (-6).dp),
         containerColor =
         if (isSystemInDarkTheme()) Color.White else UiStates.getMainColor,

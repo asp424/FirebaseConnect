@@ -5,12 +5,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.view.View
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lm.firebaseconnect.States.ANSWER
@@ -26,8 +28,12 @@ import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.log
 import com.lm.firebaseconnectapp.core.App
+import com.lm.firebaseconnectapp.databinding.VisualizerBinding
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
+import com.lm.firebaseconnectapp.ui.UiStates
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.playerSessionId
 import kotlinx.coroutines.delay
 import java.net.URL
 
@@ -55,6 +61,15 @@ val toast: Context.(String) -> Unit by lazy {
 }
 
 fun Context.showToast(text: String) = toast(this, text)
+
+val getVisualizer: Activity.() -> View by lazy {
+    {
+        VisualizerBinding.inflate(layoutInflater).root.apply {
+            setColor(getMainColor.toArgb())
+            setPlayer(playerSessionId.value)
+        }
+    }
+}
 
 fun startJitsiMit(context: Context, room: String, name: String, icon: String) {
    /* JitsiMeetConferenceOptions.Builder().apply {

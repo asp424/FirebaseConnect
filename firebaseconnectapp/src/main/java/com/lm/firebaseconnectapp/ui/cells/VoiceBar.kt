@@ -29,7 +29,7 @@ import com.lm.firebaseconnectapp.ui.UiStates.playingSendTime
 import com.lm.firebaseconnectapp.ui.UiStates.playingSenderName
 import com.lm.firebaseconnectapp.ui.UiStates.setPlayerState
 import com.lm.firebaseconnectapp.ui.UiStates.setVoiceDuration
-import com.lm.firebaseconnectapp.ui.cells.chat.message.play
+import com.lm.firebaseconnectapp.ui.cells.chat.message.voice.play
 import com.lm.firebaseconnectapp.ui.theme.darkGreen
 import kotlin.time.Duration
 

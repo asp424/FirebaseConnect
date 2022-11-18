@@ -4,10 +4,12 @@ import android.app.Activity
 import android.media.Ringtone
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -15,15 +17,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
-import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.data.one_tap_google_auth.OneTapGoogleAuth
 import com.lm.firebaseconnectapp.di.compose.MainDep
+import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.record_sound.Recorder
 import com.lm.firebaseconnectapp.ui.UiInteractor
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
-import com.lm.firebaseconnectapp.ui.UiStates.setMainColor
-import com.lm.firebaseconnectapp.ui.UiStates.setSecondColor
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -67,22 +67,20 @@ fun MainTheme(
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
+
             darkTheme -> DarkColorScheme
             else -> LightColorScheme
         }
         val view = LocalView.current
-
+        val window = (view.context as Activity).window
         if (!view.isInEditMode) {
-            getMainColor.also { color ->
-                LaunchedEffect(color) {
-                    (view.context as Activity).window.statusBarColor =
-                        if (darkTheme) Black.toArgb() else color.toArgb()
-                    (view.context as Activity).window.navigationBarColor =
-                        if (darkTheme) Black.toArgb() else color.toArgb()
-                    WindowCompat.getInsetsController((view.context as Activity).window, view)
-                        .isAppearanceLightStatusBars = darkTheme
-                }
-            }
+            window.statusBarColor =
+                if (darkTheme) Black.toArgb() else getMainColor.toArgb()
+            window.navigationBarColor =
+                if (darkTheme) Black.toArgb() else getMainColor.toArgb()
+            WindowCompat.getInsetsController((view.context as Activity).window, view)
+                .isAppearanceLightStatusBars = darkTheme
+            WindowCompat.setDecorFitsSystemWindows(window, true)
         }
 
         MaterialTheme(
@@ -92,3 +90,4 @@ fun MainTheme(
         )
     }
 }
+

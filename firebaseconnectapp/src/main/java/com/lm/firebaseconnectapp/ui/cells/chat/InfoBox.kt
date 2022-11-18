@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells
+package com.lm.firebaseconnectapp.ui.cells.chat
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -39,6 +39,8 @@ import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
 import com.lm.firebaseconnectapp.ui.UiStates.getOnlineVisible
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.cells.SetImage
+import com.lm.firebaseconnectapp.ui.cells.getChatModel
 
 @Composable
 fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
@@ -54,7 +56,6 @@ fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
                 Modifier
                     .fillMaxSize()
                     .scale(scale)
-                    .padding(start = 10.dp)
                     .padding(10.dp),
                 Arrangement.Absolute.SpaceBetween,
                 Alignment.CenterVertically
@@ -100,7 +101,7 @@ fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
                                         start = 5.dp, end = 5.dp,
                                         top = 2.dp, bottom = 2.dp
                                     ),
-                                    color = Color.White, fontSize = 14.sp
+                                    color = Color.White, fontSize = 12.sp
                                 )
                             }
                         }

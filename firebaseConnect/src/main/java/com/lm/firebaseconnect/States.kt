@@ -20,7 +20,6 @@ object States {
 
     var notifyState = mutableStateOf(false)
 
-
     private var callState = mutableStateOf(RemoteMessageModel())
 
     val remoteMessageModel by lazy { RemoteMessageModel.Instance() }

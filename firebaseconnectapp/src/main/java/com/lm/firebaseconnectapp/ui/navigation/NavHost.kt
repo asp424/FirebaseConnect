@@ -32,6 +32,7 @@ import com.lm.firebaseconnectapp.ui.cells.TopBar
 import com.lm.firebaseconnectapp.ui.cells.VoiceBar
 import com.lm.firebaseconnectapp.ui.cells.getChatModel
 import com.lm.firebaseconnectapp.ui.screens.*
+import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
@@ -78,6 +79,7 @@ fun NavHost(startScreen: NavRoutes) {
                     composable(NavRoutes.CHAT.route, enterTransition = { enterRightToLeft },
                         exitTransition = { exitLeftToRight }) {
                         LaunchedEffect(true) {
+                            delay(400)
                             setIsMainMode(false)
                         }
                         ChatScreen()
