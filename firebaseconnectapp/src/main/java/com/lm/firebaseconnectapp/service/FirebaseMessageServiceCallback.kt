@@ -21,10 +21,12 @@ import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
+import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.models.Nodes
+import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.notifications.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +59,7 @@ class FirebaseMessageServiceCallback(
                     when (model.typeMessage) {
 
                         MESSAGE -> {
-                            if (!appIsInForeground()) {
+                            if (!appIsInForeground() || firebaseConnect.chatId != model.callingId) {
                                 model.set
                                 showNotification()
                                 notificationSound.play()

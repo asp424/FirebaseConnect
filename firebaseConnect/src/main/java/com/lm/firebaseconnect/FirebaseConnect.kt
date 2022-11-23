@@ -50,18 +50,19 @@ class FirebaseConnect private constructor(
 
     fun setMyDigit(myDigit: String) = apply { this.myDigit = myDigit }
 
-    fun setWriting() = firebaseSave.save(ONE, Nodes.WRITING)
+    fun setWriting(type: String = ONE) = firebaseSave.save(type, Nodes.WRITING)
 
     fun setNoWriting() = firebaseSave.save(ZERO, Nodes.WRITING)
 
-    fun sendMessage(text: String, onSend: () -> Unit = {}) =
-        firebaseSave.sendMessage(text, remoteMessages, onSend)
+    fun sendMessage(text: String, replyKey: String, onSend: () -> Unit = {}) =
+        firebaseSave.sendMessage(text, remoteMessages, onSend = onSend, replyKey = replyKey)
 
     fun deleteAllMessages() = firebaseSave.deleteAllMessages()
 
     @Composable
     fun SetChatContent(content: @Composable FirebaseConnect.() -> Unit) {
         rememberUpdatedState(LocalLifecycleOwner.current).value.apply {
+
             DisposableEffect(this) {
                 with(firebaseRead) {
                     val observer = LifecycleEventObserver { _, event ->
@@ -69,6 +70,7 @@ class FirebaseConnect private constructor(
                             initStates()
                             firebaseHandler.startMainListener()
                         }
+
                         if (Lifecycle.Event.ON_RESUME == event) {
                             firebaseSave.save(ONE, Nodes.ONLINE)
                             firebaseSave.save(
@@ -146,6 +148,7 @@ class FirebaseConnect private constructor(
     companion object {
         const val ZERO = "0"
         const val ONE = "1"
+        const val TWO = "2"
     }
 }
 

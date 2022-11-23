@@ -5,8 +5,14 @@ import com.lm.firebaseconnect.FirebaseRead.Companion.D_T_E
 import com.lm.firebaseconnect.FirebaseRead.Companion.D_T_S
 import com.lm.firebaseconnect.FirebaseRead.Companion.F_U_E
 import com.lm.firebaseconnect.FirebaseRead.Companion.F_U_S
+import com.lm.firebaseconnect.FirebaseRead.Companion.NEW
+import com.lm.firebaseconnect.FirebaseRead.Companion.R_T_E
+import com.lm.firebaseconnect.FirebaseRead.Companion.R_T_S
 import com.lm.firebaseconnect.FirebaseRead.Companion.S_U_E
 import com.lm.firebaseconnect.FirebaseRead.Companion.S_U_S
+import com.lm.firebaseconnect.TimeConverter.Companion.T_T_E
+import com.lm.firebaseconnect.TimeConverter.Companion.T_T_S
+import com.lm.firebaseconnect.models.MessageModel
 import com.lm.firebaseconnect.models.Nodes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -26,23 +32,34 @@ class FirebaseSave(
         }
     }
 
-    fun sendMessage(text: String, remoteMessages: RemoteMessages, onSend: () -> Unit = {}) =
-        with(
-            crypto.cipherEncrypt(
-                "${D_T_S}${firebaseConnect.myDigit}${D_T_E}" +
-                        "${firebaseConnect.myName}(${timeConverter.currentTime}): $text"
-            )
-        ) {
-            child.updateChildren(mapOf(databaseReference.push().key.toString() to this))
-                .addOnCompleteListener {
-                    save(this, Nodes.LAST) {
-                        save(this, Nodes.LAST, digit = firebaseConnect.chatId) {
-                            remoteMessages.message(text)
-                            onSend()
-                        }
+    fun sendMessage(
+        text: String,
+        remoteMessages: RemoteMessages,
+        newFlag: String = NEW,
+        timeStamp: String = timeConverter.currentTime.toString(),
+        key: String = databaseReference.push().key.toString(),
+        name: String = firebaseConnect.myName,
+        digit: String = firebaseConnect.myDigit,
+        replyKey: String = "",
+        onSend: () -> Unit = {}
+    ) = with(crypto.cipherEncrypt(
+            "$newFlag${D_T_S}${digit}${D_T_E}${name}${T_T_S}$timeStamp${T_T_E}$text$R_T_S$replyKey$R_T_E"
+        )
+    ) {
+        child.updateChildren(mapOf(key to this))
+            .addOnCompleteListener {
+                save(this, Nodes.LAST) {
+                    save(this, Nodes.LAST, digit = firebaseConnect.chatId) {
+                        if (newFlag.isNotEmpty()) remoteMessages.message(text)
+                        onSend()
                     }
                 }
-        }
+            }
+    }
+
+    fun MessageModel.setWasRead()
+    = sendMessage(text, firebaseConnect.remoteMessages,
+        "", timeStamp, key, name, digit, replyKey)
 
     private val child
         get() = databaseReference.child(Nodes.CHATS.node())

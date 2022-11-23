@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells.chat
+package com.lm.firebaseconnectapp.ui.cells.chat.animations
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.offset
@@ -11,15 +11,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Boolean.WritingAnimation() {
+fun String.WritingAnimation() {
 
     Card(
         Modifier
             .padding(20.dp, bottom = 2.dp)
-            .offset(animateDpAsState(if (this) 0.dp else (-100).dp).value), CircleShape
+            .offset(animateDpAsState(if (this != "0") 0.dp else (-100).dp).value), CircleShape
     ) {
         Text(
-            "writing...",
+            when (this@WritingAnimation) {
+                "0" -> ""
+                "1" -> "writing..."
+                "2" -> "recording voice..."
+                else -> ""
+            },
             Modifier.padding(5.dp)
         )
     }

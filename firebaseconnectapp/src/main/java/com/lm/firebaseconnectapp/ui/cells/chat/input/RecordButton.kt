@@ -19,32 +19,45 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import com.lm.firebaseconnect.FirebaseConnect.Companion.TWO
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.ui.UiStates
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.setUnreadIndex
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RecordButton() {
     val haptic = LocalHapticFeedback.current
     with(mainDep) {
-        FloatingActionButton({},
-            Modifier
-                .motionEventSpy { if (it.action == 1) recorder.stopRecord() }
-                .size(46.dp)
-                .padding(start = 2.dp)
-                .offset(0.dp, (-6).dp),
-            containerColor = if (isSystemInDarkTheme()) White else getMainColor
-        ) {
-            Icon(
-                Icons.Outlined.Mic, null, Modifier
-                    .pointerInput(Unit) {
-                        detectTapGestures(onLongPress = {
-                            recorder.startRecord()
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        })
-                    }, if (isSystemInDarkTheme()) Black else getSecondColor
-            )
+        with(firebaseConnect) {
+
+            FloatingActionButton({},
+                Modifier
+                    .motionEventSpy {
+                        if (it.action == 1) {
+                            recorder.stopRecord()
+                            setNoWriting()
+                        }
+                    }
+                    .size(46.dp)
+                    .padding(start = 2.dp)
+                    .offset(0.dp, (-6).dp),
+                containerColor = if (isSystemInDarkTheme()) White else getMainColor
+            ) {
+                Icon(
+                    Icons.Outlined.Mic, null, Modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures(onLongPress = {
+                                recorder.startRecord()
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                setWriting(TWO)
+                                setUnreadIndex(-1)
+                            })
+                        }, if (isSystemInDarkTheme()) Black else getSecondColor
+                )
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ data class UserModel(
     val token: String = "",
     val id: String = "",
     val onLine: Boolean = false,
-    val isWriting: Boolean = false,
+    val isWriting: String = "",
     // val listMessages: List<String> = emptyList(),
     val iconUri: String = "",
     val lastMessage: String = "",

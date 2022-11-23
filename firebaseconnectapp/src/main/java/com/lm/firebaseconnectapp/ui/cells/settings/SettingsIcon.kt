@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells
+package com.lm.firebaseconnectapp.ui.cells.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -27,7 +27,8 @@ fun SettingsIcon() {
         ) {
             Icon(
                 Icons.Rounded.Settings, null, modifier = Modifier
-                    .clickable(onClick = settingsIconClick), tint = if (isSystemInDarkTheme()) Color.White else getSecondColor
+                    .clickable(onClick = settingsIconClick),
+                tint = if (isSystemInDarkTheme()) Color.White else getSecondColor
             )
         }
 }

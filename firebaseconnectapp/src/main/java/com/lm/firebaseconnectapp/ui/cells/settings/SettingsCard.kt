@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells
+package com.lm.firebaseconnectapp.ui.cells.settings
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -49,7 +49,9 @@ fun SettingsCard() {
                         .fillMaxSize()
                         .padding(top = 56.dp), colors = CardDefaults.cardColors(
                         containerColor = Color.White
-                    ), border = BorderStroke(3.dp, if (isSystemInDarkTheme()) Color.White else getMainColor)
+                    ), border = BorderStroke(
+                        3.dp, if (isSystemInDarkTheme()) Color.White else getMainColor
+                    )
                 ) {
                     Column {
                         Row(
@@ -87,7 +89,8 @@ fun SettingsCard() {
                             )
                         }
                     }
-                    Column(Modifier.fillMaxSize().padding(bottom = 60.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                    Column(Modifier.fillMaxSize().padding(bottom = 60.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom
                         ) {
                         val activity = LocalContext.current as MainActivity
@@ -104,8 +107,13 @@ fun SettingsCard() {
                                             setToolbarVisible(false)
                                         }
                                     }
-                                }, colors = ButtonDefaults.buttonColors(if (isSystemInDarkTheme()) Color.Black else getMainColor)
-                            ) { Text(text = "Sign out", color = if (isSystemInDarkTheme()) Color.White else getSecondColor) }
+                                }, colors =
+                                ButtonDefaults.buttonColors(
+                                    if (isSystemInDarkTheme()) Color.Black else getMainColor
+                                )
+                            ) { Text(text = "Sign out",
+                                color = if (isSystemInDarkTheme()) Color.White else getSecondColor)
+                            }
                         }
                     }
                 }

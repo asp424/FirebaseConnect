@@ -101,10 +101,11 @@ dependencies {
 
     //Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui:1.4.0-alpha01")
+    implementation("androidx.compose.ui:ui:1.4.0-alpha02")
     implementation("androidx.compose.material:material-icons-core:1.3.1")
     implementation("androidx.compose.material:material-icons-extended:1.3.1")
-    implementation("androidx.compose.material3:material3:1.1.0-alpha01")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha02")
+    implementation ("androidx.compose.material:material:1.4.0-alpha02")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha")
 
     //Dagger
@@ -112,7 +113,7 @@ dependencies {
     kapt("com.google.dagger:dagger-compiler:2.42")
 
     //Auth
-    implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.0")
     implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
 
     //ColorPicker
@@ -123,4 +124,7 @@ dependencies {
 
     //Visualizer
     implementation ("io.github.gautamchibde:audiovisualizer:2.2.5")
+
+    //Progress
+   implementation(files("libs/fantasticprogress-release.aar"))
 }

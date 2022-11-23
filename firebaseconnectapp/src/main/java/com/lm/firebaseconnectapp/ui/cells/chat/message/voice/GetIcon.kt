@@ -8,17 +8,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.lm.firebaseconnectapp.record_sound.PlayerStates
 import com.lm.firebaseconnectapp.ui.UiStates
+import com.lm.firebaseconnectapp.ui.UiStates.getCurrentPlayTimestamp
+import com.lm.firebaseconnectapp.ui.UiStates.getPlayerState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 
 @Composable
 fun String.GetIcon(onSet: (ImageVector) -> Unit) =
-    LaunchedEffect(UiStates.getPlayerState, UiStates.getCurrentPlayTimestamp) {
-        withContext(Dispatchers.IO) {
+    LaunchedEffect(getPlayerState, getCurrentPlayTimestamp) {
+        withContext(IO) {
             onSet(
-                if (this@GetIcon == UiStates.getCurrentPlayTimestamp) {
-                    if (UiStates.getPlayerState == PlayerStates.PAUSE ||
-                        UiStates.getPlayerState == PlayerStates.NULL
+                if (this@GetIcon == getCurrentPlayTimestamp) {
+                    if (getPlayerState == PlayerStates.PAUSE || getPlayerState == PlayerStates.NULL
                     ) Icons.Default.PlayArrow else Icons.Default.Pause
                 } else Icons.Default.PlayArrow
             )

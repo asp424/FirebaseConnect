@@ -24,7 +24,6 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.lm.firebaseconnectapp.R
 
-
 @Composable
 fun SetImage(
     photoUrl: String,

@@ -15,6 +15,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.lm.firebaseconnect.FirebaseConnect
+import com.lm.firebaseconnect.States
 import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.BUSY
 import com.lm.firebaseconnect.States.GET_CHECK_FOR_CALL
@@ -27,7 +29,10 @@ import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.log
+import com.lm.firebaseconnect.models.UIUsersStates
+import com.lm.firebaseconnect.models.UserModel
 import com.lm.firebaseconnectapp.core.App
+import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.databinding.VisualizerBinding
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.presentation.MainActivity
@@ -70,6 +75,14 @@ val getVisualizer: Activity.() -> View by lazy {
         }
     }
 }
+
+fun SPreferences.getChatModel(firebaseConnect: FirebaseConnect) =
+    if (States.listUsers.value is UIUsersStates.Success)
+        (States.listUsers.value as UIUsersStates.Success).list.find {
+            it.id == readChatId()
+        }?.apply {
+            firebaseConnect.setChatId(id.toInt()); UiStates.setOnlineVisible(true)
+        } ?: UserModel(name = "Empty") else UserModel(name = "Empty")
 
 fun startJitsiMit(context: Context, room: String, name: String, icon: String) {
    /* JitsiMeetConferenceOptions.Builder().apply {
@@ -131,6 +144,7 @@ fun SoundController() {
             when (get.typeMessage) {
 
                 OUTGOING_CALL -> waitSound.start()
+
                 GET_CHECK_FOR_CALL -> {
                     waitSound.stop()
                     waitSound.prepareAsync()

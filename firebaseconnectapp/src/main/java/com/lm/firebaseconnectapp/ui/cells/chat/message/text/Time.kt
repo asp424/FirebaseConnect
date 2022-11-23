@@ -18,6 +18,8 @@ fun MessageModel.Time(timeSize: IntSize) {
 
     LocalDensity.current.apply {
         Text(time, Modifier.offset(
-            timeSize.width.toDp() - 40.dp, timeSize.height.toDp() - 20.dp), Gray, 10.sp)
+            timeSize.width.toDp() - 40.dp, if (!isReply) timeSize.height.toDp() - 20.dp else
+                timeSize.height.toDp() - 65.dp
+                ), Gray, 10.sp)
     }
 }

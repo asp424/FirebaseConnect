@@ -5,16 +5,15 @@ import androidx.compose.runtime.LaunchedEffect
 import com.lm.firebaseconnectapp.ui.UiStates.getCurrentPlayTimestamp
 import com.lm.firebaseconnectapp.ui.UiStates.getVoiceDuration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration
 
 @Composable
 fun Boolean.GetText(onSet: (String) -> Unit) =
     LaunchedEffect(getCurrentPlayTimestamp, getVoiceDuration) {
-        withContext(Dispatchers.IO) {
-            onSet(
-                if (this@GetText) {
-                    if (getVoiceDuration.toString() == "0s") "" else getVoiceDuration.toString()
-                } else ""
-            )
-        }
+            if (this@GetText) {
+                if (getVoiceDuration == Duration.ZERO) onSet("")
+                else onSet(getVoiceDuration.toString())
+        } else onSet("")
     }

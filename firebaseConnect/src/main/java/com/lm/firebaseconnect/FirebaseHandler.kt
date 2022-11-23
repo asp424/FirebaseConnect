@@ -24,30 +24,21 @@ class FirebaseHandler(
     fun startMainListener() {
         listJobs.add(CoroutineScope(IO).launch {
             with(firebaseSave) { save(ONE, Nodes.ONLINE, firebaseConnect.myDigit) }
-            listener().collect { t ->
-                listUsers.value =
-                    UIUsersStates.Success(t.filter(t.find { it.key == Nodes.CHATS.node() }))
-            }
+            listener().collect { t -> listUsers.value = UIUsersStates.Success(t.filter()) }
         })
     }
 
-    fun stopMainListener() {
-        with(firebaseSave) { save(ZERO, Nodes.ONLINE, firebaseConnect.myDigit) }
-        listJobs.map { it.cancel() }
-        listJobs.clear()
+    fun stopMainListener() =
+        with(firebaseSave) { save(ZERO, Nodes.ONLINE, firebaseConnect.myDigit)
+        listJobs.map { it.cancel() }; listJobs.clear()
     }
 
-    private val listJobs by lazy { mutableListOf<Job>() }
-
-    private suspend fun List<DataSnapshot>.filter(
-        chatsSnapshot: DataSnapshot?
-    ) = withContext(IO) {
+    private suspend fun List<DataSnapshot>.filter() = withContext(IO) {
         with(firebaseSave) {
             with(firebaseRead) {
-                filter { it.key != null }.filter {
-                    it.key != firebaseConnect.myDigit &&
-                            it.key!!.isDigitsOnly()
-                }.map { it.getUserModel(it.key!!.getPairPath, firebaseRead, chatsSnapshot) }
+                filter { it.key != null }
+                    .filter { it.key != firebaseConnect.myDigit && it.key!!.isDigitsOnly() }
+                    .map { it.getUserModel(it.key!!.getPairPath) }
             }
         }
     }
@@ -55,4 +46,6 @@ class FirebaseHandler(
     private fun listener() = callbackFlow {
         with(childEventListenerInstance) { childListener() }
     }
+
+    private val listJobs by lazy { mutableListOf<Job>() }
 }

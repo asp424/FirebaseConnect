@@ -6,20 +6,27 @@ import java.util.*
 
 class TimeConverter {
 
-    val currentTime get() = "${T_T_S}${calendar.time.time}${T_T_E}"
-
-    fun String.currentTimeZoneTime() =
-        "${substringBefore(T_T_S)}${parseTimestamp().getTime()}${substringAfter(T_T_E)}"
-
+    val currentTime get() = calendar.time.time
 
     fun String.parseTimestamp() = substringAfter(T_T_S).substringBefore(T_T_E)
 
-    private fun String.getTime() = formatDate(this)
+    fun String.getTimeToMessage() = parseTimestamp().getTime()
+    private fun String.getTime() = formatTime(this)
 
     @SuppressLint("SimpleDateFormat")
-    private fun formatDate(date: String): String {
+    private fun formatTime(date: String): String {
         date.toLongOrNull()?.also {
-            return SimpleDateFormat("H:mm").apply { timeZone = TimeZone.getDefault() }.format(it)
+            return SimpleDateFormat("H:mm")
+                .apply { timeZone = TimeZone.getDefault() }.format(it)
+        }
+        return "0"
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun formatDate(date: String): String {
+        date.toLongOrNull()?.also {
+            return SimpleDateFormat("d MMMM")
+                .apply { timeZone = TimeZone.getDefault() }.format(it)
         }
         return "0"
     }

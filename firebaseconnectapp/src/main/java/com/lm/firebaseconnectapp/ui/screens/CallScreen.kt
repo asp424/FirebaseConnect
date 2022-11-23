@@ -42,11 +42,11 @@ import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.SoundController
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.getChatModel
 import com.lm.firebaseconnectapp.startJitsiMit
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.cells.SetImage
-import com.lm.firebaseconnectapp.ui.cells.getChatModel
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable

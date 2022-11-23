@@ -17,18 +17,17 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
 import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnectapp.core.IntentHandler
-import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.data.one_tap_google_auth.FBRegStates
 import com.lm.firebaseconnectapp.data.one_tap_google_auth.OneTapGoogleAuth
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.record_sound.Recorder
 import com.lm.firebaseconnectapp.toast
 import com.lm.firebaseconnectapp.ui.UiStates.getNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setToolbarVisible
-import com.lm.firebaseconnectapp.ui.cells.TopBar
 import com.lm.firebaseconnectapp.ui.navigation.NavHost
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 import com.lm.firebaseconnectapp.ui.theme.MainTheme
@@ -89,6 +88,7 @@ interface UiInteractor {
         private fun start(startScreen: NavRoutes, mainActivity: MainActivity) {
             notificationManager.cancelAll()
             mainActivity.setContent {
+
                 MainTheme(
                     firebaseConnect, ringtone, sPreferences, firebaseAuth, oneTapGoogleAuth,
                     this, notificationReceiver, recorder
@@ -114,7 +114,8 @@ interface UiInteractor {
             @Composable get() = with(mainDep) {
                 LaunchedEffect(getNavState) {
                     if (getNavState != NavRoutes.EMPTY &&
-                        navController.currentDestination?.route != getNavState.route)
+                        navController.currentDestination?.route != getNavState.route
+                    )
                         navController.navigate(getNavState.route)
                 }
             }
@@ -169,7 +170,6 @@ interface UiInteractor {
         }
 
         private val String.checkId
-            get() =
-                if (isNotEmpty()) filter { v -> v.isDigit() && v != '0' } else null
+            get() = if (isNotEmpty()) filter { v -> v.isDigit() && v != '0' } else null
     }
 }

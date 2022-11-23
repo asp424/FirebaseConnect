@@ -27,8 +27,8 @@
             android:name=".presentation.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.FirebaseConnect"
-            >
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.FirebaseConnect">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

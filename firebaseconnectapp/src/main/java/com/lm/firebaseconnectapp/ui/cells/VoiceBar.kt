@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +29,13 @@ import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.record_sound.PlayerStates
 import com.lm.firebaseconnectapp.ui.UiStates
 import com.lm.firebaseconnectapp.ui.UiStates.getCurrentPlayTimestamp
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
+import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
+import com.lm.firebaseconnectapp.ui.UiStates.getVoiceBarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.playingSendTime
 import com.lm.firebaseconnectapp.ui.UiStates.playingSenderName
 import com.lm.firebaseconnectapp.ui.UiStates.setPlayerState
+import com.lm.firebaseconnectapp.ui.UiStates.setVoiceBarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setVoiceDuration
 import com.lm.firebaseconnectapp.ui.cells.chat.message.voice.play
 import com.lm.firebaseconnectapp.ui.theme.darkGreen
@@ -42,9 +50,13 @@ fun VoiceBar() {
                 .fillMaxWidth()
                 .height(
                     animateDpAsState(
-                        if (UiStates.getPlayerState != PlayerStates.NULL) 30.dp else 0.dp
+                        if (getVoiceBarVisible) 30.dp else 0.dp
                     ).value
                 )
+                .offset(0.dp, 64.dp), colors = CardDefaults.cardColors(
+                containerColor = getMainColor
+                ), shape = RoundedCornerShape(0.dp, 0.dp, 10.dp, 10.dp)
+
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -58,16 +70,20 @@ fun VoiceBar() {
                         )
                     }
                     Text(
-                        text = "Sender: ${playingSenderName.value} / Time: ${playingSendTime.value}",
-                        fontSize = 12.sp
+                        text = "${playingSenderName.value} / ${playingSendTime.value}",
+                        fontSize = 12.sp, color = getSecondColor
                     )
                 }
                 Box {
                     Icon(Icons.Default.Close, null, modifier =
-                    Modifier.clickable { stopPlay(); setPlayerState(PlayerStates.NULL)
-                        setVoiceDuration(Duration.ZERO)
-                    }
-                        .padding(end = 20.dp, top = 3.dp)
+                    Modifier
+                        .clickable {
+                            stopPlay(); setPlayerState(PlayerStates.NULL)
+                            setVoiceDuration(Duration.ZERO)
+                            setVoiceBarVisible(false)
+                        }
+                        .padding(end = 20.dp, top = 6.dp)
+                        .size(20.dp), tint = getSecondColor
                     )
                 }
             }

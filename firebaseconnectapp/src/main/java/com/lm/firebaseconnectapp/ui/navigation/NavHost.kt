@@ -22,15 +22,15 @@ import com.lm.firebaseconnect.States.OUTGOING_CALL
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.getChatModel
 import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.ui.UiStates.getSettingsVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setIsMainMode
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
-import com.lm.firebaseconnectapp.ui.cells.SettingsCard
+import com.lm.firebaseconnectapp.ui.cells.settings.SettingsCard
 import com.lm.firebaseconnectapp.ui.cells.TopBar
 import com.lm.firebaseconnectapp.ui.cells.VoiceBar
-import com.lm.firebaseconnectapp.ui.cells.getChatModel
 import com.lm.firebaseconnectapp.ui.screens.*
 import kotlinx.coroutines.delay
 
@@ -48,7 +48,6 @@ fun NavHost(startScreen: NavRoutes) {
         ) {
             Column() {
                 TopBar()
-                VoiceBar()
                 AnimatedNavHost(
                     navController = navController,
                     startDestination = startScreen.route
@@ -86,6 +85,7 @@ fun NavHost(startScreen: NavRoutes) {
                     }
                 }
             }
+            VoiceBar()
             SettingsCard()
             CallScreen()
             BackHandler() {

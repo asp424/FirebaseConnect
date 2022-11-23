@@ -36,21 +36,21 @@ import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
+import com.lm.firebaseconnectapp.getChatModel
 import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
 import com.lm.firebaseconnectapp.ui.UiStates.getOnlineVisible
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.cells.SetImage
-import com.lm.firebaseconnectapp.ui.cells.getChatModel
 
 @Composable
 fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
     with(mainDep) {
+
         val userModel by remember {
             listMessages.value = UIMessagesStates.Loading
-            derivedStateOf {
-                sPreferences.getChatModel(firebaseConnect)
-            }
+            derivedStateOf { sPreferences.getChatModel(firebaseConnect) }
         }
+
         with(firebaseConnect) {
             Row(
                 Modifier

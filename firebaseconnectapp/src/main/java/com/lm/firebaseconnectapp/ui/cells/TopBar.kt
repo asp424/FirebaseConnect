@@ -32,6 +32,7 @@ import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setOnlineVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
 import com.lm.firebaseconnectapp.ui.cells.chat.InfoBox
+import com.lm.firebaseconnectapp.ui.cells.settings.SettingsIcon
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,11 +60,4 @@ fun TopBar() {
     )
 }
 
-fun SPreferences.getChatModel(firebaseConnect: FirebaseConnect) =
-    if (listUsers.value is UIUsersStates.Success)
-        (listUsers.value as UIUsersStates.Success).list.find {
-            it.id == readChatId()
-        }?.apply {
-            firebaseConnect.setChatId(id.toInt()); setOnlineVisible(true)
-        } ?: UserModel(name = "Empty") else UserModel(name = "Empty")
 
