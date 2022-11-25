@@ -64,7 +64,7 @@ fun MessageModel.VoiceMessage() {
 
     LaunchedEffect(true) { setButtonPlayOffset(false) }
     voiceTimeStamp.GetIcon { icon = it }
-    isCurrentTimestamp.GetText { timeString = it }
+    (isCurrentTimestamp && getPlayerState == PlayerStates.PLAYING).GetText { timeString = it }
 
     val rotate by animateFloatAsState(
         if (getButtonPlayOffset && isCurrentTimestamp) 1000f else 0f, tween(700),
@@ -120,18 +120,15 @@ fun String.play(recorder: Recorder) = with(recorder) {
     }
 }
 
-fun playingTimer(player: MediaPlayer) {
-    CoroutineScope(IO).launch {
+fun MediaPlayer.playingTimer() = CoroutineScope(IO).launch {
         while (true) {
-            if (getVoiceDuration > ZERO && getPlayerState == PlayerStates.PLAYING) {
-                player.apply {
-                    if (isActive)
-                        setVoiceDuration(duration.milliseconds - currentPosition.milliseconds)
-                }
+            if (getVoiceDuration > ZERO
+                && getPlayerState == PlayerStates.PLAYING
+                && isPlaying && isActive) {
+                    setVoiceDuration(duration.milliseconds - currentPosition.milliseconds)
             } else break
         }
     }
-}
 
 
 

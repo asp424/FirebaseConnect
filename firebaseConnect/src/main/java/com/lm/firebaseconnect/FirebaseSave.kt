@@ -43,15 +43,16 @@ class FirebaseSave(
         replyKey: String = "",
         onSend: () -> Unit = {}
     ) = with(crypto.cipherEncrypt(
-            "$newFlag${D_T_S}${digit}${D_T_E}${name}${T_T_S}$timeStamp${T_T_E}$text$R_T_S$replyKey$R_T_E"
+            "$newFlag${D_T_S}${digit}${D_T_E}${
+                name
+            }${T_T_S}$timeStamp${T_T_E}$text$R_T_S$replyKey$R_T_E"
         )
     ) {
         child.updateChildren(mapOf(key to this))
             .addOnCompleteListener {
                 save(this, Nodes.LAST) {
                     save(this, Nodes.LAST, digit = firebaseConnect.chatId) {
-                        if (newFlag.isNotEmpty()) remoteMessages.message(text)
-                        onSend()
+                        if (newFlag.isNotEmpty()) remoteMessages.message(text); onSend()
                     }
                 }
             }

@@ -6,6 +6,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.gms.auth.api.identity.Identity
 import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.core.Permissions
@@ -40,8 +44,7 @@ class MainActivity : ComponentActivity() {
         googleOneTapLauncher
 
         uiInteractor.onCreate(intent, this)
-        permissions.launchIfHasPermissions(this){
-        }
+        permissions.launchIfHasPermissions(this)
     }
 
     override fun onNewIntent(intent: Intent?) {

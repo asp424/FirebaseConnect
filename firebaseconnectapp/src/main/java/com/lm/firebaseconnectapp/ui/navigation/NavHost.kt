@@ -7,14 +7,17 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.lm.firebaseconnect.States.GET_INCOMING_CALL
@@ -85,9 +88,11 @@ fun NavHost(startScreen: NavRoutes) {
                     }
                 }
             }
-            VoiceBar()
-            SettingsCard()
-            CallScreen()
+            Box(Modifier.padding(top = 38.dp)) {
+                VoiceBar()
+                SettingsCard()
+                CallScreen()
+            }
             BackHandler() {
                 with(sPreferences.getChatModel(firebaseConnect)) {
                     when (navController.currentDestination?.route) {

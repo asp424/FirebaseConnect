@@ -25,6 +25,7 @@ object UiStates {
     private var currentPlayTimestamp: MutableState<String> = mutableStateOf("")
     private var currentDateAtScroll: MutableState<String> = mutableStateOf("")
     var playerSessionId: MutableState<Int> = mutableStateOf(0)
+    var keyboardHeight: MutableState<Int> = mutableStateOf(0)
     var playingSendTime: MutableState<String> = mutableStateOf("")
     var playingSenderName: MutableState<String> = mutableStateOf("")
     private var voiceDuration: MutableState<Duration> = mutableStateOf(Duration.ZERO)

@@ -15,5 +15,6 @@ fun Boolean.GetText(onSet: (String) -> Unit) =
             if (this@GetText) {
                 if (getVoiceDuration == Duration.ZERO) onSet("")
                 else onSet(getVoiceDuration.toString())
-        } else onSet("")
+        }
+            else onSet("")
     }

@@ -1,21 +1,14 @@
 package com.lm.firebaseconnectapp.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Reply
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,23 +16,17 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnect.States.GetListMessages
 import com.lm.firebaseconnect.States.listMessages
-import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.animDp
-import com.lm.firebaseconnectapp.animScale
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.getChatModel
-import com.lm.firebaseconnectapp.ui.UiStates
-import com.lm.firebaseconnectapp.ui.UiStates.getReplyMessage
+import com.lm.firebaseconnectapp.ui.UiStates.getDateCardVisible
 import com.lm.firebaseconnectapp.ui.UiStates.getReplyVisible
 import com.lm.firebaseconnectapp.ui.UiStates.getVoiceBarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setDateCardVisible
@@ -54,15 +41,16 @@ import com.lm.firebaseconnectapp.ui.cells.chat.actions.OnScrollAction
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.DateAnimation
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.RecordingAnimation
 import com.lm.firebaseconnectapp.ui.cells.chat.input.InputBar
-import com.lm.firebaseconnectapp.ui.cells.chat.input.KeyboardListener
+import com.lm.firebaseconnectapp.ui.cells.chat.input.keyboardListener
 import com.lm.firebaseconnectapp.ui.cells.chat.message.Message
 
 @[SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState") OptIn(
-    ExperimentalMaterial3Api::class
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class
 )
 Composable]
 fun ChatScreen() {
-    val isKeyboardOpen = KeyboardListener()
+    val isKeyboardOpen = keyboardListener()
+    val coroutine = rememberCoroutineScope()
     with(mainDep) {
         with(firebaseConnect) {
             val text = remember { mutableStateOf("") }
@@ -77,7 +65,11 @@ fun ChatScreen() {
             OnCallStateAction()
 
             SetChatContent {
-                Scaffold {
+                Scaffold(
+                    modifier = Modifier
+                        .imePadding()
+                        .navigationBarsPadding(),
+                ) {
                     GetListMessages({
                         val state = rememberLazyListState(size)
 
@@ -90,24 +82,18 @@ fun ChatScreen() {
                             }
                         }
 
-                        val bottomPadding = remember { mutableStateOf(0f) }
-
-                        OnKeyboardAction(isKeyboardOpen, state, bottomPadding)
-
                         LazyColumn(
-                            Modifier.fillMaxWidth(), state, PaddingValues(
-                                10.dp, animDp(getVoiceBarVisible, 35.dp, 10.dp), 10.dp, 80.dp
+                            state = state, contentPadding = PaddingValues(
+                                10.dp, 10.dp, 10.dp, animDp(getReplyVisible, 110.dp, 80.dp)
                             )
                         ) {
                             items(
                                 size,
-                                { get(it).key },
-                                { get(it) },
-                                { get(it).Message(state, it, size) })
-
+                                { get(it).key }, { get(it) }, { get(it).Message(state, it, size) }
+                            )
                         }
-
-                        text.InputBar(bottomPadding, isKeyboardOpen, userModel.isWriting, state)
+                        OnKeyboardAction(isKeyboardOpen, state)
+                        text.InputBar(userModel.isWriting, state)
                         NotificationAnimation()
                     }, { Progress() })
                 }

@@ -111,9 +111,12 @@ class FirebaseRead(
         messageJob = startMessagesListener {
             find { it.mustSetWasRead }?.apply { isUnreadFlag = true }
             filter { it.isReply }.map { m ->
-                find { m.replyKey == it.key }?.also { replied ->
-                    m.replyName = replied.name
-                    m.replyText = replied.text
+                find { m.replyKey == it.key }?.apply {
+                    m.replyName = name
+                    m.replyText =  if (!text.contains(IS_RECORD)) {
+                        if (text.length >= 10)
+                            "${text.substring(0, 10)}..." else text
+                    } else "voice"
                 }
             }
             listMessages.value = UIMessagesStates.Success(this)

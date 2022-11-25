@@ -7,6 +7,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.lm.firebaseconnect.models.MessageModel
 import com.lm.firebaseconnect.models.RemoteMessageModel
+import com.lm.firebaseconnect.models.TypeMessage
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnect.models.UIUsersStates
 import kotlinx.coroutines.delay
@@ -25,107 +26,115 @@ object States {
     val listMessages: MutableState<UIMessagesStates> = mutableStateOf(UIMessagesStates.Loading)
 
     @Composable
-    fun GetListMessages( onGet: @Composable List<MessageModel>.() -> Unit, onLoading:  @Composable () -> Unit) =
+    fun GetListMessages(
+        onGet: @Composable List<MessageModel>.() -> Unit,
+        onLoading: @Composable () -> Unit
+    ) = if (listMessages.value is UIMessagesStates.Success)
+        onGet((listMessages.value as UIMessagesStates.Success).list)
+    else onLoading()
+
+    fun getListMessages(onGet: List<MessageModel>.() -> Unit) =
         if (listMessages.value is UIMessagesStates.Success)
-            onGet((listMessages.value as UIMessagesStates.Success).list)
-        else onLoading()
+            (listMessages.value as UIMessagesStates.Success).list.apply { onGet(this) }
+                .filter { it.type == TypeMessage.VOICE }.map { it.voiceTimeStamp }
+        else emptyList()
 
-val RemoteMessageModel.set get() = run { callState.value = this }
+    val RemoteMessageModel.set get() = run { callState.value = this }
 
-val String.isType get() = callState.value.typeMessage == this
+    val String.isType get() = callState.value.typeMessage == this
 
-val callScreenVisible = mutableStateOf(false)
+    val callScreenVisible = mutableStateOf(false)
 
-@Composable
-fun StateController() = LaunchedEffect(get) {
-    callScreenVisibleController()
-}
-
-val isOutgoingCall
-    get() =
-        OUTGOING_CALL.isType || GET_INCOMING_CALL.isType || GET_CHECK_FOR_CALL.isType
-
-private suspend fun callScreenVisibleController() {
-    callScreenVisible.value = when (get.typeMessage) {
-        OUTGOING_CALL -> true
-        INCOMING_CALL -> true
-        GET_CHECK_FOR_CALL -> true
-        GET_INCOMING_CALL -> true
-        WAIT -> {
-            delay(1000)
-            false
-        }
-
-        ANSWER -> {
-            delay(1000)
-            false
-        }
-
-        REJECT -> {
-            delay(1000)
-            false
-        }
-
-        RESET -> {
-            delay(1000)
-            false
-        }
-
-        BUSY -> true
-        else -> false
+    @Composable
+    fun StateController() = LaunchedEffect(get) {
+        callScreenVisibleController()
     }
-}
 
-fun getCallingState() = when (get.typeMessage) {
+    val isOutgoingCall
+        get() =
+            OUTGOING_CALL.isType || GET_INCOMING_CALL.isType || GET_CHECK_FOR_CALL.isType
 
-    REJECT -> "Вызов отменен"
+    private suspend fun callScreenVisibleController() {
+        callScreenVisible.value = when (get.typeMessage) {
+            OUTGOING_CALL -> true
+            INCOMING_CALL -> true
+            GET_CHECK_FOR_CALL -> true
+            GET_INCOMING_CALL -> true
+            WAIT -> {
+                delay(1000)
+                false
+            }
 
-    ANSWER -> "Открывается jitsi..."
+            ANSWER -> {
+                delay(1000)
+                false
+            }
 
-    RESET -> "Вызов отменен"
+            REJECT -> {
+                delay(1000)
+                false
+            }
 
-    GET_CHECK_FOR_CALL -> "Соединение установлено"
+            RESET -> {
+                delay(1000)
+                false
+            }
 
-    INCOMING_CALL -> "Входящий вызов"
+            BUSY -> true
+            else -> false
+        }
+    }
 
-    GET_INCOMING_CALL -> "Идёт вызов..."
+    fun getCallingState() = when (get.typeMessage) {
 
-    BUSY -> "Юзер занят"
+        REJECT -> "Вызов отменен"
 
-    WAIT -> "Вызов отменен"
+        ANSWER -> "Открывается jitsi..."
 
-    OUTGOING_CALL -> "Установка соединения..."
-    else -> ""
-}
+        RESET -> "Вызов отменен"
 
-val getToken get() = callState.value.token
+        GET_CHECK_FOR_CALL -> "Соединение установлено"
 
-val get get() = callState.value
+        INCOMING_CALL -> "Входящий вызов"
 
-@SuppressLint("MutableCollectionMutableState")
-var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
+        GET_INCOMING_CALL -> "Идёт вызов..."
 
-const val TOKEN = "registration_ids"
-const val DATA = "data"
-const val NAME = "name"
-const val ICON = "icon"
-const val TITLE = "title"
-const val TYPE_MESSAGE = "typeMessage"
-const val INCOMING_CALL = "incomingCall"
-const val OUTGOING_CALL = "outgoingCall"
-const val CALL = "call"
-const val CALL_STATE = "callState"
-const val ANSWER = "answer"
-const val REJECT = "reject"
-const val RESET = "reset"
-const val MESSAGE = "message"
-const val WAIT = "wait"
-const val BUSY = "busy"
-const val GET_INCOMING_CALL = "getIncomingCall"
-const val CALLING_ID = "callingId"
-const val DESTINATION_ID = "destinationId"
-const val GET_CHECK_FOR_CALL = "getCheckForCall"
-const val CHECK_FOR_CALL = "checkForCall"
-const val NOTIFY_CALLBACK = "notifyCallback"
-const val REJECTED_CALL = "rejectedCall"
+        BUSY -> "Юзер занят"
+
+        WAIT -> "Вызов отменен"
+
+        OUTGOING_CALL -> "Установка соединения..."
+        else -> ""
+    }
+
+    val getToken get() = callState.value.token
+
+    val get get() = callState.value
+
+    @SuppressLint("MutableCollectionMutableState")
+    var listUsers: MutableState<UIUsersStates> = mutableStateOf(UIUsersStates.Loading)
+
+    const val TOKEN = "registration_ids"
+    const val DATA = "data"
+    const val NAME = "name"
+    const val ICON = "icon"
+    const val TITLE = "title"
+    const val TYPE_MESSAGE = "typeMessage"
+    const val INCOMING_CALL = "incomingCall"
+    const val OUTGOING_CALL = "outgoingCall"
+    const val CALL = "call"
+    const val CALL_STATE = "callState"
+    const val ANSWER = "answer"
+    const val REJECT = "reject"
+    const val RESET = "reset"
+    const val MESSAGE = "message"
+    const val WAIT = "wait"
+    const val BUSY = "busy"
+    const val GET_INCOMING_CALL = "getIncomingCall"
+    const val CALLING_ID = "callingId"
+    const val DESTINATION_ID = "destinationId"
+    const val GET_CHECK_FOR_CALL = "getCheckForCall"
+    const val CHECK_FOR_CALL = "checkForCall"
+    const val NOTIFY_CALLBACK = "notifyCallback"
+    const val REJECTED_CALL = "rejectedCall"
 }

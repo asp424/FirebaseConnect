@@ -59,9 +59,10 @@ interface UiInteractor {
         private val recorder: Recorder
     ) : UiInteractor {
 
-        override fun onCreate(intent: Intent, mainActivity: MainActivity) {
+        override fun onCreate(intent: Intent, mainActivity: MainActivity) =
             setData(intentHandler.onCreate(intent, firebaseConnect), mainActivity)
-        }
+
+        override fun onNewIntent(intent: Intent) = intentHandler.onNewIntent(intent)
 
         private val setData: (NavRoutes, MainActivity) -> Unit by lazy {
             { r, a ->
@@ -74,8 +75,6 @@ interface UiInteractor {
                 }
             }
         }
-
-        override fun onNewIntent(intent: Intent) = intentHandler.onNewIntent(intent)
 
         override fun SignInClient.regCallBack(context: Context): (ActivityResult) -> Unit =
             { oneTapGoogleAuth.handleResult(it, this, saveData) { toast(context, this) } }
@@ -113,10 +112,9 @@ interface UiInteractor {
         private val setNavController
             @Composable get() = with(mainDep) {
                 LaunchedEffect(getNavState) {
-                    if (getNavState != NavRoutes.EMPTY &&
-                        navController.currentDestination?.route != getNavState.route
-                    )
-                        navController.navigate(getNavState.route)
+                    if (getNavState != NavRoutes.EMPTY && navController.currentDestination?.route
+                        != getNavState.route
+                    ) navController.navigate(getNavState.route)
                 }
             }
 
@@ -164,7 +162,8 @@ interface UiInteractor {
         private val getUid: (String?.() -> Unit) -> Unit by lazy {
             {
                 firebaseAuth.currentUser?.uid?.apply {
-                    checkId?.also { myId -> it(myId) } ?: it(null)
+                    checkId?.also { myId -> it(myId) }
+                        ?: it(null)
                 } ?: it(null)
             }
         }

@@ -2,6 +2,7 @@ package com.lm.firebaseconnectapp.ui.cells.chat.cells
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +17,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.MessageModel
 import com.lm.firebaseconnectapp.ui.UiStates.getReplyVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setReplyMessage
@@ -38,16 +41,18 @@ fun MessageModel.SwipeAbleBox(state: LazyListState, offset: @Composable BoxScope
         Modifier
             .fillMaxWidth()
             .motionEventSpy {
-                if (it.action == 1 && swipeAbleState.offset.value < -20f) {
-                    vibration.performHapticFeedback(HapticFeedbackType.LongPress)
-                    if (!getReplyVisible)
-                        coroutineScope.launch {
-                            keyBoardController?.show()
-                            state.animateScrollBy(140f)
+                    if (it.action == 1) {
+                        if (swipeAbleState.offset.value < -30f) {
+                            vibration.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            if (!getReplyVisible)
+                                coroutineScope.launch {
+                                    keyBoardController?.show()
+                                    state.animateScrollBy(140f)
+                                }
+                            setReplyMessage(this@SwipeAbleBox)
+                            setReplyVisible(true)
                         }
-                    setReplyMessage(this)
-                    setReplyVisible(true)
-                }
+                    }
             }
             .swipeable(
                 swipeAbleState,

@@ -13,7 +13,7 @@ import javax.inject.Named
 
 interface Permissions {
 
-    fun launchIfHasPermissions(activity: MainActivity, unit: () -> Unit)
+    fun launchIfHasPermissions(activity: MainActivity, unit: () -> Unit = {})
 
     class Base @Inject constructor(
         @Named("hasPerm") private val hasPermissions: () -> Boolean

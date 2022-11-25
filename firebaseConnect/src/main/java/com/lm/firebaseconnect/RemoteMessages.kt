@@ -42,7 +42,8 @@ class RemoteMessages(
                     fcmProvider.send(
                         JSONObject()
                             .put(TYPE_MESSAGE, CHECK_FOR_CALL)
-                            .put(DESTINATION_ID, getChatId).put(CALLING_ID, getMyDigit)
+                            .put(DESTINATION_ID, getChatId)
+                            .put(CALLING_ID, getMyDigit)
                             .put(TOKEN, myToken), token
                     )
                 }
@@ -122,7 +123,7 @@ class RemoteMessages(
 
     private fun cancelInbox(typeMessage: String, destinationId: String, callingId: String) =
         JSONObject().put(TYPE_MESSAGE, typeMessage).put(DESTINATION_ID, destinationId)
-            .put(CALLING_ID, callingId).put(NAME, getMyName)
+            .put(CALLING_ID, callingId).put(NAME, getMyName).put(ICON, getMyIcon)
 
     fun callMessage(typeMessage: String, destinationId: String, token: String) =
         fcmProvider.send(

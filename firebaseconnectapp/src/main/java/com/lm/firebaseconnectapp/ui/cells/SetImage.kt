@@ -44,7 +44,6 @@ fun SetImage(
             }
         })
     if (bitmap != null) {
-
         Box {
             Image(
                 bitmap = bitmap!!.asImageBitmap(), modifier = with(

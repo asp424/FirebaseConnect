@@ -8,9 +8,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
+import com.lm.firebaseconnectapp.ui.UiStates.keyboardHeight
 
 @Composable
-fun KeyboardListener(): State<Boolean> {
+fun keyboardListener(): State<Boolean> {
     val keyboardState = remember { mutableStateOf(false) }
     val view = LocalView.current
     DisposableEffect(view) {
@@ -19,6 +21,7 @@ fun KeyboardListener(): State<Boolean> {
             view.getWindowVisibleDisplayFrame(rect)
             val screenHeight = view.rootView.height
             val keypadHeight = screenHeight - rect.bottom
+            keyboardHeight.value = keypadHeight - 132
             keyboardState.value = keypadHeight > screenHeight * 0.15
         }
         view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalListener)
