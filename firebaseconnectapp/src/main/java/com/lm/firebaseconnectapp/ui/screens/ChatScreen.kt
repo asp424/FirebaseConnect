@@ -50,7 +50,6 @@ import com.lm.firebaseconnectapp.ui.cells.chat.message.Message
 Composable]
 fun ChatScreen() {
     val isKeyboardOpen = keyboardListener()
-    val coroutine = rememberCoroutineScope()
     with(mainDep) {
         with(firebaseConnect) {
             val text = remember { mutableStateOf("") }

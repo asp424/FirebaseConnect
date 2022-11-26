@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -47,6 +48,10 @@ class MainActivity : ComponentActivity() {
         permissions.launchIfHasPermissions(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 

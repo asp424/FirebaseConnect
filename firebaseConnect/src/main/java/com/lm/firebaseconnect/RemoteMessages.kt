@@ -81,7 +81,6 @@ class RemoteMessages(
         }
     }
 
-
     val rejectCall get() = remoteMessageModel.rejectCall.set
 
     private val getMyName get() = firebaseRead.firebaseSave.firebaseConnect.myName

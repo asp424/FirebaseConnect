@@ -1,13 +1,12 @@
 package com.lm.firebaseconnectapp.notifications
 
+import android.annotation.SuppressLint
 import android.app.Application
-import android.app.Notification.CallStyle
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
@@ -19,9 +18,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
-import com.lm.firebaseconnectapp.R
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnect.States.ICON
@@ -32,8 +33,11 @@ import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.TOKEN
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
+import com.lm.firebaseconnect.log
+import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.presentation.IntentActivity
 import com.lm.firebaseconnectapp.record_sound.Recorder.Companion.IS_RECORD
+import com.lm.firebaseconnectapp.showToast
 import java.util.Calendar
 import javax.inject.Named
 import kotlin.random.Random
@@ -44,14 +48,18 @@ class Notifications(
     private val pendingIntentBroadcastBuilder: (Int, Intent) -> PendingIntent,
     private val notificationBuilder: (String) -> NotificationCompat.Builder,
     private val intentBuilder: (String, Bundle) -> Intent,
-    private val context: Application
+    private val context: Application,
 ) {
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.O)
-    fun showNotification() {
+    fun showNotification(onShow: () -> Unit = {}) {
         createChannel()
-        loadIcon(get.icon) {
+        loadIcon(get.icon, onLoad = {
             notificationManager.notify(id, it.notification())
+            onShow()
+        }) {
+            context.showToast("ошибка")
         }
     }
 
@@ -63,7 +71,6 @@ class Notifications(
             .build()
         notificationBuilder.invoke(typeMessage).apply {
             setAutoCancel(true)
-
             when (typeMessage) {
                 MESSAGE -> {
                     setCategory(CATEGORY_MESSAGE)
@@ -71,13 +78,16 @@ class Notifications(
                         NotificationCompat.MessagingStyle(person)
                             .addMessage(
                                 NotificationCompat.MessagingStyle.Message(
-                                    textMessage, currentTimestamp, person
+                                    if (textMessage.contains(IS_RECORD))
+                                        "Голосовое сособщение" else textMessage,
+                                    currentTimestamp, person
                                 )
-                            ).setConversationTitle("message")
+                            ).setConversationTitle(name)
                     )
                     setContentTitle(titles)
-                    setSmallIcon(R.mipmap.ic_launcher)
+                    setSmallIcon(R.drawable.baseline_message_24)
                 }
+
                 else -> {
                     setCategory(CATEGORY_CALL)
                     setLargeIcon(this@notification)
@@ -170,20 +180,35 @@ class Notifications(
     private fun channel() = NotificationChannel(get.typeMessage, get.typeMessage, IMPORTANCE_HIGH)
         .apply { setSound(null, null) }
 
-    private fun loadIcon(url: String, onLoad: (Bitmap) -> Unit) {
+    private fun loadIcon(url: String, onLoad: (Bitmap) -> Unit, onFail: () -> Unit) {
         Glide.with(context).asBitmap()
             .load(url)
-            .placeholder(com.lm.firebaseconnectapp.R.drawable.ic_baseline_person_24)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    onLoad(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {
-
-                }
-            })
+            .placeholder(R.drawable.ic_baseline_person_24)
+            .circleCrop()
+            .addListener(successListener(onLoad, onFail)).submit()
     }
+
+    private fun successListener(onSuccess: (Bitmap) -> Unit, onFail: () -> Unit) =
+        object : RequestListener<Bitmap> {
+
+            override fun onResourceReady(
+                resource: Bitmap?,
+                model: Any?,
+                target: Target<Bitmap>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ) = isFirstResource.apply { resource?.apply { onSuccess(this) } }
+
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Bitmap>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                onFail()
+                return false
+            }
+        }
 
     private val currentTimestamp get() = Calendar.getInstance().time.time
 }

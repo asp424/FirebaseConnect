@@ -80,7 +80,6 @@ fun MainTheme(
                 if (darkTheme) Black.toArgb() else getMainColor.toArgb()
             WindowCompat.getInsetsController((view.context as Activity).window, view)
                 .isAppearanceLightStatusBars = darkTheme
-            WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
         MaterialTheme(

@@ -21,12 +21,10 @@ import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.RESET
 import com.lm.firebaseconnect.States.get
 import com.lm.firebaseconnect.States.isType
-import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
 import com.lm.firebaseconnect.models.Nodes
-import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.notifications.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
 import kotlinx.coroutines.CoroutineScope
@@ -61,10 +59,11 @@ class FirebaseMessageServiceCallback(
                         MESSAGE -> {
                             if (!appIsInForeground() || firebaseConnect.chatId != model.callingId) {
                                 model.set
-                                showNotification()
-                                notificationSound.play()
-                                rejectCall
-                                callMessage(NOTIFY_CALLBACK, model.destinationId, model.token)
+                                showNotification {
+                                    notificationSound.play()
+                                    callMessage(NOTIFY_CALLBACK, model.destinationId, model.token)
+                                    rejectCall
+                                }
                             }
                         }
 
@@ -76,11 +75,12 @@ class FirebaseMessageServiceCallback(
                             if (!appIsInForeground()) {
                                 model.set
                                 notificationManager.cancel(get.callingId.toInt())
-                                showNotification()
-                                notificationSound.play()
-                            }
+                                showNotification {
+                                    notificationSound.play()
+                                    rejectCall
+                                }
+                            } else rejectCall
                             ringtone.stop()
-                            rejectCall
                         }
 
                         ANSWER -> {
@@ -97,6 +97,7 @@ class FirebaseMessageServiceCallback(
                                 }
                             }
                         }
+
                         RESET -> rejectCall
 
                         GET_CHECK_FOR_CALL -> if (OUTGOING_CALL.isType) {
@@ -105,8 +106,9 @@ class FirebaseMessageServiceCallback(
 
                         INCOMING_CALL -> {
                             model.set
-                            if (!appIsInForeground()) showNotification()
-                            ringtone.play()
+                            if (!appIsInForeground()) showNotification{
+                                ringtone.play()
+                            }
                         }
 
                         GET_INCOMING_CALL -> {
@@ -120,6 +122,7 @@ class FirebaseMessageServiceCallback(
                                 notifyState.value = false
                             }
                         }
+
                         BUSY -> {
                             CoroutineScope(IO).launch {
                                 model.set
