@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.TextHandleMove
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -43,7 +44,7 @@ fun MessageModel.SwipeAbleBox(state: LazyListState, offset: @Composable BoxScope
             .motionEventSpy {
                     if (it.action == 1) {
                         if (swipeAbleState.offset.value < -30f) {
-                            vibration.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            vibration.performHapticFeedback(TextHandleMove)
                             if (!getReplyVisible)
                                 coroutineScope.launch {
                                     keyBoardController?.show()

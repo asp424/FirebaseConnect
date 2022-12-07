@@ -16,6 +16,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +28,7 @@ import com.lm.fantasticprogress.CircleProgress
 import com.lm.fantasticprogress.ProgressCircleType
 import com.lm.firebaseconnect.States.listUsers
 import com.lm.firebaseconnect.models.UIUsersStates
-import com.lm.firebaseconnectapp.animDp
+import com.lm.firebaseconnectapp.AnimDp
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.ui.UiStates.getVoiceBarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
@@ -36,6 +40,10 @@ import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun MainScreen() {
+    var paddingTop by remember { mutableStateOf(0.dp) }
+
+    AnimDp(getVoiceBarVisible, 25.dp, 0.dp) { paddingTop = it }
+
     with(mainDep) {
         with(firebaseConnect) {
             val state = rememberLazyListState()
@@ -69,7 +77,7 @@ fun MainScreen() {
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = animDp(getVoiceBarVisible, 25.dp, 0.dp)),
+                                .padding(top = paddingTop),
                             contentPadding = PaddingValues(
                                 start = 10.dp, end = 10.dp, top = 10.dp
                             )

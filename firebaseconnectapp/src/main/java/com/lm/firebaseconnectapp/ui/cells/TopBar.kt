@@ -12,24 +12,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.lm.firebaseconnect.FirebaseConnect
-import com.lm.firebaseconnect.States.listUsers
-import com.lm.firebaseconnect.models.UIUsersStates
-import com.lm.firebaseconnect.models.UserModel
-import com.lm.firebaseconnectapp.animDp
+import com.lm.firebaseconnectapp.AnimDp
 import com.lm.firebaseconnectapp.animScale
-import com.lm.firebaseconnectapp.data.SPreferences
 import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.UiStates.getToolbarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
-import com.lm.firebaseconnectapp.ui.UiStates.setOnlineVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
 import com.lm.firebaseconnectapp.ui.cells.chat.InfoBox
 import com.lm.firebaseconnectapp.ui.cells.settings.SettingsIcon
@@ -38,12 +35,15 @@ import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar() {
+    var y by remember { mutableStateOf(0.dp) }
+
+    AnimDp(getToolbarVisible, 0.dp, (-100).dp, 350) { y = it }
     TopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = if (isSystemInDarkTheme()) Color.Black else getMainColor
         ), modifier = Modifier
             .fillMaxWidth()
-            .offset(0.dp, animDp(getToolbarVisible, 0.dp, (-100).dp, 350))
+            .offset(0.dp, y)
             .clickable(onClick = remember { { false.setSettingsVisible } }),
         navigationIcon = { SettingsIcon() }, title = {},
         actions = {

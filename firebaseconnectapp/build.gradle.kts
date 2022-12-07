@@ -105,12 +105,12 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:1.3.1")
     implementation("androidx.compose.material:material-icons-extended:1.3.1")
     implementation("androidx.compose.material3:material3:1.1.0-alpha02")
-    implementation ("androidx.compose.material:material:1.4.0-alpha02")
+    implementation("androidx.compose.material:material:1.4.0-alpha02")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha")
 
     //Dagger
-    implementation("com.google.dagger:dagger:2.42")
-    kapt("com.google.dagger:dagger-compiler:2.42")
+    implementation("com.google.dagger:dagger:2.44.2")
+    kapt("com.google.dagger:dagger-compiler:2.44.2")
 
     //Auth
     implementation("com.google.android.gms:play-services-auth:20.4.0")
@@ -123,8 +123,8 @@ dependencies {
     // debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.9.1")
 
     //Visualizer
-    implementation ("io.github.gautamchibde:audiovisualizer:2.2.5")
+    implementation("io.github.gautamchibde:audiovisualizer:2.2.5")
 
     //Progress
-   implementation(files("libs/fantasticprogress-release.aar"))
+    implementation(files("libs/fantasticprogress-release.aar"))
 }

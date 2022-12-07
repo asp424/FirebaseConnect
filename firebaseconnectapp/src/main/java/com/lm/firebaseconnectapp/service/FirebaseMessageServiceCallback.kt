@@ -58,27 +58,25 @@ class FirebaseMessageServiceCallback(
 
                         MESSAGE -> {
                             if (!appIsInForeground() || firebaseConnect.chatId != model.callingId) {
-                                model.set
-                                showNotification {
+                                showNotification(model, onShow = {
                                     notificationSound.play()
                                     callMessage(NOTIFY_CALLBACK, model.destinationId, model.token)
-                                    rejectCall
-                                }
+                                })
                             }
                         }
 
-                        CHECK_FOR_CALL -> {
-                            checkForCall(model)
-                        }
+                        CHECK_FOR_CALL -> checkForCall(model)
 
                         REJECT -> {
                             if (!appIsInForeground()) {
                                 model.set
                                 notificationManager.cancel(get.callingId.toInt())
-                                showNotification {
+                                showNotification(model, onShow = {
                                     notificationSound.play()
                                     rejectCall
-                                }
+                                }, onFail = {
+                                    rejectCall
+                                })
                             } else rejectCall
                             ringtone.stop()
                         }
@@ -106,9 +104,9 @@ class FirebaseMessageServiceCallback(
 
                         INCOMING_CALL -> {
                             model.set
-                            if (!appIsInForeground()) showNotification{
+                            if (!appIsInForeground()) showNotification(model, onShow = {
                                 ringtone.play()
-                            }
+                            })
                         }
 
                         GET_INCOMING_CALL -> {

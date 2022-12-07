@@ -25,8 +25,8 @@ object UiStates {
     private var currentPlayTimestamp: MutableState<String> = mutableStateOf("")
     private var currentDateAtScroll: MutableState<String> = mutableStateOf("")
     var playerSessionId: MutableState<Int> = mutableStateOf(0)
-    var keyboardHeight: MutableState<Int> = mutableStateOf(0)
     var playingSendTime: MutableState<String> = mutableStateOf("")
+    var inputText: MutableState<String> = mutableStateOf("")
     var playingSenderName: MutableState<String> = mutableStateOf("")
     private var voiceDuration: MutableState<Duration> = mutableStateOf(Duration.ZERO)
     private var voiceLength: MutableState<Duration> = mutableStateOf(Duration.ZERO)
@@ -39,6 +39,7 @@ object UiStates {
     private val secondColor: MutableState<Color> = mutableStateOf(second)
     private val onlineVisible = mutableStateOf(false)
     private val unreadIndex = mutableStateOf(-1)
+
     val getMainColor get() = mainColor.value
 
     val getReplyMessage get() = replyMessage.value

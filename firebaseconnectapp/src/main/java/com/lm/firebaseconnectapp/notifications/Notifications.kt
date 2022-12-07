@@ -22,7 +22,6 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.lm.firebaseconnect.FirebaseConnect
 import com.lm.firebaseconnect.States.ANSWER
 import com.lm.firebaseconnect.States.CALLING_ID
 import com.lm.firebaseconnect.States.ICON
@@ -32,8 +31,7 @@ import com.lm.firebaseconnect.States.NAME
 import com.lm.firebaseconnect.States.REJECT
 import com.lm.firebaseconnect.States.TOKEN
 import com.lm.firebaseconnect.States.get
-import com.lm.firebaseconnect.States.isType
-import com.lm.firebaseconnect.log
+import com.lm.firebaseconnect.models.RemoteMessageModel
 import com.lm.firebaseconnectapp.R
 import com.lm.firebaseconnectapp.presentation.IntentActivity
 import com.lm.firebaseconnectapp.record_sound.Recorder.Companion.IS_RECORD
@@ -53,17 +51,18 @@ class Notifications(
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.O)
-    fun showNotification(onShow: () -> Unit = {}) {
-        createChannel()
-        loadIcon(get.icon, onLoad = {
-            notificationManager.notify(id, it.notification())
+    fun showNotification(model: RemoteMessageModel, onShow: () -> Unit = {}, onFail: () -> Unit = {}) {
+        createChannel(model)
+        loadIcon(model.icon, onLoad = {
+            notificationManager.notify(model.id, it.notification(model))
             onShow()
         }) {
             context.showToast("ошибка")
+            onFail()
         }
     }
 
-    private fun Bitmap.notification() = with(get) {
+    private fun Bitmap.notification(model: RemoteMessageModel) = with(model) {
         val person = Person.Builder()
             .setIcon(IconCompat.createWithBitmap(this@notification))
             .setName(name)
@@ -86,31 +85,35 @@ class Notifications(
                     )
                     setContentTitle(titles)
                     setSmallIcon(R.drawable.baseline_message_24)
+                    setContentIntent(MESSAGE.activityPendingIntent(model))
                 }
 
-                else -> {
+                INCOMING_CALL -> {
                     setCategory(CATEGORY_CALL)
                     setLargeIcon(this@notification)
                     setContentText(name)
                     setContentTitle(titles)
                     setSmallIcon(R.drawable.ic_baseline_phone_24)
+                    setDeleteIntent(pendingBroadcastIntent(2, REJECT, model))
+                    getAction("Отклонить", 3, REJECT, model)
+                    getAction("Ответить", 4, ANSWER, model)
+                    setContentIntent(INCOMING_CALL.activityPendingIntent(model))
+                }
+
+                REJECT -> {
+                    setCategory(CATEGORY_CALL)
+                    setLargeIcon(this@notification)
+                    setContentText(name)
+                    setContentTitle(titles)
+                    setSmallIcon(R.drawable.ic_baseline_phone_24)
+                    setContentIntent(INCOMING_CALL.activityPendingIntent(model))
                 }
             }
             priority = PRIORITY_MAX
-            if (INCOMING_CALL.isType) {
-                setDeleteIntent(pendingBroadcastIntent(2, REJECT))
-                getAction("Отклонить", 3, REJECT)
-                getAction("Ответить", 4, ANSWER)
-                setContentIntent(INCOMING_CALL.activityPendingIntent())
-            }
-            if (MESSAGE.isType)
-                setContentIntent(MESSAGE.activityPendingIntent())
-            if (REJECT.isType)
-                setContentIntent(INCOMING_CALL.activityPendingIntent())
         }.build()
     }
 
-    private fun String.activityPendingIntent() = with(get) {
+    private fun String.activityPendingIntent(model: RemoteMessageModel) = with(model) {
         PendingIntent.getActivity(
             context, Random(99).nextInt(),
             Intent(
@@ -128,13 +131,14 @@ class Notifications(
         )
     }
 
-    private val id get() = if (MESSAGE.isType) Random(99).nextInt() else get.callingId.toInt()
+    private val RemoteMessageModel.id
+        get() = if (typeMessage == MESSAGE) Random(99).nextInt() else callingId.toInt()
 
-    private val titles
-        get() = when (get.typeMessage) {
+    private val RemoteMessageModel.titles
+        get() = when (typeMessage) {
             MESSAGE -> {
                 if (get.textMessage.startsWith(IS_RECORD.trim()))
-                    "Голосовое сообщение от ${get.name}" else "Входящее сообщение от ${get.name}"
+                    "Голосовое сообщение от $name" else "Входящее сообщение от $name"
             }
 
             REJECT -> "Пропущенный вызов"
@@ -142,43 +146,25 @@ class Notifications(
             else -> ""
         }
 
-    private val text
-        get() = when (get.typeMessage) {
-            MESSAGE -> {
-                if (get.textMessage.startsWith(IS_RECORD.trim()))
-                    "Голосовое сообщение" else "Сообщение: ${get.textMessage}"
-            }
+    private fun NotificationCompat.Builder.getAction(
+        text: String, code: Int, action: String, model: RemoteMessageModel
+    ) = addAction(1, text, pendingBroadcastIntent(code, action, model))
 
-            REJECT -> "Вам звонил ${get.name}"
-            INCOMING_CALL -> "Входящий вызов от ${get.name}"
-            else -> ""
+    private fun pendingBroadcastIntent(code: Int, action: String, model: RemoteMessageModel) =
+        with(model) {
+            val bundle = Bundle().apply { putString(CALLING_ID, callingId) }
+            pendingIntentBroadcastBuilder.invoke(code, intentBuilder.invoke(action, bundle))
         }
 
-    private fun NotificationCompat.Builder.getAction(text: String, code: Int, action: String) =
-        addAction(1, text, pendingBroadcastIntent(code, action))
-
-    private fun pendingIntent(code: Int, action: String) = with(get) {
-        val bundle = Bundle().apply {
-            putString(NAME, name)
-            putString(CALLING_ID, callingId)
-            putString(TOKEN, token)
-            putString(ICON, icon)
-        }
-        pendingIntentBroadcastBuilder.invoke(code, intentBuilder.invoke(action, bundle))
-    }
-
-    private fun pendingBroadcastIntent(code: Int, action: String) = with(get) {
-        val bundle = Bundle().apply { putString(CALLING_ID, callingId) }
-        pendingIntentBroadcastBuilder.invoke(code, intentBuilder.invoke(action, bundle))
-    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannel(model: RemoteMessageModel) =
+        notificationManager.getNotificationChannel(model.typeMessage)
+            ?: notificationManager.createNotificationChannel(channel(model))
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createChannel() = notificationManager.getNotificationChannel(get.typeMessage)
-        ?: notificationManager.createNotificationChannel(channel())
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun channel() = NotificationChannel(get.typeMessage, get.typeMessage, IMPORTANCE_HIGH)
-        .apply { setSound(null, null) }
+    private fun channel(model: RemoteMessageModel) = with(model) {
+        NotificationChannel(typeMessage, typeMessage, IMPORTANCE_HIGH)
+    }.apply { setSound(null, null) }
 
     private fun loadIcon(url: String, onLoad: (Bitmap) -> Unit, onFail: () -> Unit) {
         Glide.with(context).asBitmap()

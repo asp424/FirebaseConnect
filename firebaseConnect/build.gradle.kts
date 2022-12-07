@@ -34,11 +34,12 @@ dependencies {
     //Retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
 
     //Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui:1.4.0-alpha01")
+    implementation("androidx.compose.ui:ui:1.4.0-alpha02")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha02")
 
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")

@@ -17,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -37,45 +39,52 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 @Composable
-fun MessageModel.Message(
+fun Message(
     state: LazyListState,
-    i: Int,
-    size: Int
+    i: Int, size: Int, messageModel: MessageModel, listIsNotEmpty: Boolean
 ) {
+    with(messageModel) {
+        var index by remember { mutableStateOf(0) }
+        var timeSize by remember { mutableStateOf(IntSize.Zero) }
 
-    var index by remember { mutableStateOf(0) }
-    var timeSize by remember { mutableStateOf(IntSize.Zero) }
-
-    LaunchedEffect(state) { snapshotFlow { state.firstVisibleItemIndex }.collect { index = it } }
-
-    with(mainDep) { LaunchedEffect(true) { setWasRead(firebaseConnect) } }
-
-    if (isNewDate) DateAnimation(true, date, if (index == 0) 0.dp else 10.dp, index)
-
-    LaunchedEffect(true) {
-        if (isUnreadFlag) {
-            setUnreadIndex(i)
-            if (size != 0) state.animateScrollToItem(size)
+        LaunchedEffect(state) {
+            snapshotFlow { state.firstVisibleItemIndex }.collect {
+                index = it
+            }
         }
-    }
 
-    NewMessageBox(i)
+        with(mainDep) {
+            LaunchedEffect(true) {
+                setWasRead(firebaseConnect)
+                if (isUnreadFlag) {
+                    setUnreadIndex(i)
+                    if (listIsNotEmpty) state.animateScrollToItem(size)
+                }
+            }
+        }
 
-    SwipeAbleBox(state) { offset ->
-        ReplyAnimation(offset)
-        Card(
-            Modifier
-                .padding(2.dp)
-                .offset { IntOffset(offset.roundToInt(), 0) }
-                .widthIn(0.dp, 250.dp)
-                .onGloballyPositioned { timeSize = it.size },
-            shape = RoundedCornerShape(topStartShape, 20.dp, bottomEndShape, 20.dp),
-            colors = CardDefaults.cardColors(wasReadColor.copy(alpha = 0.1f))
-        ) {
-            ReplyBox()
-            Box {
-                if (type == TypeMessage.VOICE) VoiceMessage() else TextMessage()
-                Time(timeSize)
+        if (isNewDate) DateAnimation(true, date, 10.dp, index)
+
+        NewMessageBox(i)
+
+        SwipeAbleBox(state) { offset ->
+            ReplyAnimation(offset)
+            Card(
+                Modifier
+                    .padding(2.dp)
+                    .offset { IntOffset(offset.roundToInt(), 0) }
+                    .widthIn(0.dp, 250.dp)
+                    .onGloballyPositioned { timeSize = it.size },
+                shape = RoundedCornerShape(topStartShape, 20.dp, bottomEndShape, 20.dp),
+                colors = CardDefaults.cardColors(wasReadColor.copy(alpha = 0.1f))
+            ) {
+                ReplyBox()
+                Box {
+                    LocalDensity.current.apply {
+                    if (type == TypeMessage.VOICE) VoiceMessage() else TextMessage()
+                         Time(DpSize(timeSize.width.toDp(), timeSize.height.toDp()))
+                    }
+                }
             }
         }
     }

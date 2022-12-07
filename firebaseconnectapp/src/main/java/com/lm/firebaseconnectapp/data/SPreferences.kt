@@ -36,6 +36,14 @@ interface SPreferences {
 
     fun readChatId(): String
 
+    fun saveFirstIndex(i: Int): Int
+
+    fun readFirstIndex(init: Int): Int
+
+    fun saveFirstItemOffset(i: Int): Int
+
+    fun readFirstItemOffset(init: Int): Int
+
     class Base @Inject constructor(
         private val sharedPreferences: SharedPreferences,
     ) : SPreferences {
@@ -55,6 +63,20 @@ interface SPreferences {
 
         override fun readChatId()
         = sharedPreferences.getString("chatId", "") ?: ""
+
+        override fun saveFirstIndex(i: Int) = i.apply {
+            sharedPreferences.edit().putInt("firstIndex", this).apply()
+        }
+
+        override fun readFirstIndex(init: Int) = sharedPreferences
+            .getInt("firstIndex", init)
+
+        override fun saveFirstItemOffset(i: Int) = i.apply {
+            sharedPreferences.edit().putInt("firstIndexOffset", this).apply()
+        }
+
+        override fun readFirstItemOffset(init: Int) = sharedPreferences
+            .getInt("firstIndexOffset", init)
 
         override fun readIconUri() = sharedPreferences
             .getString(Uri.EMPTY.toString(), "")?.toUri()

@@ -88,11 +88,11 @@ fun NavHost(startScreen: NavRoutes) {
                     }
                 }
             }
-            Box(Modifier.padding(top = 38.dp)) {
-                VoiceBar()
-                SettingsCard()
-                CallScreen()
-            }
+//            Box(Modifier.padding(top = 38.dp)) {
+//                VoiceBar()
+//                SettingsCard()
+//                CallScreen()
+//            }
             BackHandler() {
                 with(sPreferences.getChatModel(firebaseConnect)) {
                     when (navController.currentDestination?.route) {

@@ -15,10 +15,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnect.models.MessageModel
-import com.lm.firebaseconnectapp.ui.UiStates
+import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
 
 @Composable
-fun MessageModel.ReplyAnimation(offset: Float) {
+fun MessageModel.ReplyAnimation(offset: Float) =
 
     Row(
         Modifier
@@ -30,8 +30,8 @@ fun MessageModel.ReplyAnimation(offset: Float) {
         Icon(
             Icons.Default.Reply, null, modifier =
             Modifier
-                .scale(offset / 35).rotate(180f)
-                .offset(offset.dp / 10, 0.dp), tint = UiStates.getMainColor
+                .scale(offset / 35)
+                .rotate(180f)
+                .offset(offset.dp / 10, 0.dp), tint = getMainColor
         )
     }
-}

@@ -1,10 +1,10 @@
 package com.lm.firebaseconnect.models
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
 data class MessageModel(
     val key: String = "",
     val text: String = "",
@@ -27,4 +27,5 @@ data class MessageModel(
     var replyName: String = "",
     var replyText: String = "",
     var replyKey: String = "",
+    var isNew: Boolean = false,
 )

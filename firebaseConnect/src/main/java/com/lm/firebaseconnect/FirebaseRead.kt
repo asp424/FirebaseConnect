@@ -89,7 +89,8 @@ class FirebaseRead(
                 topStartShape = if (side == MY_COLOR) 20.dp else 0.dp,
                 bottomEndShape = if (side == MY_COLOR) 0.dp else 20.dp,
                 isReply = isReply,
-                replyKey = replyKey
+                replyKey = replyKey,
+                isNew = side == MY_COLOR && isNew
             )
         }
 

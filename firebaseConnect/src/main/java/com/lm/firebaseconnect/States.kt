@@ -1,6 +1,7 @@
 package com.lm.firebaseconnect
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -10,7 +11,9 @@ import com.lm.firebaseconnect.models.RemoteMessageModel
 import com.lm.firebaseconnect.models.TypeMessage
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnect.models.UIUsersStates
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 object States {
     val onLineState = mutableStateOf(false)
@@ -33,11 +36,15 @@ object States {
         onGet((listMessages.value as UIMessagesStates.Success).list)
     else onLoading()
 
-    fun getListMessages(onGet: List<MessageModel>.() -> Unit) =
+    fun getListMessages(onGet: List<MessageModel>.() -> Unit = {}) =
         if (listMessages.value is UIMessagesStates.Success)
             (listMessages.value as UIMessagesStates.Success).list.apply { onGet(this) }
                 .filter { it.type == TypeMessage.VOICE }.map { it.voiceTimeStamp }
         else emptyList()
+
+    @Composable
+    fun List<MessageModel>.ScrollToBottom(state: LazyListState) =
+        LaunchedEffect(this) { state.scrollToItem(size) }
 
     val RemoteMessageModel.set get() = run { callState.value = this }
 
