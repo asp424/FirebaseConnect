@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnect.FirebaseConnect
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.MessageModel
 import com.lm.firebaseconnect.models.TypeMessage
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep

@@ -15,7 +15,6 @@ interface IntentHandler {
     fun onCreate(intent: Intent, firebaseConnect: FirebaseConnect): NavRoutes
 
     fun onNewIntent(intent: Intent)
-
     class Base @Inject constructor(
         private val sPreferences: SPreferences
     ) : IntentHandler {

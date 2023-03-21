@@ -30,7 +30,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 
-
 class Recorder @Inject constructor(
     private val mediaRecorder: Function1<@JvmSuppressWildcards String, @JvmSuppressWildcards MediaRecorder?>,
     private val context: Application,

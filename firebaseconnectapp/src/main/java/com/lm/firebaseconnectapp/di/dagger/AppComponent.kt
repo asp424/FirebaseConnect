@@ -1,6 +1,7 @@
 package com.lm.firebaseconnectapp.di.dagger
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import com.lm.firebaseconnectapp.notifications.NotificationReceiver
 import com.lm.firebaseconnectapp.presentation.MainActivity
 import com.lm.firebaseconnectapp.service.FBMessageService
@@ -23,4 +24,6 @@ interface AppComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(fBMessageService: FBMessageService)
     fun inject(notificationReceiver: NotificationReceiver)
+
+    fun inject(broadcastReceiver: BroadcastReceiver)
 }

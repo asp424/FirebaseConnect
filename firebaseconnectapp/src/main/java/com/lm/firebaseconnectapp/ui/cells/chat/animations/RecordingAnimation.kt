@@ -2,6 +2,7 @@ package com.lm.firebaseconnectapp.ui.cells.chat.animations
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Mic
@@ -19,12 +20,12 @@ import com.lm.firebaseconnectapp.record_sound.RecordState
 import com.lm.firebaseconnectapp.ui.UiStates.getRecordState
 
 @Composable
-fun RecordingAnimation() =
+fun RecordingAnimation(keyboardState: Boolean) =
 
     Box(
         Modifier
             .scale(animScale(getRecordState == RecordState.RECORDING))
-            .fillMaxSize(),
+            .fillMaxSize().padding(bottom = if (keyboardState) 100.dp else 0.dp),
         Center
     ) {
         FloatingActionButton({}, Modifier.size(100.dp)) {

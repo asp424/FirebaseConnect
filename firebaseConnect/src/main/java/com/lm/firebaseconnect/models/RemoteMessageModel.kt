@@ -48,6 +48,8 @@ data class RemoteMessageModel constructor(
         val rejectCall get() = RemoteMessageModel(WAIT, title = "Отмена вызова",
             callingId = get.callingId, name = get.name)
 
+        val wait get() = RemoteMessageModel(WAIT)
+
         val answer get() = RemoteMessageModel(ANSWER).set
 
         val getIncomingCall

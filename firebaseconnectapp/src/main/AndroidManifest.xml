@@ -21,7 +21,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.FirebaseConnect">
-
         <activity
             android:name=".presentation.IntentActivity"
             android:exported="false" />
@@ -33,17 +32,13 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
         <receiver android:name=".notifications.NotificationReceiver" />
-
         <service
             android:name="com.lm.firebaseconnectapp.service.FBMessageService"
             android:directBootAware="true"
@@ -63,7 +58,5 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
     </application>
-
 </manifest>

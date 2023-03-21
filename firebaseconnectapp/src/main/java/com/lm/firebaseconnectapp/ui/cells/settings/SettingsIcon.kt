@@ -13,22 +13,21 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnectapp.animScale
-import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
 import com.lm.firebaseconnectapp.ui.UiStates.getIsMainMode
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.UiStates.settingsIconClick
 
 @Composable
 fun SettingsIcon() {
-        Box(
-            modifier = Modifier
-                .scale(animScale(getIsMainMode))
-                .padding(start = 20.dp)
-        ) {
-            Icon(
-                Icons.Rounded.Settings, null, modifier = Modifier
-                    .clickable(onClick = settingsIconClick),
-                tint = if (isSystemInDarkTheme()) Color.White else getSecondColor
-            )
-        }
+    Box(
+        modifier = Modifier
+            .scale(animScale(getIsMainMode))
+            .padding(start = 20.dp, top = 5.dp)
+    ) {
+        Icon(
+            Icons.Rounded.Settings, null, modifier = Modifier
+                .clickable(onClick = settingsIconClick),
+            tint = if (isSystemInDarkTheme()) Color.White else getSecondColor
+        )
+    }
 }

@@ -24,6 +24,7 @@ import com.lm.firebaseconnect.States.isType
 import com.lm.firebaseconnect.States.notifyState
 import com.lm.firebaseconnect.States.remoteMessageModel
 import com.lm.firebaseconnect.States.set
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.Nodes
 import com.lm.firebaseconnectapp.notifications.Notifications
 import com.lm.firebaseconnectapp.startJitsiMit
@@ -107,6 +108,7 @@ class FirebaseMessageServiceCallback(
                             if (!appIsInForeground()) showNotification(model, onShow = {
                                 ringtone.play()
                             })
+                            ringtone.play()
                         }
 
                         GET_INCOMING_CALL -> {

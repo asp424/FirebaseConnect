@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells.chat
+package com.lm.firebaseconnectapp.ui.cells.chat.cells
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +11,7 @@ import com.lm.firebaseconnect.States
 import com.lm.firebaseconnect.models.UIMessagesStates
 
 @Composable
-fun Progress() {
+fun Progress() =
     Box(
         Modifier.fillMaxSize(),
         Alignment.Center
@@ -21,4 +21,3 @@ fun Progress() {
             States.listMessages.value is UIMessagesStates.Loading
         )
     }
-}

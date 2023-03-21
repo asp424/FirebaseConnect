@@ -1,4 +1,4 @@
-package com.lm.firebaseconnectapp.ui.cells.chat
+package com.lm.firebaseconnectapp.ui.cells.chat.cells
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -56,7 +56,7 @@ fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
                 Modifier
                     .fillMaxSize()
                     .scale(scale)
-                    .padding(10.dp),
+                    .padding(top = 10.dp, end = 10.dp),
                 Arrangement.Absolute.SpaceBetween,
                 Alignment.CenterVertically
             ) {
@@ -107,16 +107,18 @@ fun InfoBox(scale: Float, onIconClick: () -> Unit = {}) {
                         }
                     }
                 }
-                Row(Modifier.padding(start = 20.dp, top = 5.dp)) {
+                Row(Modifier.padding(start = 30.dp)) {
                     Icon(
                         Icons.Default.Call, null, modifier = Modifier
                             .clickable(
+                                !getIsMainMode,
                                 onClick = remember { { remoteMessages.initialCall() } },
-                                enabled = !getIsMainMode
                             )
                             .padding(end = 10.dp)
                             .size(32.dp)
-                            .scale(animScale(!getIsMainMode && WAIT.isType && getOnlineVisible)),
+                            .scale(
+                                animScale(!getIsMainMode && getOnlineVisible)
+                            ),
                         tint = if (isSystemInDarkTheme()) Color.White else getSecondColor
                     )
                     Box(Modifier.padding(start = 10.dp)) {

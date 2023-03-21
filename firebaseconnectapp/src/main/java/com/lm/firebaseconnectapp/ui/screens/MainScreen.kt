@@ -61,9 +61,7 @@ fun MainScreen() {
                             content = {
                                 items(
                                     count = listMessages.size,
-                                    key = {
-                                        derivedStateOf { listMessages[it].id }.value
-                                    },
+                                    key = { derivedStateOf { listMessages[it].id }.value },
                                     itemContent = {
                                         UserCard(listMessages[it],
                                             onCardClick = {

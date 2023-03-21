@@ -57,8 +57,10 @@ android {
     }
 
     kotlinOptions {
+        freeCompilerArgs += "-Xcontext-receivers"
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
         viewBinding = true
@@ -85,7 +87,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     //JitsiMeet
-    // implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
+    implementation("org.jitsi.react:jitsi-meet-sdk:+") { isTransitive = true }
 
     //FirebaseConnect
     implementation(project(mapOf("path" to ":firebaseConnect")))
@@ -101,7 +103,7 @@ dependencies {
 
     //Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui:1.4.0-alpha02")
+    implementation("androidx.compose.ui:ui:1.4.0-alpha03")
     implementation("androidx.compose.material:material-icons-core:1.3.1")
     implementation("androidx.compose.material:material-icons-extended:1.3.1")
     implementation("androidx.compose.material3:material3:1.1.0-alpha02")

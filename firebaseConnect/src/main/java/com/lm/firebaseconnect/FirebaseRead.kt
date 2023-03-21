@@ -9,6 +9,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ONE
 import com.lm.firebaseconnect.FirebaseConnect.Companion.ZERO
+import com.lm.firebaseconnect.States.ANSWER
+import com.lm.firebaseconnect.States.WAIT
 import com.lm.firebaseconnect.States.listMessages
 import com.lm.firebaseconnect.States.onLineState
 import com.lm.firebaseconnect.States.writingState
@@ -68,7 +70,8 @@ class FirebaseRead(
             val wasRead = if (side == MY_COLOR && !startsWith(NEW)) 1.dp else 0.dp
             val date = formatDate(parseTimestamp())
             val type = if (contains(IS_RECORD)) TypeMessage.VOICE else TypeMessage.MESSAGE
-            val isNew = contains(NEW)
+            val isNew = startsWith(NEW)
+            this@getMessageModel.log
             val replyKey = getReplyKey()
             val isReply = replyKey.isNotEmpty()
             MessageModel(
@@ -102,6 +105,7 @@ class FirebaseRead(
         token = getValue(key ?: "", Nodes.TOKEN),
         lastMessage = getValue(pairPath, Nodes.LAST).decrypt().removeKey().ifEmpty { EMPTY },
         iconUri = getValue(key ?: "", Nodes.ICON),
+        isFree = getValue("callState", Nodes.CALL) != ANSWER
     )
 
     fun DataSnapshot.getValue(path: String, node: Nodes) =

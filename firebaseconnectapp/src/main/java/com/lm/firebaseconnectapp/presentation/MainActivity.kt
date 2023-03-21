@@ -6,11 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsAnimationCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import com.google.android.gms.auth.api.identity.Identity
 import com.lm.firebaseconnectapp.appComponent
 import com.lm.firebaseconnectapp.core.Permissions
@@ -37,20 +33,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val takeImageResult =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
-        if (isSuccess) {
+    private val takeImageResult = registerForActivityResult(ActivityResultContracts.GetContent())
+    {
 
-            }
-        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        //   takeImageResult.launch("image/*")
         appComponent.inject(this)
         googleOneTapLauncher
-
         uiInteractor.onCreate(intent, this)
         permissions.launchIfHasPermissions(this)
     }
@@ -59,9 +52,9 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         WindowCompat.setDecorFitsSystemWindows(window, false)
     }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
         intent?.apply { uiInteractor.onNewIntent(intent) }
     }
 }

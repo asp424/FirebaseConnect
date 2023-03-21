@@ -47,6 +47,7 @@ import com.lm.firebaseconnectapp.startJitsiMit
 import com.lm.firebaseconnectapp.ui.UiStates.getMainColor
 import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.cells.SetImage
+import okhttp3.internal.wait
 
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
@@ -124,6 +125,7 @@ fun CallScreen() {
                                 firebaseConnect.remoteMessages.getMyDigit,
                                 getToken
                             )
+                        callScreenVisible.value = false
                         startJitsiMit(
                             context,
                             getToken,

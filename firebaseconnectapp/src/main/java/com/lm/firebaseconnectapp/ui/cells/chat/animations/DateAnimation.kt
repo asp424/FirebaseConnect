@@ -37,7 +37,7 @@ fun DateAnimation(
         .fillMaxSize()
         .padding(top = paddingTop, bottom = 10.dp)
     // .offset(0.dp, y)
-    ,
+            ,
     contentAlignment = Alignment.TopCenter
 ) {
     var y by remember { mutableStateOf(0.dp) }

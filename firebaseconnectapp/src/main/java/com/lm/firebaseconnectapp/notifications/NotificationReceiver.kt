@@ -67,7 +67,6 @@ class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.P)
     private fun messageAction(context: Context, intent: Intent) {
         val newIntent = Intent(context, MainActivity::class.java).apply {

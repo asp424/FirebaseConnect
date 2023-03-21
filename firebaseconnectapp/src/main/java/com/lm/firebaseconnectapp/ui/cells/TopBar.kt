@@ -28,7 +28,7 @@ import com.lm.firebaseconnectapp.ui.UiStates.getSecondColor
 import com.lm.firebaseconnectapp.ui.UiStates.getToolbarVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setNavState
 import com.lm.firebaseconnectapp.ui.UiStates.setSettingsVisible
-import com.lm.firebaseconnectapp.ui.cells.chat.InfoBox
+import com.lm.firebaseconnectapp.ui.cells.chat.cells.InfoBox
 import com.lm.firebaseconnectapp.ui.cells.settings.SettingsIcon
 import com.lm.firebaseconnectapp.ui.navigation.NavRoutes
 
@@ -45,16 +45,18 @@ fun TopBar() {
             .fillMaxWidth()
             .offset(0.dp, y)
             .clickable(onClick = remember { { false.setSettingsVisible } }),
-        navigationIcon = { SettingsIcon() }, title = {},
-        actions = {
+        navigationIcon = {
             Icon(
                 Icons.Default.ArrowBack, null, modifier =
                 Modifier
                     .clickable { setNavState(NavRoutes.MAIN) }
                     .scale(animScale(!getIsMainMode))
-                    .padding(start = 20.dp),
+                    .padding(start = 15.dp, top = 10.dp),
                 tint = getSecondColor
             )
+        }, title = {},
+        actions = {
+            SettingsIcon()
             InfoBox(0.8f)
         }
     )

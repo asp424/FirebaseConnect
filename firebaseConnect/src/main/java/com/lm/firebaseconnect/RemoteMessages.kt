@@ -83,6 +83,8 @@ class RemoteMessages(
 
     val rejectCall get() = remoteMessageModel.rejectCall.set
 
+    val wait get() = remoteMessageModel.wait.set
+
     private val getMyName get() = firebaseRead.firebaseSave.firebaseConnect.myName
 
     private val getMyIcon get() = firebaseRead.firebaseSave.firebaseConnect.myIcon
@@ -124,10 +126,11 @@ class RemoteMessages(
         JSONObject().put(TYPE_MESSAGE, typeMessage).put(DESTINATION_ID, destinationId)
             .put(CALLING_ID, callingId).put(NAME, getMyName).put(ICON, getMyIcon)
 
-    fun callMessage(typeMessage: String, destinationId: String, token: String) =
+    fun callMessage(typeMessage: String, destinationId: String, token: String) {
         fcmProvider.send(
             JSONObject()
                 .put(TYPE_MESSAGE, typeMessage)
                 .put(DESTINATION_ID, destinationId), token
         )
+    }
 }

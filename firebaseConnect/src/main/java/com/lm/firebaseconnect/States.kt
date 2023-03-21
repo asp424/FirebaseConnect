@@ -33,8 +33,8 @@ object States {
         onGet: @Composable List<MessageModel>.() -> Unit,
         onLoading: @Composable () -> Unit
     ) = if (listMessages.value is UIMessagesStates.Success)
-        onGet((listMessages.value as UIMessagesStates.Success).list)
-    else onLoading()
+            onGet((listMessages.value as UIMessagesStates.Success).list)
+        else onLoading()
 
     fun getListMessages(onGet: List<MessageModel>.() -> Unit = {}) =
         if (listMessages.value is UIMessagesStates.Success)

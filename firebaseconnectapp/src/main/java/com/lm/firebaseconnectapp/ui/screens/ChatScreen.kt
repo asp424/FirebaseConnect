@@ -15,11 +15,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.lm.firebaseconnect.States.GetListMessages
 import com.lm.firebaseconnect.States.ScrollToBottom
 import com.lm.firebaseconnect.States.listMessages
+import com.lm.firebaseconnect.log
 import com.lm.firebaseconnect.models.UIMessagesStates
 import com.lm.firebaseconnectapp.AnimDp
 import com.lm.firebaseconnectapp.di.compose.MainDep.mainDep
@@ -29,20 +32,21 @@ import com.lm.firebaseconnectapp.ui.UiStates.setDateCardVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setReplyVisible
 import com.lm.firebaseconnectapp.ui.UiStates.setUnreadIndex
 import com.lm.firebaseconnectapp.ui.cells.chat.NotificationAnimation
-import com.lm.firebaseconnectapp.ui.cells.chat.Progress
 import com.lm.firebaseconnectapp.ui.cells.chat.actions.OnCallStateAction
 import com.lm.firebaseconnectapp.ui.cells.chat.actions.OnIdAction
 import com.lm.firebaseconnectapp.ui.cells.chat.actions.OnScrollAction
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.DateAnimation
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.RecordingAnimation
 import com.lm.firebaseconnectapp.ui.cells.chat.animations.ToBottomButton
+import com.lm.firebaseconnectapp.ui.cells.chat.cells.Progress
 import com.lm.firebaseconnectapp.ui.cells.chat.input.InputBar
 import com.lm.firebaseconnectapp.ui.cells.chat.input.keyboardListener
 import com.lm.firebaseconnectapp.ui.cells.chat.message.Message
 
 @[SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
-OptIn(ExperimentalMaterial3Api::class) Composable
+OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class) Composable
 ]
+
 fun ChatScreen() {
     with(mainDep) {
         with(firebaseConnect) {
@@ -54,7 +58,7 @@ fun ChatScreen() {
 
             OnIdAction(userModel.id)
 
-            OnCallStateAction()
+            LocalSoftwareKeyboardController.current?.OnCallStateAction()
 
             SetChatContent {
                 Scaffold(
@@ -64,8 +68,7 @@ fun ChatScreen() {
                 ) {
                     GetListMessages({
                         val state = rememberLazyListState(size)
-                        val isKeyBoardOpen by keyboardListener(state)
-
+                        val keyboardState by keyboardListener(state)
                         OnScrollAction(state)
                         ScrollToBottom(state)
                         var bottomDp by remember { mutableStateOf(80.dp) }
@@ -78,12 +81,14 @@ fun ChatScreen() {
                             )
                         ) {
                             items(size,
-                                { get(it).key }, { get(it) }, { Message(state, it, size, remember { get(it) }, isNotEmpty()) }
+                                { get(it).key },
+                                { get(it) },
+                                { Message(state, it, size, get(it), isNotEmpty()) }
                             )
                         }
                         InputBar(userModel.isWriting, state)
                         NotificationAnimation()
-                        ToBottomButton(state, last().key, size)
+                        if (isNotEmpty()) ToBottomButton(state, last().key, size)
                         DisposableEffect(true) {
                             onDispose {
                                 setDateCardVisible(false)
@@ -92,9 +97,9 @@ fun ChatScreen() {
                                 firebaseConnect.setChatId(-1)
                             }
                         }
+                        RecordingAnimation(keyboardState)
                     }, { Progress() })
                 }
-                RecordingAnimation()
                 DateAnimation()
             }
         }
