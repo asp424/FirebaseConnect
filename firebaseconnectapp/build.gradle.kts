@@ -24,17 +24,7 @@ android {
     buildTypes {
         debug {
             //  isMinifyEnabled = true
-            buildConfigField(
-                "String",
-                "FCM_SERVER_KEY",
-                "\"AAAAoyEPC5o:APA91bFan2FPNVGsLjebfDbm51TUz0-KPhcl86TZe9CwyYoOmTr631B5Axd7eRJ3qfg5PUC4SAKCJkndfmPCf2rq7fl9X1xzkFsitgiqQbQq4gtRHAc3keGyKoIs1O4TzNPSdgBT5HbK\""
-            )
-            buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
-            buildConfigField(
-                "String",
-                "WEB_CLIENT_ID",
-                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\""
-            )
+            
         }
         release {
             isMinifyEnabled = true
@@ -42,17 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField(
-                "String",
-                "FCM_SERVER_KEY",
-                "\"AAAAoyEPC5o:APA91bFan2FPNVGsLjebfDbm51TUz0-KPhcl86TZe9CwyYoOmTr631B5Axd7eRJ3qfg5PUC4SAKCJkndfmPCf2rq7fl9X1xzkFsitgiqQbQq4gtRHAc3keGyKoIs1O4TzNPSdgBT5HbK\""
-            )
-            buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
-            buildConfigField(
-                "String",
-                "WEB_CLIENT_ID",
-                "\"700634303386-0lerrkifeeaqrkujudnspt6b7f7oam76.apps.googleusercontent.com\""
-            )
+           
         }
     }
 
